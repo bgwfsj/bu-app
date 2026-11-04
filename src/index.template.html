@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#f6f8fa">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>补</title>
+<style>
+/* __APP_STYLES__ */
+</style>
+</head>
+<body data-page="home">
+
+<div id="app">
+  <div id="track">
+
+    <!-- ================= 应用首页 ================= -->
+    <section class="page on" id="p-home">
+      <div class="home-top">
+        <div class="home-mark">补<span>每天补一点</span></div>
+        <div class="home-meta"><div class="home-date" id="home-date"></div><button class="home-data-btn" id="btn-app-data" title="数据备份" aria-label="数据备份">⋯</button></div>
+      </div>
+      <div class="home-hero">
+        <div class="home-eyebrow">TODAY</div>
+        <h1 class="home-title">不圆满处，<br>慢慢补。</h1>
+        <p class="home-sub">人生难求圆满，日日可补。把训练、喝水、戒烟和每一件小事，一点点补回来。</p>
+      </div>
+      <div class="home-notice" id="home-notice" hidden>
+        <button class="home-notice-main" data-action="goPage" data-args="[5]">
+          <span class="home-notice-dot"></span>
+          <span><b id="home-notice-title">今天的提醒</b><small id="home-notice-copy"></small></span>
+          <em>查看</em>
+        </button>
+        <button class="home-notice-close" data-action="dismissHomeNoticeToday" aria-label="今天不再提示">×</button>
+      </div>
+      <div class="home-grid">
+        <button class="home-card" data-action="goPage" data-args="[1]">
+          <span class="home-icon">练</span><b>训练</b>
+          <small id="home-fitness-copy">记录今天的训练</small>
+        </button>
+        <button class="home-card" data-action="goPage" data-args="[2]">
+          <span class="home-icon">水</span><b>喝水</b>
+          <small id="home-water-copy">今天 0 / 2000 ml</small>
+        </button>
+        <button class="home-card" data-action="goPage" data-args="[3]">
+          <span class="home-icon">戒</span><b>戒烟</b>
+          <small id="home-quit-copy">看看身体恢复进度</small>
+        </button>
+        <button class="home-card" data-action="goPage" data-args="[4]">
+          <span class="home-icon">记</span><b>待办</b>
+          <small id="home-todo-copy">今天没有待办</small>
+        </button>
+        <button class="home-card compact ledger-card" data-action="goPage" data-args="[6]">
+          <span class="home-icon">账</span><b>记账</b>
+          <small id="home-ledger-copy">本月还没有记录</small>
+        </button>
+        <button class="home-card compact reminder-card" data-action="goPage" data-args="[5]">
+          <span class="home-icon">醒</span><b>提醒</b>
+          <small id="home-reminder-copy">没有独立提醒</small>
+        </button>
+      </div>
+      <div class="home-footnote">点击进入，功能页之间可以滑动切换</div>
+    </section>
+
+    <!-- ================= 戒烟页 ================= -->
+    <section class="page" id="p-quit">
+      <div class="top">
+        <div class="brand"><span class="led"></span>戒烟</div>
+        <div class="quit-top-actions">
+          <button class="breakdot" id="btn-break" aria-label="破戒"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M5.4 5.4 L18.6 18.6 M18.6 5.4 L5.4 18.6" stroke="currentColor" stroke-width="1.15" stroke-linecap="round" fill="none"/></svg></button>
+          <button class="iconbtn" id="btn-set" title="设置">&#8942;</button>
+        </div>
+      </div>
+
+      <div class="section-hero">
+        <div class="section-kicker">戒烟时间</div>
+        <h1 class="section-title" id="quit-hero-title">身体正在回来</h1>
+        <p class="section-sub" id="quit-hero-sub">每一次坚持，都是身体慢慢修复的过程。</p>
+      </div>
+
+      <div class="hero">
+      <div class="clock-wrap">
+        <div class="clocks" id="clocks" data-view="round">
+          <div class="clock-view v-flip"><div class="fliprow" id="fliprow"></div></div>
+          <div class="clock-view v-neon">
+            <div class="clock nclock">
+              <div class="grp"><b id="n-d">0</b><i>天</i></div>
+              <div class="grp"><b id="n-h">00</b><i>小时</i></div>
+              <div class="grp"><b id="n-m">00</b><i>分</i></div>
+              <div class="grp"><b id="n-s">00</b><i>秒</i></div>
+            </div>
+          </div>
+          <div class="clock-view v-round">
+            <div class="roundclock">
+              <div class="rounddial">
+                <svg class="roundtrack" viewBox="0 0 280 280" aria-hidden="true">
+                  <defs>
+                    <linearGradient id="roundgrad" x1="30" y1="25" x2="250" y2="255" gradientUnits="userSpaceOnUse">
+                      <stop offset="0%" stop-color="#37d5a2"/>
+                      <stop offset="52%" stop-color="#0aa87a"/>
+                      <stop offset="100%" stop-color="#0b8ed6"/>
+                    </linearGradient>
+                  </defs>
+                  <circle class="rveil rv1" cx="140" cy="140" r="109"/>
+                  <circle class="rveil rv2" cx="140" cy="140" r="91"/>
+                  <circle class="rprogress" id="round-ring" cx="140" cy="140" r="128" stroke-dasharray="804.25" stroke-dashoffset="804.25"/>
+                  <circle class="orbitglow" id="orbit-glow" cx="140" cy="12" r="8"/>
+                  <circle class="orbitdot" id="orbit-dot" cx="140" cy="12" r="3"/>
+                </svg>
+                <div class="roundcenter">
+                  <div class="roundday"><b id="r-d">0</b><span>天</span></div>
+                </div>
+              </div>
+              <div class="roundtime" aria-label="时分秒">
+                <b id="r-h">00</b><i></i><b id="r-m">00</b><i></i><b id="r-s">00</b>
+              </div>
+            </div>
+          </div>
+          <div class="clock-view v-enso">
+            <div class="ensoclock">
+              <div class="ensodial">
+                <svg class="ensoart" viewBox="0 0 320 246" aria-hidden="true">
+                  <defs>
+                    <linearGradient id="ensog" x1="31" y1="183" x2="284" y2="103" gradientUnits="userSpaceOnUse">
+                      <stop offset="0%" stop-color="#8ba59c"/>
+                      <stop offset="48%" stop-color="#1f5a47"/>
+                      <stop offset="100%" stop-color="#28b98d"/>
+                    </linearGradient>
+                  </defs>
+                  <path class="ensotrace" d="M22 184 C78 149 97 72 174 63 C227 57 268 82 291 122"/>
+                  <path class="ensoprogress" id="enso-ring" d="M22 184 C78 149 97 72 174 63 C227 57 268 82 291 122"/>
+                  <path class="ensowhisper" d="M43 208 C108 195 132 121 204 111 C245 105 276 120 306 146"/>
+                </svg>
+                <div class="ensoday"><b id="e-d">0</b><span>天</span></div>
+              </div>
+              <div class="ensotime" aria-label="时分秒">
+                <b id="e-h">00</b><em>·</em><b id="e-m">00</b><em>·</em><b id="e-s">00</b>
+              </div>
+            </div>
+          </div>
+          <div class="clock-view v-flow">
+            <div class="flowclock">
+              <svg class="flowart" viewBox="0 0 360 234" preserveAspectRatio="none" aria-hidden="true">
+                <defs>
+                  <linearGradient id="flowgrad" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stop-color="#0b8ed6" stop-opacity=".12"/>
+                    <stop offset="42%" stop-color="#0aa87a" stop-opacity=".72"/>
+                    <stop offset="100%" stop-color="#3ac9ff" stop-opacity=".14"/>
+                  </linearGradient>
+                </defs>
+                <path class="flowglow" d="M-28 171 C49 91 105 218 181 141 C251 70 306 70 388 116"/>
+                <path class="flowline" id="flow-track" d="M-28 171 C49 91 105 218 181 141 C251 70 306 70 388 116"/>
+                <circle class="flowdot" id="flow-dot" cx="0" cy="0" r="3.5"/>
+              </svg>
+              <div class="flowday"><b id="f-d">0</b><span>天</span></div>
+              <div class="flowtime" aria-label="时分秒">
+                <b id="f-h">00</b><em>·</em><b id="f-m">00</b><em>·</em><b id="f-s">00</b>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="textblock">
+      <div class="cur" id="curcard">
+        <div class="ct" id="cur-t"><span class="cdot"></span>刚刚开始<em>0/11</em></div>
+        <div class="cd" id="cur-d">身体开始代谢尼古丁，先坚持住最初的 20 分钟。</div>
+      </div>
+
+      <div class="next">
+        <div class="nt" id="next-t">心率、血压逐步回落至正常水平</div>
+        <div class="nv"><span>还差</span><b id="next-v">--</b></div>
+        <div class="bar"><i id="barfill"></i></div>
+      </div>
+
+      <details class="stages" id="stages">
+        <summary>全部 11 个阶段 <i>&#9662;</i></summary>
+        <div class="stagelist" id="stagelist"></div>
+      </details>
+      </div>
+      </div>
+
+    </section>
+
+    <!-- ================= 喝水页 ================= -->
+    <section class="page" id="p-water">
+      <div class="top">
+        <div class="brand"><span class="led"></span>喝水</div>
+        <button class="iconbtn" id="btn-wset" title="设置">&#8942;</button>
+      </div>
+
+      <div class="section-hero water-hero">
+        <div class="section-kicker">今日饮水</div>
+        <h1 class="section-title">慢慢喝够</h1>
+        <p class="section-sub" id="water-hero-sub">少量多次，让身体保持舒服的节奏。</p>
+      </div>
+
+      <div class="ringwrap">
+        <svg class="ring" viewBox="0 0 200 200">
+          <defs>
+            <linearGradient id="wg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#3ac9ff"/>
+              <stop offset="100%" stop-color="#2ee6a8"/>
+            </linearGradient>
+          </defs>
+          <circle class="rbg" cx="100" cy="100" r="86"></circle>
+          <circle class="rfg" id="rfg" cx="100" cy="100" r="86" stroke-dasharray="540.35" stroke-dashoffset="540.35"></circle>
+        </svg>
+        <div class="ringtxt">
+          <b id="w-total">0</b>
+          <span id="w-goal">/ 2000 ml</span>
+          <em id="w-pct">0%</em>
+        </div>
+      </div>
+
+      <div class="qgrid" id="qgrid"></div>
+
+      <div class="crow">
+        <input id="w-input" type="number" inputmode="numeric" placeholder="自定义 ml">
+        <button class="addbtn" id="btn-wadd">记 录</button>
+      </div>
+
+      <div class="wrecs">
+        <h4>今日记录 <small id="w-count">0 次</small></h4>
+        <div class="rlist" id="w-list"></div>
+      </div>
+
+      <div class="wcard">
+        <h4>近 7 天 <small id="w-chart-goal">目标 2000 ml</small></h4>
+        <div class="wchart" id="w-chart"></div>
+      </div>
+
+      <details class="whist" id="w-histbox">
+        <summary>历史记录 <small id="w-hist-sum">0 天</small></summary>
+        <div class="rlist" id="w-list2"></div>
+        <div class="hfoot" id="w-hist-foot" style="display:none">
+          <button id="w-hist-clear">清空历史</button>
+        </div>
+      </details>
+    </section>
+
+    <!-- ================= 训练首页 ================= -->
+    <section class="page" id="p-fitness">
+      <div class="top">
+        <div class="brand"><span class="led"></span>训练</div>
+        <button class="iconbtn" id="btn-fit-manage" title="管理训练动作">&#8942;</button>
+      </div>
+
+      <div class="fit-hero">
+        <div class="fit-kicker" id="fit-kicker">今天</div>
+        <h1 class="fit-title" id="fit-title">准备好就练</h1>
+        <p class="fit-desc" id="fit-desc">记录每次训练、每个动作和每一组完成的时间。</p>
+        <div class="fit-overview">
+          <span><b id="fit-month-days">0</b>本月训练天</span>
+          <span><b id="fit-month-count">0</b>本月训练次数</span>
+          <span><b id="fit-month-cheats">0</b>本月放纵餐</span>
+        </div>
+      </div>
+
+      <div id="workout-start-view">
+        <div class="fit-start-card">
+          <div class="fit-plan-head"><span>我的训练计划</span><b id="fit-plan-label">还没有设置</b></div>
+          <div class="fit-plan-list" id="fit-plan-preview"></div>
+          <button class="fit-primary" id="btn-workout-start">新建训练计划</button>
+          <button class="fit-secondary" id="btn-workout-backfill">补记某一天的训练</button>
+        </div>
+      </div>
+
+      <div id="workout-active-view" style="display:none">
+        <div class="fit-session-head">
+          <div><span>训练中</span><b id="workout-timer">00:00:00</b></div>
+          <div class="fit-session-actions">
+            <button class="fit-end" id="btn-workout-adjust">调整本次</button>
+            <button class="fit-end" id="btn-workout-end">结束训练</button>
+          </div>
+        </div>
+        <div class="fit-progress-summary">
+          <span id="workout-count">0 / 0 组</span>
+          <i id="workout-progress"></i>
+        </div>
+        <div class="fit-exercise-list" id="active-ex-list"></div>
+      </div>
+
+      <div class="fit-section">
+        <div class="fit-section-head"><h3>训练日历</h3><small>有记录的月份</small></div>
+        <div class="fit-calendar-card">
+          <div class="fit-cal-head">
+            <button class="iconbtn" id="cal-prev" style="width:28px;height:28px;font-size:18px" aria-label="更早的有记录月份">&#8249;</button>
+            <div class="fit-cal-title" id="cal-title"></div>
+            <button class="iconbtn" id="cal-next" style="width:28px;height:28px;font-size:18px" aria-label="更新的有记录月份">&#8250;</button>
+          </div>
+          <div class="fit-month-jumps" id="fit-month-jumps"></div>
+          <div id="cal-current-view">
+          <div class="fit-week"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div>
+          <div class="fit-cal-legend"><span><i></i>训练</span><span class="cheat"><i></i>放纵餐</span></div>
+          <div class="fit-cal-grid" id="cal-grid"></div>
+          <div class="fit-cal-summary" id="cal-summary"></div>
+          <div class="fit-cheat-actions"><span id="fit-cheat-month">本月 0 顿</span><button class="fit-cheat-add" id="btn-cheat-add">＋ 记录放纵餐</button></div>
+          </div>
+          <div class="fit-archive-detail" id="cal-archive-detail" style="display:none"></div>
+        </div>
+        <div class="fit-archive-title">更早月份 · 月汇总</div>
+        <div class="fit-archive" id="fit-archive"></div>
+      </div>
+
+      <details class="fit-recent-box">
+        <summary class="fit-section-head"><h3>最近训练</h3><small>点击展开 <i>&#9662;</i></small></summary>
+        <div class="fit-recent" id="fit-recent"></div>
+      </details>
+    </section>
+
+    <!-- ================= 每日待办 ================= -->
+    <section class="page" id="p-todo">
+      <div class="top">
+        <div class="brand"><span class="led"></span>待办</div>
+        <button class="iconbtn" id="btn-todo-add-top" title="添加待办">＋</button>
+      </div>
+      <div class="todo-hero">
+        <div class="todo-kicker" id="todo-kicker">今天</div>
+        <h1 class="todo-title" id="todo-title">把事情补上</h1>
+        <p class="todo-sub" id="todo-sub">每天完成一点，重复事项会自动出现在今天。</p>
+      </div>
+      <div class="todo-progress"><span id="todo-summary">0 / 0</span><i id="todo-progress"></i></div>
+      <button class="todo-add" id="btn-todo-add">＋ 添加待办</button>
+      <div class="todo-list" id="todo-list"></div>
+      <div class="todo-section-title"><span>即将到来</span><small>未来 30 天</small></div>
+      <div class="todo-upcoming" id="todo-upcoming"></div>
+      <div class="todo-reminder">
+        <div><b id="todo-reminder-title">每天晚上提醒</b><span id="todo-reminder-desc">每天 20:00 提醒今天还没完成的事项</span></div>
+        <button id="btn-todo-reminder">设置</button>
+      </div>
+    </section>
+
+    <!-- ================= 独立提醒 ================= -->
+    <section class="page" id="p-reminder">
+      <div class="top">
+        <div class="brand"><span class="led"></span>提醒</div>
+        <button class="iconbtn" id="btn-reminder-add-top" title="添加提醒">＋</button>
+      </div>
+      <div class="reminder-hero">
+        <div class="reminder-kicker">独立提醒</div>
+        <h1 class="reminder-title">让时间记得</h1>
+        <p class="reminder-sub">与待办分开保存，到点由手机系统通知。</p>
+      </div>
+      <div class="reminder-overview">
+        <div><b id="reminder-count">0</b><span>条提醒</span></div>
+        <small id="reminder-next-summary">还没有安排</small>
+      </div>
+      <button class="reminder-add" id="btn-reminder-add">＋ 添加提醒</button>
+      <div class="reminder-list" id="reminder-list"></div>
+      <p class="reminder-hint" id="reminder-hint">提醒只保存在这台设备上。</p>
+      <div class="reminder-settings">
+        <div class="reminder-setting-row">
+          <span><b>首页通知</b><small>当天有提醒时，每次打开软件都在首页显示</small></span>
+          <button id="btn-reminder-home-toggle" data-action="toggleReminderHomeNotice">已开启</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 记账 ================= -->
+    <section class="page" id="p-ledger">
+      <div class="top">
+        <div class="brand"><span class="led"></span>记账</div>
+        <button class="iconbtn" id="btn-ledger-new-book" title="事件与数据">＋</button>
+      </div>
+      <div class="ledger-hero">
+        <div class="ledger-kicker">所选事件本月支出</div>
+        <div class="ledger-total"><small>¥</small><span id="ledger-month-total">0.00</span></div>
+        <div class="ledger-sub" id="ledger-summary">0 笔记录</div>
+      </div>
+      <div class="ledger-tree-box" id="ledger-tree-box">
+        <div class="ledger-tree-head"><span>事件</span><b id="ledger-tree-summary"></b><small>点击切换</small></div>
+        <div class="ledger-tree" id="ledger-tree"></div>
+      </div>
+      <details class="ledger-months-box" open>
+        <summary><span>月度总览 · 全部事件</span><b id="ledger-months-total"></b></summary>
+        <div class="ledger-month-list" id="ledger-month-list"></div>
+      </details>
+      <div class="ledger-branch-actions">
+        <span class="ledger-branch-path" id="ledger-branch-path"></span>
+        <button class="ledger-add-child" id="btn-ledger-add-child">＋ 当前事件的子事件</button>
+      </div>
+      <div class="ledger-actions">
+        <button class="ledger-entry-btn" id="btn-ledger-add">＋ 记一笔</button>
+      </div>
+      <div class="ledger-stats">
+        <div class="ledger-stat"><span>今日</span><b id="ledger-today-total">¥0.00</b></div>
+        <div class="ledger-stat"><span>当前事件累计</span><b id="ledger-book-total">¥0.00</b></div>
+      </div>
+      <details class="ledger-record-box">
+        <summary><span>最近记录</span><i id="ledger-record-count">0 笔</i></summary>
+        <div class="ledger-list" id="ledger-list"></div>
+      </details>
+    </section>
+
+  </div>
+
+  <nav class="page-pager" id="page-pager" aria-label="页面切换">
+    <button data-page-index="1" data-action="goPage" data-args="[1]" aria-label="训练"><span>练</span></button>
+    <button data-page-index="2" data-action="goPage" data-args="[2]" aria-label="喝水"><span>水</span></button>
+    <button data-page-index="3" data-action="goPage" data-args="[3]" aria-label="戒烟"><span>戒</span></button>
+    <button data-page-index="4" data-action="goPage" data-args="[4]" aria-label="待办"><span>记</span></button>
+    <button data-page-index="6" data-action="goPage" data-args="[6]" aria-label="记账"><span>账</span></button>
+    <button data-page-index="5" data-action="goPage" data-args="[5]" aria-label="提醒"><span>醒</span></button>
+  </nav>
+
+</div>
+
+<div class="mask" id="mask"></div>
+<div class="sheet" id="sheet"></div>
+<div id="toast"></div>
+
+<script>
+/* __APP_SCRIPTS__ */
+</script>
+</body>
+</html>

@@ -1,0 +1,151 @@
+/* ---------- 倒计时皮肤 ---------- */
+.clocks{display:flex;align-items:center;justify-content:center;width:100%;min-height:180px;cursor:pointer}
+.clock-view{display:none;width:100%}
+.clocks[data-view="flip-v"] .v-flip,
+.clocks[data-view="neon-v"] .v-neon,
+.clocks[data-view="round"] .v-round,
+.clocks[data-view="enso"] .v-enso,
+.clocks[data-view="flow"] .v-flow{display:block}
+
+/* 竖版灯管：天/小时/分/秒各占一行，单位贴数字右侧 */
+.clocks[data-view="neon-v"] .clock{
+  display:grid;grid-template-columns:1fr auto 1fr;align-items:baseline;
+  row-gap:4px;width:100%;margin:0 auto;
+}
+.clocks[data-view="neon-v"] .grp{display:contents}
+.clocks[data-view="neon-v"] .grp b{grid-column:2;justify-self:center;text-align:center;line-height:1.04}
+.clocks[data-view="neon-v"] .grp i{grid-column:3;justify-self:start;margin:0 0 0 13px;text-align:left}
+.clocks[data-view="neon-v"] .grp+.grp::before{display:none}
+.clocks[data-view="neon-v"] .grp i{font-size:max(11px, calc(var(--fs) * 0.2));margin-left:13px}
+
+/* 翻页竖排：四组格子竖着排，左边补一个等宽空位让格子居中 */
+.clocks[data-view="flip-v"] .fliprow{flex-direction:column;align-items:center;gap:7px}
+.clocks[data-view="flip-v"] .fgroup{flex:0 0 auto;flex-direction:row;align-items:center;gap:11px;width:auto}
+.clocks[data-view="flip-v"] .fgroup::before{content:'';flex:0 0 auto;width:var(--flabw,26px)}
+.clocks[data-view="flip-v"] .fgroup i{flex:0 0 var(--flabw,26px);width:var(--flabw,26px)}
+.clocks[data-view="flip-v"] .fcells{width:auto}
+.clocks[data-view="flip-v"] .fc{flex:0 0 auto;width:var(--fcw,36px);height:var(--fch,50px)}
+.clocks[data-view="flip-v"] .fnum{font-size:var(--fnum,30px)}
+.clocks[data-view="flip-v"] .fgroup i{font-size:max(10px, calc(var(--fnum,30px) * 0.26))}
+
+/* 复古翻页 */
+.fliprow{display:flex;align-items:flex-start;justify-content:center;gap:7px;width:100%}
+.fgroup{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:7px}
+.fcells{display:flex;gap:3px;width:100%}
+.fc{position:relative;flex:1 1 0;min-width:0;height:clamp(44px,12.8vw,58px);border-radius:6px;
+  background:linear-gradient(180deg,#ffffff 0%,#f7f9fa 49%,#eef2f4 51%,#fbfcfd 100%);
+  border:1px solid rgba(13,32,45,.10);
+  box-shadow:0 1px 2px rgba(13,32,45,.10),inset 0 1px 0 #fff;
+  display:grid;place-items:center;transform-style:preserve-3d;backface-visibility:hidden}
+.fc::after{content:'';position:absolute;left:0;right:0;top:calc(50% - .5px);height:1px;background:rgba(13,32,45,.16);z-index:2}
+.fnum{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;
+  font-size:clamp(25px,7.8vw,34px);font-weight:600;line-height:1;color:#131b21;z-index:1}
+.fc.flipping{animation:fcflip .5s cubic-bezier(.32,.06,.26,1)}
+@keyframes fcflip{0%{transform:rotateX(0)}46%{transform:rotateX(-88deg)}54%{transform:rotateX(88deg)}100%{transform:rotateX(0)}}
+.fgroup i{font-style:normal;font-size:10px;letter-spacing:.2em;color:#a9b6c1;text-indent:.2em}
+
+/* 霓虹灯管（无框，数字直接顶到两侧） */
+.v-neon{padding:0}
+.nclock{--fs:clamp(38px,13.4vw,62px)}
+.nclock .grp{padding:0 clamp(7px,1.9vw,13px)}
+/* 灯管皮肤的数字与单位排版 */
+.nclock .grp+.grp::before{
+  content:'';display:block;position:absolute;left:0;top:7%;bottom:26%;width:1px;
+  background:linear-gradient(180deg,rgba(13,143,168,0),rgba(13,143,168,.62),rgba(13,143,168,0));
+}
+.nclock .grp b{color:#0d8fa8;font-weight:300;
+  text-shadow:0 0 6px rgba(70,216,234,.55),0 0 16px rgba(70,216,234,.38),0 0 34px rgba(70,216,234,.22);
+  -webkit-text-stroke:.4px rgba(70,216,234,.85)}
+.nclock .grp i{color:rgba(13,143,168,.6);text-shadow:0 0 7px rgba(70,216,234,.35);letter-spacing:.24em}
+
+/* 涟漪：悬浮数字与多层轻盈光环 */
+.v-round{padding:3px 0 0}
+.roundclock{display:flex;flex-direction:column;align-items:center;gap:7px;width:100%}
+.rounddial{position:relative;width:min(67vw,270px);aspect-ratio:1;margin:0 auto}
+.rounddial::before{
+  content:'';position:absolute;inset:4%;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,rgba(55,213,162,.12),rgba(11,142,214,.035) 52%,transparent 70%);
+  filter:blur(18px);animation:halobreathe 6.4s ease-in-out infinite
+}
+@keyframes halobreathe{0%,100%{opacity:.42;transform:scale(.95)}50%{opacity:.82;transform:scale(1.045)}}
+.roundtrack{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg);overflow:visible}
+.roundtrack .rveil{fill:none;transform-origin:140px 140px}
+.roundtrack .rv1{
+  stroke:rgba(10,168,122,.19);stroke-width:1.15;stroke-linecap:round;
+  stroke-dasharray:74 24 3 17;animation:ringturn 28s linear infinite
+}
+.roundtrack .rv2{
+  stroke:rgba(11,142,214,.13);stroke-width:.9;stroke-linecap:round;
+  stroke-dasharray:22 34 2 15;animation:ringturn 36s linear infinite reverse
+}
+@keyframes ringturn{to{transform:rotate(360deg)}}
+.roundtrack .rprogress{
+  fill:none;stroke:url(#roundgrad);stroke-width:2.1;stroke-linecap:round;
+  filter:drop-shadow(0 0 4px rgba(10,168,122,.28));
+  transition:stroke-dashoffset .65s cubic-bezier(.22,.61,.36,1)
+}
+.roundtrack .orbitglow{fill:rgba(55,213,162,.16);filter:blur(6px)}
+.roundtrack .orbitdot{fill:#fff;stroke:#0a9d74;stroke-width:2;filter:drop-shadow(0 0 5px rgba(10,168,122,.62))}
+.roundcenter{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.roundday{position:relative;z-index:1;display:flex;align-items:baseline;justify-content:center;line-height:1;padding-right:10px}
+.roundday b{
+  font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;
+  font-size:clamp(56px,19vw,82px);font-weight:200;letter-spacing:-.075em;color:#0b2119;
+  text-shadow:0 8px 30px rgba(23,77,59,.10)
+}
+.roundday[data-len="4"] b{font-size:clamp(48px,15vw,66px)}
+.roundday[data-len="5"] b{font-size:clamp(38px,12vw,52px)}
+.roundday span{font-size:9px;line-height:1;letter-spacing:.18em;color:var(--acc);margin-left:4px;white-space:nowrap}
+.roundtime,.ensotime,.flowtime{display:flex;align-items:center;justify-content:center;font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+.roundtime{gap:14px;color:#5d7068}
+.roundtime b{font-size:15px;font-weight:500;letter-spacing:.09em}
+.roundtime i{width:3px;height:3px;border-radius:50%;background:rgba(10,168,122,.42)}
+
+/* 风迹：两笔留白，日期停在风的间隙里 */
+.v-enso{padding:0}
+.ensoclock{display:flex;flex-direction:column;align-items:center;gap:1px;width:100%}
+.ensodial{position:relative;width:min(82vw,320px);height:246px;margin:0 auto}
+.ensoart{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.ensotrace,.ensoprogress,.ensowhisper{fill:none;stroke-linecap:round}
+.ensotrace{stroke:rgba(13,32,45,.075);stroke-width:1.25}
+.ensoprogress{
+  stroke:url(#ensog);stroke-width:2.2;
+  filter:drop-shadow(0 3px 7px rgba(10,104,78,.15));
+  transition:stroke-dashoffset .9s cubic-bezier(.22,.61,.36,1)
+}
+.ensowhisper{stroke:rgba(96,126,115,.18);stroke-width:1;stroke-dasharray:2 8;animation:windflow 12s linear infinite}
+@keyframes windflow{to{stroke-dashoffset:-70}}
+.ensoday{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding-right:10px}
+.ensoday b{
+  font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;
+  font-size:clamp(70px,22vw,96px);font-weight:200;line-height:.92;letter-spacing:-.08em;color:#132c24;
+  text-shadow:0 10px 34px rgba(31,78,64,.10)
+}
+.ensoday span{font-size:9px;letter-spacing:.2em;color:var(--acc);margin-left:7px;transform:translateY(23px)}
+.ensotime{gap:18px;color:#5b6f67;margin-top:2px}
+.ensotime b{font-size:14px;font-weight:400;letter-spacing:.11em}
+.ensotime em{font-style:normal;font-size:9px;color:rgba(91,111,103,.38)}
+
+/* 流光：数字浮在一条持续延展的曲线上 */
+.v-flow{padding:0}
+.flowclock{position:relative;width:100%;min-height:234px;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+.flowart{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.flowglow{fill:none;stroke:rgba(10,168,122,.11);stroke-width:9;filter:blur(6px)}
+.flowline{fill:none;stroke:url(#flowgrad);stroke-width:1.45;stroke-dasharray:3 5;stroke-linecap:round;animation:flowline 9s linear infinite}
+@keyframes flowline{to{stroke-dashoffset:-64}}
+.flowdot{fill:#fff;stroke:#0a9d74;stroke-width:2.3;filter:drop-shadow(0 0 5px rgba(10,168,122,.62));transition:cx .7s ease,cy .7s ease}
+.flowday{position:relative;z-index:1;display:flex;align-items:baseline;justify-content:center;line-height:1;padding-right:10px}
+.flowday b{
+  font-family:ui-serif,Georgia,"Songti SC",serif;font-variant-numeric:tabular-nums;
+  font-size:clamp(72px,23vw,102px);font-weight:400;letter-spacing:-.075em;color:#10252e;
+  text-shadow:0 8px 28px rgba(19,49,55,.08)
+}
+.flowday span{font-size:9px;letter-spacing:.18em;color:var(--acc);margin-left:5px}
+.flowtime{position:relative;z-index:1;gap:18px;color:#536a70;margin-top:20px}
+.flowtime b{font-size:15px;font-weight:500;letter-spacing:.1em}
+.flowtime em{font-style:normal;font-size:9px;color:rgba(83,106,112,.38)}
+
+@media(prefers-reduced-motion:reduce){
+  .page,.rprogress,.ensoprogress,.flowdot,.bar i{transition:none}
+  .led,.cdot,.rounddial::before,.flowline,.rveil,.ensowhisper{animation:none}
+}

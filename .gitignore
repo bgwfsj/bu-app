@@ -1,0 +1,25 @@
+# Build outputs
+*.apk
+/QuitSmokeApp/app/build/
+/QuitSmokeApp/.gradle/
+/.gradle/
+
+# Machine-specific Android configuration
+/QuitSmokeApp/local.properties
+
+# Personal import data
+/导出数据.csv
+
+# Historical binaries, private signing files and old reference project
+/历史版本/
+
+# Generated preview captures
+/QuitSmokeApp/_tools/preview_*.png
+/_tools/final-home.png
+
+# OS and editor noise
+.DS_Store
+Thumbs.db
+*.log
+.idea/
+*.iml
