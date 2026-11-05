@@ -263,6 +263,11 @@ async function run() {
       var opened = byId('p-settings').classList.contains('on') &&
         document.body.dataset.page === 'settings';
       var dataActions = byId('p-settings').querySelectorAll('[data-action="exportAppBackup"], [data-action="chooseAppBackup"]').length;
+      byId('p-settings').querySelector('[data-action="openAboutSheet"]').click();
+      var aboutOpened = byId('sheet').classList.contains('on');
+      var changelogCount = byId('sheet').querySelectorAll('.changelog-entry').length;
+      var aboutVersion = byId('sheet').querySelector('.about-current b').textContent.trim();
+      closeSheet();
       byId('p-settings').querySelector('[data-action="checkAppUpdate"]').click();
       var handledBack = handleBackNavigation();
       var returnedHome = !settingsOpen && page === 0 && byId('p-home').classList.contains('on');
@@ -270,6 +275,9 @@ async function run() {
       return {
         opened: opened,
         dataActions: dataActions,
+        aboutOpened: aboutOpened,
+        changelogCount: changelogCount,
+        aboutVersion: aboutVersion,
         updateCalls: calls,
         handledBack: handledBack,
         returnedHome: returnedHome
@@ -278,6 +286,9 @@ async function run() {
     assert.deepEqual(settingsPage, {
       opened: true,
       dataActions: 2,
+      aboutOpened: true,
+      changelogCount: 24,
+      aboutVersion: '5.4.1',
       updateCalls: 1,
       handledBack: true,
       returnedHome: true

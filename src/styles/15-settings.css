@@ -22,3 +22,16 @@ body[data-page="settings"] #page-pager{opacity:0;pointer-events:none}
 .settings-row small{display:block;font-size:var(--fs-caption);line-height:1.55;color:#8b9ba2;margin-top:4px}
 .settings-row em{font-style:normal;font-size:10px;color:#6594aa;white-space:nowrap}
 .settings-row:active{background:rgba(78,148,188,.045)}
+
+/* ---------- 关于与更新记录 ---------- */
+.about-current{display:flex;align-items:baseline;justify-content:space-between;margin:0 0 14px;padding:11px 12px;border-radius:11px;background:#f4f8f7;color:#6f858d;font-size:var(--fs-caption)}
+.about-current b{font:500 15px var(--font-mono);color:#397f91}
+.changelog-list{display:flex;flex-direction:column;gap:7px}
+.changelog-entry{border:1px solid var(--line2);border-radius:11px;background:#fbfcfc;overflow:hidden}
+.changelog-entry>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;cursor:pointer;color:#3c554a}
+.changelog-entry>summary::-webkit-details-marker{display:none}
+.changelog-entry>summary::marker{content:''}
+.changelog-entry>summary b{font:500 12.5px var(--font-mono);color:#43889b}
+.changelog-entry>summary span{font-size:10px;color:#9aa8ad}
+.changelog-entry ul{margin:0;padding:0 14px 11px 29px;color:#71858a}
+.changelog-entry li{font-size:11.5px;line-height:1.65;margin:3px 0}

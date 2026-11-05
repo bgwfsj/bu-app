@@ -132,6 +132,7 @@ var APP_ACTION_NAMES = {
   checkAppUpdate: true,
   openSettingsPage: true,
   closeSettingsPage: true,
+  openAboutSheet: true,
   openLedgerMonthReport: true,
   toggleLedgerNode: true,
   selectLedgerBook: true,

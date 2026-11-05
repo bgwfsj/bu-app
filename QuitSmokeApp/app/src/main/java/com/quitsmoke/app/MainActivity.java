@@ -211,6 +211,17 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @JavascriptInterface
+        public String getAppVersion() {
+            try {
+                android.content.pm.PackageInfo info = getPackageManager()
+                    .getPackageInfo(getPackageName(), 0);
+                return info.versionName == null ? "" : info.versionName;
+            } catch (Exception error) {
+                return "";
+            }
+        }
+
+        @JavascriptInterface
         public void pickCsvFile() {
             runOnUiThread(() -> {
                 filePickerPurpose = "csv";
