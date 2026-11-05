@@ -244,6 +244,16 @@ async function run() {
       activeQuickLabel: '戒'
     });
 
+    const updateButton = await evaluate(cdp, `(function(){
+      var originalNative = window.AppNative;
+      var calls = 0;
+      window.AppNative = { checkForUpdates: function(){ calls++; } };
+      document.querySelector('.home-update-btn').click();
+      window.AppNative = originalNative;
+      return { calls: calls, label: document.querySelector('.home-update-btn').textContent.trim() };
+    })()`);
+    assert.deepEqual(updateButton, { calls: 1, label: '更新' });
+
     const workout = await evaluate(cdp, `(function(){
       startWorkoutFromPlan('plan_default');
       var active = activeWorkout();

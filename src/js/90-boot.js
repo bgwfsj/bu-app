@@ -58,6 +58,14 @@ function boot(){
   }, 30000);
 }
 
+function checkAppUpdate(){
+  if (window.AppNative && window.AppNative.checkForUpdates) {
+    window.AppNative.checkForUpdates();
+    return;
+  }
+  toast('网页预览不能检查安装包更新');
+}
+
 (function(){
   // 便于测试：window.RESET_APP() 清空本 app 存档
   window.RESET_APP = function(){ localStorage.removeItem(AKEY); location.reload(); };

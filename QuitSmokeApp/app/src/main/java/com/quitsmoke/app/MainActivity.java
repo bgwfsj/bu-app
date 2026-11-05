@@ -206,6 +206,11 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @JavascriptInterface
+        public void checkForUpdates() {
+            AppUpdater.check(MainActivity.this);
+        }
+
+        @JavascriptInterface
         public void pickCsvFile() {
             runOnUiThread(() -> {
                 filePickerPurpose = "csv";

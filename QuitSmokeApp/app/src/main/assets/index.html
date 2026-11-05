@@ -260,6 +260,7 @@ body[data-page="home"]::before{
 .home-date{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:10px;color:#94a3a8}
 .home-meta{display:flex;align-items:center;gap:7px}
 .home-data-btn{width:30px;height:30px;border-radius:9px;border:1px solid var(--line2);background:rgba(255,255,255,.7);color:#87979c;font-size:15px;line-height:1;cursor:pointer}
+.home-update-btn{height:30px;padding:0 9px;border-radius:9px;border:1px solid rgba(78,148,188,.16);background:rgba(255,255,255,.64);color:rgba(78,148,188,.85);font-size:9.5px;letter-spacing:.05em;cursor:pointer}
 .home-hero{flex:0 0 auto;margin-bottom:23px}
 .home-eyebrow{font-size:10px;letter-spacing:.24em;color:var(--acc);font-weight:600;margin-bottom:9px}
 .home-title{font-size:36px;line-height:1.18;letter-spacing:-.045em;font-weight:400;color:#10241d;margin:0}
@@ -943,7 +944,7 @@ body[data-page="fitness"]::before{
     <section class="page on" id="p-home">
       <div class="home-top">
         <div class="home-mark">补<span>每天补一点</span></div>
-        <div class="home-meta"><div class="home-date" id="home-date"></div><button class="home-data-btn" id="btn-app-data" title="数据备份" aria-label="数据备份">⋯</button></div>
+        <div class="home-meta"><div class="home-date" id="home-date"></div><button class="home-update-btn" data-action="checkAppUpdate" title="检查更新">更新</button><button class="home-data-btn" id="btn-app-data" title="数据备份" aria-label="数据备份">⋯</button></div>
       </div>
       <div class="home-hero">
         <div class="home-eyebrow">TODAY</div>
@@ -1471,6 +1472,7 @@ var APP_ACTION_NAMES = {
   toggleReminderHomeNotice: true,
   dismissHomeNoticeToday: true,
   saveSnooze: true,
+  checkAppUpdate: true,
   openLedgerMonthReport: true,
   toggleLedgerNode: true,
   selectLedgerBook: true,
@@ -5508,6 +5510,14 @@ function boot(){
     if (reminderData && page === 5) renderReminderPage();
     checkTodoReminder();
   }, 30000);
+}
+
+function checkAppUpdate(){
+  if (window.AppNative && window.AppNative.checkForUpdates) {
+    window.AppNative.checkForUpdates();
+    return;
+  }
+  toast('网页预览不能检查安装包更新');
 }
 
 (function(){
