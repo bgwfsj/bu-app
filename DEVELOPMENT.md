@@ -6,7 +6,7 @@
 
 - 应用名：补
 - 包名：`com.quitsmoke.app`
-- 当前版本：5.8.1
+- 当前版本：5.8.2
 - 最低 Android：API 24
 - Target SDK：34
 - 仓库：`bgwfsj/bu-app`（公开）
@@ -176,7 +176,7 @@ bu_pre_restore_v1    完整恢复前的安全副本
 - `SnoozeScheduler` / `SnoozeReceiver`：一次性稍后提醒。
 - `NotificationActionReceiver`：通知“确认”动作，收起通知。
 
-提醒通知的操作顺序固定为“稍后”在前、“确认”在后。部分国产系统在折叠通知中只显示第一个操作，调整顺序后无需展开即可直接稍后提醒。
+提醒通知使用 `ReminderNotificationFactory` 和 `res/layout/notification_reminder.xml` 构建自定义双按钮界面，避免小米等系统隐藏标准通知操作栏。独立提醒与待办提醒使用新的 `*_v2` 通知通道，旧通道会被清理。
 
 通知点击：
 

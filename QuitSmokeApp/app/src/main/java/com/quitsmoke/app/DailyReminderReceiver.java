@@ -9,7 +9,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 
-import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
@@ -67,22 +66,16 @@ public class DailyReminderReceiver extends BroadcastReceiver {
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
 
-        NotificationCompat.Builder notification = new NotificationCompat.Builder(
-            context, ReminderScheduler.CHANNEL_ID
-        )
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentTitle("补 · 今晚的待办")
-            .setContentText(body)
-            .setStyle(new NotificationCompat.BigTextStyle().bigText(body))
-            .setContentIntent(contentIntent)
-            .addAction(0, "稍后", snoozeAction)
-            .addAction(0, "确认", confirmAction)
-            .setAutoCancel(true)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .setCategory(NotificationCompat.CATEGORY_REMINDER);
-
-        NotificationManagerCompat.from(context).notify(4101, notification.build());
+        NotificationManagerCompat.from(context).notify(4101, ReminderNotificationFactory.create(
+            context,
+            ReminderScheduler.CHANNEL_ID,
+            "补 · 今晚的待办",
+            body,
+            contentIntent,
+            snoozeAction,
+            confirmAction,
+            androidx.core.app.NotificationCompat.PRIORITY_DEFAULT
+        ).build());
         // This is a one-shot alarm. Schedule tomorrow's occurrence now that
         // today's notification has been delivered.
         ReminderScheduler.schedule(context);

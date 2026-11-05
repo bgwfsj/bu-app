@@ -17,8 +17,8 @@ android {
         applicationId "com.quitsmoke.app"
         minSdk 24
         targetSdk 34
-        versionCode 44
-        versionName "5.8.1"
+        versionCode 45
+        versionName "5.8.2"
     }
 
     signingConfigs {
