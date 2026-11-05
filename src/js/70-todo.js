@@ -38,7 +38,7 @@ function todoDateObject(date){
 }
 
 function todoMatchesDate(item, date){
-  if (item.repeat === 'once') return item.date === date || (item.date < date && !item.done);
+  if (item.repeat === 'once') return item.date === date;
   if (item.repeat === 'custom') return (item.dates || []).indexOf(date) >= 0;
   if (date < item.createdDate) return false;
   var day = todoDateObject(date).getDay();
@@ -46,6 +46,31 @@ function todoMatchesDate(item, date){
   if (item.repeat === 'weekdays') return day >= 1 && day <= 5;
   if (item.repeat === 'weekends') return day === 0 || day === 6;
   return false;
+}
+
+function todoArchiveDate(item){
+  if (item.repeat === 'once') return item.date || '';
+  if (item.repeat === 'custom' && Array.isArray(item.dates) && item.dates.length) {
+    return item.dates.slice().sort().pop();
+  }
+  return '';
+}
+
+function todoIsArchived(item, today){
+  today = today || wTodayStr();
+  if (item.repeat === 'once') return !!item.date && item.date < today;
+  if (item.repeat === 'custom') {
+    var dates = Array.isArray(item.dates) ? item.dates : [];
+    return dates.length > 0 && dates.every(function(date){ return date < today; });
+  }
+  return false;
+}
+
+function todoArchivedItems(){
+  return todoData.items.filter(function(item){ return todoIsArchived(item); })
+    .sort(function(a, b){
+      return todoArchiveDate(b).localeCompare(todoArchiveDate(a));
+    });
 }
 
 function todoIsDone(item, date){
@@ -111,6 +136,19 @@ function renderTodoPage(){
     return '<button type="button" class="todo-up-item"' + actionAttrs('editTodo', [u.item.id]) + '>' +
       '<span>' + escHtml(u.item.title) + '</span><span>' + workoutDateLabel(u.date) + ' ›</span></button>';
   }).join('') : '<div class="todo-empty" style="padding:10px 0">未来还没有单独日期的事项</div>';
+
+  var archived = todoArchivedItems();
+  byId('todo-archive-count').textContent = archived.length + ' 项';
+  byId('todo-archive-list').innerHTML = archived.length ? archived.map(function(item){
+    var archiveDate = todoArchiveDate(item);
+    var state;
+    if (item.repeat === 'once') state = item.done ? '已完成' : '未完成';
+    else state = '已结束';
+    return '<div class="todo-archive-item">' +
+      '<span class="todo-archive-copy"><b>' + escHtml(item.title) + '</b>' +
+      '<span>原定 ' + workoutDateLabel(archiveDate) + (item.repeat === 'custom' ? ' · 自定义日期' : '') + '</span></span>' +
+      '<span class="todo-archive-state">' + state + '</span></div>';
+  }).join('') : '<div class="todo-archive-empty">还没有失效的待办</div>';
 
   var r = todoData.reminder;
   var time = pad2(r.hour) + ':' + pad2(r.minute);

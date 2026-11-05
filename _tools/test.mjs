@@ -277,23 +277,42 @@ async function run() {
     const todo = await evaluate(cdp, `(function(){
       var today = wTodayStr();
       var yesterday = new Date(Date.now() - 86400000);
+      var tomorrow = new Date(Date.now() + 86400000);
       var overdueDate = yesterday.getFullYear() + '-' + pad2(yesterday.getMonth() + 1) + '-' + pad2(yesterday.getDate());
+      var futureDate = tomorrow.getFullYear() + '-' + pad2(tomorrow.getMonth() + 1) + '-' + pad2(tomorrow.getDate());
       todoData.items = [
         { id: 'overdue', title: '逾期一次', repeat: 'once', date: overdueDate, createdDate: overdueDate, done: false, doneDates: {} },
+        { id: 'pastDone', title: '昨天完成', repeat: 'once', date: overdueDate, createdDate: overdueDate, done: true, doneDates: {} },
+        { id: 'expiredCustom', title: '结束的自定义', repeat: 'custom', dates: [overdueDate], createdDate: overdueDate, done: false, doneDates: {} },
+        { id: 'futureOnce', title: '未来一次', repeat: 'once', date: futureDate, createdDate: today, done: false, doneDates: {} },
         { id: 'daily', title: '每天一次', repeat: 'daily', createdDate: overdueDate, done: false, doneDates: {} }
       ];
       saveTodoState();
       var before = todosForDate(today).map(function(item){ return item.id; }).sort();
-      toggleTodo('overdue');
+      toggleTodo('daily');
       var after = todosForDate(today).map(function(item){ return item.id; }).sort();
-      return { before: before, after: after };
+      var completedToday = todosForDate(today).some(function(item){
+        return item.id === 'daily' && todoIsDone(item, today);
+      });
+      renderTodoPage();
+      return {
+        before: before,
+        after: after,
+        completedToday: completedToday,
+        archived: todoArchivedItems().map(function(item){ return item.id; }).sort(),
+        archiveCollapsed: byId('todo-archive-box').open === false,
+        archiveCount: byId('todo-archive-count').textContent
+      };
     })()`);
-    assert.deepEqual(todo.before, ['daily', 'overdue']);
+    assert.deepEqual(todo.before, ['daily']);
     assert.deepEqual(todo.after, ['daily']);
+    assert.equal(todo.completedToday, true);
+    assert.deepEqual(todo.archived, ['expiredCustom', 'overdue', 'pastDone']);
+    assert.equal(todo.archiveCollapsed, true);
+    assert.equal(todo.archiveCount, '3 项');
 
     const todoEdit = await evaluate(cdp, `(function(){
       var today = wTodayStr();
-      toggleTodo('daily');
       var beforeCount = todoData.items.length;
       document.querySelector('.todo-edit[data-action="editTodo"]').click();
       byId('todo-name').value = '每天一次（已编辑）';
@@ -505,7 +524,7 @@ async function run() {
     })()`);
     assert.equal(restored.waterGoal, 2600);
     assert.equal(restored.fitnessSessions, 1);
-    assert.equal(restored.todoItems, 2);
+    assert.equal(restored.todoItems, 5);
     assert.equal(restored.reminderItems, 5);
     assert.equal(restored.ledgerRecords, 118);
     assert.ok(restored.quitDate > 0);

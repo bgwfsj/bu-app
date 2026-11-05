@@ -333,6 +333,20 @@ body[data-page="home"]::before{
 .todo-upcoming{display:flex;flex-direction:column;gap:6px}
 .todo-up-item{display:flex;align-items:center;justify-content:space-between;padding:10px 11px;background:rgba(255,255,255,.72);border:1px solid var(--line2);border-radius:10px;font-size:12px;color:#657b83;width:100%;text-align:left;font-family:inherit;cursor:pointer}
 .todo-up-item span:last-child{font-size:var(--fs-caption);color:#9ca9ad}
+.todo-archive-box{margin-top:20px;border-top:1px solid var(--line2);padding-top:10px}
+.todo-archive-box>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;cursor:pointer;color:#6d8089;font-size:var(--fs-meta);letter-spacing:.08em}
+.todo-archive-box>summary::-webkit-details-marker{display:none}
+.todo-archive-box>summary::marker{content:''}
+.todo-archive-box>summary small{display:flex;align-items:center;gap:7px;font-size:var(--fs-caption);color:#9aa8ad;letter-spacing:0}
+.todo-archive-box>summary em{font-style:normal;transition:transform .2s;color:#a4b0b5}
+.todo-archive-box[open]>summary em{transform:rotate(180deg)}
+.todo-archive-list{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.todo-archive-item{display:flex;align-items:center;gap:10px;padding:10px 11px;border-radius:10px;background:rgba(255,255,255,.6);border:1px solid var(--line2)}
+.todo-archive-copy{flex:1;min-width:0}
+.todo-archive-copy b{display:block;font-size:12.5px;font-weight:500;color:#74858b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.todo-archive-copy span{display:block;font-size:var(--fs-caption);color:#a0acb0;margin-top:3px}
+.todo-archive-state{font-size:10px;color:#9aa8ad;white-space:nowrap}
+.todo-archive-empty{text-align:center;padding:12px 8px;color:#9aa8ad;font-size:11.5px}
 .todo-reminder{margin-top:22px;padding:14px;border-radius:14px;background:#fff;border:1px solid var(--line2);display:flex;align-items:center;gap:11px}
 .todo-reminder div{flex:1}
 .todo-reminder b{display:block;font-size:12.5px;color:#3b544a;font-weight:500}
@@ -1236,6 +1250,10 @@ body[data-page="fitness"]::before{
       <div class="todo-list" id="todo-list"></div>
       <div class="todo-section-title"><span>即将到来</span><small>未来 30 天</small></div>
       <div class="todo-upcoming" id="todo-upcoming"></div>
+      <details class="todo-archive-box" id="todo-archive-box">
+        <summary><span>归档</span><small><i id="todo-archive-count">0 项</i><em>&#9662;</em></small></summary>
+        <div class="todo-archive-list" id="todo-archive-list"></div>
+      </details>
       <div class="todo-reminder">
         <div><b id="todo-reminder-title">每天晚上提醒</b><span id="todo-reminder-desc">每天 20:00 提醒今天还没完成的事项</span></div>
         <button id="btn-todo-reminder">设置</button>
@@ -3790,7 +3808,7 @@ function todoDateObject(date){
 }
 
 function todoMatchesDate(item, date){
-  if (item.repeat === 'once') return item.date === date || (item.date < date && !item.done);
+  if (item.repeat === 'once') return item.date === date;
   if (item.repeat === 'custom') return (item.dates || []).indexOf(date) >= 0;
   if (date < item.createdDate) return false;
   var day = todoDateObject(date).getDay();
@@ -3798,6 +3816,31 @@ function todoMatchesDate(item, date){
   if (item.repeat === 'weekdays') return day >= 1 && day <= 5;
   if (item.repeat === 'weekends') return day === 0 || day === 6;
   return false;
+}
+
+function todoArchiveDate(item){
+  if (item.repeat === 'once') return item.date || '';
+  if (item.repeat === 'custom' && Array.isArray(item.dates) && item.dates.length) {
+    return item.dates.slice().sort().pop();
+  }
+  return '';
+}
+
+function todoIsArchived(item, today){
+  today = today || wTodayStr();
+  if (item.repeat === 'once') return !!item.date && item.date < today;
+  if (item.repeat === 'custom') {
+    var dates = Array.isArray(item.dates) ? item.dates : [];
+    return dates.length > 0 && dates.every(function(date){ return date < today; });
+  }
+  return false;
+}
+
+function todoArchivedItems(){
+  return todoData.items.filter(function(item){ return todoIsArchived(item); })
+    .sort(function(a, b){
+      return todoArchiveDate(b).localeCompare(todoArchiveDate(a));
+    });
 }
 
 function todoIsDone(item, date){
@@ -3863,6 +3906,19 @@ function renderTodoPage(){
     return '<button type="button" class="todo-up-item"' + actionAttrs('editTodo', [u.item.id]) + '>' +
       '<span>' + escHtml(u.item.title) + '</span><span>' + workoutDateLabel(u.date) + ' ›</span></button>';
   }).join('') : '<div class="todo-empty" style="padding:10px 0">未来还没有单独日期的事项</div>';
+
+  var archived = todoArchivedItems();
+  byId('todo-archive-count').textContent = archived.length + ' 项';
+  byId('todo-archive-list').innerHTML = archived.length ? archived.map(function(item){
+    var archiveDate = todoArchiveDate(item);
+    var state;
+    if (item.repeat === 'once') state = item.done ? '已完成' : '未完成';
+    else state = '已结束';
+    return '<div class="todo-archive-item">' +
+      '<span class="todo-archive-copy"><b>' + escHtml(item.title) + '</b>' +
+      '<span>原定 ' + workoutDateLabel(archiveDate) + (item.repeat === 'custom' ? ' · 自定义日期' : '') + '</span></span>' +
+      '<span class="todo-archive-state">' + state + '</span></div>';
+  }).join('') : '<div class="todo-archive-empty">还没有失效的待办</div>';
 
   var r = todoData.reminder;
   var time = pad2(r.hour) + ':' + pad2(r.minute);
