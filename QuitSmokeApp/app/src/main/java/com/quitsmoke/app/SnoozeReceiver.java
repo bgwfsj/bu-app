@@ -43,14 +43,32 @@ public class SnoozeReceiver extends BroadcastReceiver {
         int requestCode = SnoozeScheduler.requestCode(type, id);
         Intent openIntent = new Intent(context, MainActivity.class)
             .putExtra("open_page", page)
-            .putExtra("snooze_type", type)
-            .putExtra("snooze_id", id)
-            .putExtra("snooze_title", title)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent contentIntent = PendingIntent.getActivity(
             context,
             requestCode,
             openIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+        Intent confirmIntent = new Intent(context, NotificationActionReceiver.class)
+            .putExtra("notification_id", requestCode);
+        PendingIntent confirmAction = PendingIntent.getBroadcast(
+            context,
+            requestCode ^ 0x434F,
+            confirmIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+        Intent snoozeIntent = new Intent(context, MainActivity.class)
+            .putExtra("open_page", page)
+            .putExtra("notification_id", requestCode)
+            .putExtra("snooze_type", type)
+            .putExtra("snooze_id", id)
+            .putExtra("snooze_title", title)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        PendingIntent snoozeAction = PendingIntent.getActivity(
+            context,
+            requestCode ^ 0x534E,
+            snoozeIntent,
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
         NotificationCompat.Builder notification = new NotificationCompat.Builder(context, channelId)
@@ -59,6 +77,8 @@ public class SnoozeReceiver extends BroadcastReceiver {
             .setContentText("补 · 稍后提醒时间到了")
             .setStyle(new NotificationCompat.BigTextStyle().bigText(title))
             .setContentIntent(contentIntent)
+            .addAction(0, "确认", confirmAction)
+            .addAction(0, "稍后", snoozeAction)
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_REMINDER);

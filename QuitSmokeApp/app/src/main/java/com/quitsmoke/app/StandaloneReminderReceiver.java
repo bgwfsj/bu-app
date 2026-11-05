@@ -43,19 +43,36 @@ public class StandaloneReminderReceiver extends BroadcastReceiver {
         NotificationManagerCompat manager = NotificationManagerCompat.from(context);
         if (!manager.areNotificationsEnabled()) return false;
         StandaloneReminderScheduler.ensureChannel(context);
+        int notificationId = StandaloneReminderScheduler.requestCode(id);
 
         Intent openIntent = new Intent(context, MainActivity.class)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        if (openReminderPage) {
-            openIntent.putExtra("open_page", "reminder")
-                .putExtra("snooze_type", "standalone")
-                .putExtra("snooze_id", id)
-                .putExtra("snooze_title", title);
-        }
+        if (openReminderPage) openIntent.putExtra("open_page", "reminder");
         PendingIntent contentIntent = PendingIntent.getActivity(
             context,
-            StandaloneReminderScheduler.requestCode(id),
+            notificationId,
             openIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+        Intent confirmIntent = new Intent(context, NotificationActionReceiver.class)
+            .putExtra("notification_id", notificationId);
+        PendingIntent confirmAction = PendingIntent.getBroadcast(
+            context,
+            notificationId ^ 0x434F,
+            confirmIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+        Intent snoozeIntent = new Intent(context, MainActivity.class)
+            .putExtra("open_page", "reminder")
+            .putExtra("notification_id", notificationId)
+            .putExtra("snooze_type", "standalone")
+            .putExtra("snooze_id", id)
+            .putExtra("snooze_title", title)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        PendingIntent snoozeAction = PendingIntent.getActivity(
+            context,
+            notificationId ^ 0x534E,
+            snoozeIntent,
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
         NotificationCompat.Builder notification = new NotificationCompat.Builder(
@@ -66,10 +83,12 @@ public class StandaloneReminderReceiver extends BroadcastReceiver {
             .setContentText(body)
             .setStyle(new NotificationCompat.BigTextStyle().bigText(body))
             .setContentIntent(contentIntent)
+            .addAction(0, "确认", confirmAction)
+            .addAction(0, "稍后", snoozeAction)
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_REMINDER);
-        manager.notify(StandaloneReminderScheduler.requestCode(id), notification.build());
+        manager.notify(notificationId, notification.build());
         return true;
     }
 }

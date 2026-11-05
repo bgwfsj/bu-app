@@ -38,14 +38,32 @@ public class DailyReminderReceiver extends BroadcastReceiver {
 
         Intent openIntent = new Intent(context, MainActivity.class)
             .putExtra("open_page", "todo")
-            .putExtra("snooze_type", "todo")
-            .putExtra("snooze_id", "todo_daily")
-            .putExtra("snooze_title", "今晚的待办")
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent contentIntent = PendingIntent.getActivity(
             context,
             0,
             openIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+        Intent confirmIntent = new Intent(context, NotificationActionReceiver.class)
+            .putExtra("notification_id", 4101);
+        PendingIntent confirmAction = PendingIntent.getBroadcast(
+            context,
+            4101 ^ 0x434F,
+            confirmIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+        Intent snoozeIntent = new Intent(context, MainActivity.class)
+            .putExtra("open_page", "todo")
+            .putExtra("notification_id", 4101)
+            .putExtra("snooze_type", "todo")
+            .putExtra("snooze_id", "todo_daily")
+            .putExtra("snooze_title", "今晚的待办")
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        PendingIntent snoozeAction = PendingIntent.getActivity(
+            context,
+            4101 ^ 0x534E,
+            snoozeIntent,
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
 
@@ -57,6 +75,8 @@ public class DailyReminderReceiver extends BroadcastReceiver {
             .setContentText(body)
             .setStyle(new NotificationCompat.BigTextStyle().bigText(body))
             .setContentIntent(contentIntent)
+            .addAction(0, "确认", confirmAction)
+            .addAction(0, "稍后", snoozeAction)
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 

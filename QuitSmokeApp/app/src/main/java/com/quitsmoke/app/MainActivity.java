@@ -27,6 +27,7 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationManagerCompat;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -282,8 +283,12 @@ public class MainActivity extends AppCompatActivity {
         String snoozeType = intent.getStringExtra("snooze_type");
         String snoozeId = intent.getStringExtra("snooze_id");
         String snoozeTitle = intent.getStringExtra("snooze_title");
+        int notificationId = intent.getIntExtra("notification_id", -1);
         if (!"reminder".equals(page) && !"todo".equals(page) &&
                 snoozeType == null) return;
+        if (notificationId >= 0) {
+            NotificationManagerCompat.from(this).cancel(notificationId);
+        }
         StringBuilder script = new StringBuilder();
         if ("reminder".equals(page) || "todo".equals(page)) {
             script.append("window.goPage&&window.goPage(")
@@ -304,6 +309,7 @@ public class MainActivity extends AppCompatActivity {
         intent.removeExtra("snooze_type");
         intent.removeExtra("snooze_id");
         intent.removeExtra("snooze_title");
+        intent.removeExtra("notification_id");
     }
 
     @Override
