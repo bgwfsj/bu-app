@@ -1,0 +1,24 @@
+/* ---------- 设置 ---------- */
+body[data-page="settings"] #page-pager{opacity:0;pointer-events:none}
+.settings-back{
+  width:34px;height:34px;padding:0;border:1px solid var(--line2);border-radius:10px;
+  background:rgba(255,255,255,.66);color:#71868f;font-size:23px;line-height:1;cursor:pointer
+}
+.settings-top-space{width:34px;height:34px}
+.settings-hero{margin:24px 0 20px}
+.settings-kicker{font-size:var(--fs-meta);letter-spacing:.16em;color:#5d97b7;font-weight:600;margin-bottom:7px}
+.settings-title{font-size:27px;line-height:1.22;font-weight:500;letter-spacing:-.035em;color:#0b1b22;margin:0}
+.settings-sub{font-size:var(--fs-body);line-height:1.65;color:#71838e;margin:8px 0 0}
+.settings-group{margin-bottom:18px;background:rgba(255,255,255,.82);border:1px solid var(--line2);border-radius:15px;overflow:hidden}
+.settings-group-title{padding:11px 14px 7px;font-size:var(--fs-caption);letter-spacing:.13em;color:#8b9da3}
+.settings-row{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;width:100%;
+  padding:13px 14px;border:0;border-top:1px solid var(--line2);background:transparent;
+  text-align:left;color:#31483e;cursor:pointer
+}
+.settings-group-title + .settings-row{border-top:0}
+.settings-row span{flex:1;min-width:0}
+.settings-row b{display:block;font-size:var(--fs-card);font-weight:500}
+.settings-row small{display:block;font-size:var(--fs-caption);line-height:1.55;color:#8b9ba2;margin-top:4px}
+.settings-row em{font-style:normal;font-size:10px;color:#6594aa;white-space:nowrap}
+.settings-row:active{background:rgba(78,148,188,.045)}

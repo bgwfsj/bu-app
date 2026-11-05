@@ -20,7 +20,7 @@
     <section class="page on" id="p-home">
       <div class="home-top">
         <div class="home-mark">补<span>每天补一点</span></div>
-        <div class="home-meta"><div class="home-date" id="home-date"></div><button class="home-update-btn" data-action="checkAppUpdate" title="检查更新">更新</button><button class="home-data-btn" id="btn-app-data" title="数据备份" aria-label="数据备份">⋯</button></div>
+        <div class="home-meta"><div class="home-date" id="home-date"></div><button class="home-data-btn" id="btn-app-settings" data-action="openSettingsPage" title="设置" aria-label="设置">⋯</button></div>
       </div>
       <div class="home-hero">
         <div class="home-eyebrow">TODAY</div>
@@ -62,6 +62,35 @@
         </button>
       </div>
       <div class="home-footnote">点击进入，功能页之间可以滑动切换</div>
+    </section>
+
+    <!-- ================= 设置 ================= -->
+    <section class="page" id="p-settings">
+      <div class="top">
+        <button class="settings-back" data-action="closeSettingsPage" aria-label="返回首页">&#8249;</button>
+        <div class="brand"><span class="led"></span>设置</div>
+        <span class="settings-top-space"></span>
+      </div>
+      <div class="settings-hero">
+        <div class="settings-kicker">应用设置</div>
+        <h1 class="settings-title">管理与更新</h1>
+        <p class="settings-sub">数据备份、恢复和安装包更新集中在这里。</p>
+      </div>
+      <div class="settings-group">
+        <div class="settings-group-title">数据</div>
+        <button class="settings-row" data-action="exportAppBackup">
+          <span><b>导出完整备份</b><small>训练、喝水、戒烟、待办、提醒和记账</small></span><em>导出 ›</em>
+        </button>
+        <button class="settings-row" data-action="chooseAppBackup">
+          <span><b>恢复完整备份</b><small>使用之前导出的 JSON 备份文件</small></span><em>选择文件 ›</em>
+        </button>
+      </div>
+      <div class="settings-group">
+        <div class="settings-group-title">应用</div>
+        <button class="settings-row" data-action="checkAppUpdate">
+          <span><b>检查更新</b><small>从 GitHub 下载并安装新版本</small></span><em>检查 ›</em>
+        </button>
+      </div>
     </section>
 
     <!-- ================= 戒烟页 ================= -->

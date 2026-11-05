@@ -75,7 +75,22 @@ function loadLedgerState(){
   var old = current ? null : storeGet(LOLDKEY, null);
   ledgerData = normalizeLedgerState(current || old);
   ledgerData.migrated = !current && !!old;
+  collapseAllLedgerNodes();
+  var selected = ledgerBookById(ledgerData.selectedId);
+  if (selected && selected.parentId) {
+    ledgerData.selectedId = ledgerRootBook(selected).id;
+  }
   saveLedgerState();
+}
+
+function collapseAllLedgerNodes(){
+  ledgerCollapsed = {};
+  each(ledgerData.books, function(book){
+    var hasChildren = ledgerData.books.some(function(child){
+      return child.parentId === book.id;
+    });
+    if (hasChildren) ledgerCollapsed[book.id] = true;
+  });
 }
 
 function saveLedgerState(){ ledgerData.schemaVersion = 2; storeSet(LKEY, ledgerData); }
@@ -569,6 +584,7 @@ function importLedgerCsvText(text){
     while (selected.parentId) selected = ledgerBookById(selected.parentId) || selected;
     ledgerData.selectedId = selected.id;
   }
+  collapseAllLedgerNodes();
   saveLedgerState();
   renderLedgerPage();
   return { imported: imported, skipped: skipped, total: rows.length - 1 };

@@ -49,6 +49,7 @@ var ledgerCollapsed = {};
 var workoutFrameId = 0;
 var workoutLastPaint = 0;
 var page = 0;
+var settingsOpen = false;
 var sheetRequired = false;
 var lastStageIdx = -99;
 var lastDLen = -1;   // 天数位数，用于触发字号重算
@@ -129,6 +130,8 @@ var APP_ACTION_NAMES = {
   dismissHomeNoticeToday: true,
   saveSnooze: true,
   checkAppUpdate: true,
+  openSettingsPage: true,
+  closeSettingsPage: true,
   openLedgerMonthReport: true,
   toggleLedgerNode: true,
   selectLedgerBook: true,
@@ -352,16 +355,6 @@ function receiveAppBackup(text){
       location.reload();
     },
     { title: '恢复全部数据', confirmLabel: '覆盖并恢复' }
-  );
-}
-
-function openAppDataSheet(){
-  openSheet(
-    '<h3>数据与备份</h3>' +
-    '<p>完整备份包含训练、喝水、戒烟、待办、提醒和记账。备份文件只保存在你选择的位置。</p>' +
-    '<button class="primary" style="width:100%;margin-bottom:8px"' + actionAttrs('exportAppBackup') + '>导出完整备份</button>' +
-    '<button class="ghost" style="width:100%;margin-bottom:8px"' + actionAttrs('chooseAppBackup') + '>从完整备份恢复</button>' +
-    '<div class="row"><button class="ghost" style="flex:1"' + actionAttrs('closeSheet') + '>关闭</button></div>'
   );
 }
 

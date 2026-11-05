@@ -3,7 +3,6 @@
    ============================================================ */
 function boot(){
   var ok = loadState();
-  byId('btn-app-data').addEventListener('click', openAppDataSheet);
   setView(S.view || 'round');
   if (flipLen === 0) buildFlip(2);
   var clkBox = byId('clocks');

@@ -244,15 +244,33 @@ async function run() {
       activeQuickLabel: '戒'
     });
 
-    const updateButton = await evaluate(cdp, `(function(){
+    const settingsPage = await evaluate(cdp, `(function(){
       var originalNative = window.AppNative;
       var calls = 0;
       window.AppNative = { checkForUpdates: function(){ calls++; } };
-      document.querySelector('.home-update-btn').click();
+      byId('btn-app-settings').click();
+      var opened = byId('p-settings').classList.contains('on') &&
+        document.body.dataset.page === 'settings';
+      var dataActions = byId('p-settings').querySelectorAll('[data-action="exportAppBackup"], [data-action="chooseAppBackup"]').length;
+      byId('p-settings').querySelector('[data-action="checkAppUpdate"]').click();
+      var handledBack = handleBackNavigation();
+      var returnedHome = !settingsOpen && page === 0 && byId('p-home').classList.contains('on');
       window.AppNative = originalNative;
-      return { calls: calls, label: document.querySelector('.home-update-btn').textContent.trim() };
+      return {
+        opened: opened,
+        dataActions: dataActions,
+        updateCalls: calls,
+        handledBack: handledBack,
+        returnedHome: returnedHome
+      };
     })()`);
-    assert.deepEqual(updateButton, { calls: 1, label: '更新' });
+    assert.deepEqual(settingsPage, {
+      opened: true,
+      dataActions: 2,
+      updateCalls: 1,
+      handledBack: true,
+      returnedHome: true
+    });
 
     const workout = await evaluate(cdp, `(function(){
       startWorkoutFromPlan('plan_default');
@@ -479,12 +497,20 @@ async function run() {
         if (book.parentId) childCount++;
         book.records.forEach(function(record){ total += record.amount; count++; });
       });
+      var parentIds = ledgerData.books.filter(function(book){
+        return ledgerData.books.some(function(child){ return child.parentId === book.id; });
+      }).map(function(book){ return book.id; });
+      var rootCount = ledgerData.books.filter(function(book){ return !book.parentId; }).length;
+      var visibleRows = byId('ledger-tree').querySelectorAll('.ledger-tree-row').length;
       return {
         first: first,
         second: second,
         total: Math.round(total * 100) / 100,
         count: count,
-        childCount: childCount
+        childCount: childCount,
+        allCollapsed: parentIds.every(function(id){ return ledgerCollapsed[id] === true; }),
+        visibleRows: visibleRows,
+        rootCount: rootCount
       };
     })()`);
     assert.equal(ledger.first.imported, 118);
@@ -494,6 +520,8 @@ async function run() {
     assert.equal(ledger.total, 12449.6);
     assert.equal(ledger.count, 118);
     assert.equal(ledger.childCount, 10);
+    assert.equal(ledger.allCollapsed, true);
+    assert.equal(ledger.visibleRows, ledger.rootCount);
 
     await evaluate(cdp, `(function(){
       S.quitDate = Date.now() - 86400000;

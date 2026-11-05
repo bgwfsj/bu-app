@@ -2,6 +2,7 @@
    7. 页面切换
    ============================================================ */
 function goPage(i){
+  settingsOpen = false;
   page = i < 0 ? 0 : (i > 6 ? 6 : i);
   var pages = ['home', 'fitness', 'water', 'quit', 'todo', 'reminder', 'ledger'];
   document.body.dataset.page = pages[page];
@@ -15,16 +16,46 @@ function goPage(i){
   each(byId('page-pager').querySelectorAll('button'), function(btn){
     btn.classList.toggle('on', parseInt(btn.getAttribute('data-page-index'), 10) === page);
   });
+  var settings = byId('p-settings');
+  if (settings) {
+    settings.classList.remove('on');
+    settings.setAttribute('aria-hidden', 'true');
+  }
   if (page === 3 && !S.quitDate && !sheetRequired) firstRunSheet();
   if (page === 1) ensureWorkoutTicker();
   if (page === 5 && reminderData) renderReminderPage();
   if (page === 0) renderDashboard();
 }
 
+function openSettingsPage(){
+  goPage(0);
+  settingsOpen = true;
+  document.body.dataset.page = 'settings';
+  var home = byId('p-home');
+  if (home) {
+    home.classList.remove('on');
+    home.setAttribute('aria-hidden', 'true');
+  }
+  var settings = byId('p-settings');
+  if (settings) {
+    settings.classList.add('on');
+    settings.setAttribute('aria-hidden', 'false');
+  }
+}
+
+function closeSettingsPage(){
+  settingsOpen = false;
+  goPage(0);
+}
+
 function handleBackNavigation(){
   var sheet = byId('sheet');
   if (sheet && sheet.classList.contains('on')) {
     if (!sheetRequired) closeSheet();
+    return true;
+  }
+  if (settingsOpen) {
+    closeSettingsPage();
     return true;
   }
   if (page > 0) {
@@ -35,7 +66,7 @@ function handleBackNavigation(){
 }
 
 function moveByHorizontalSwipe(dx){
-  if (page === 0) {
+  if (page === 0 || settingsOpen) {
     return;
   }
   if (dx < 0) goPage(page === 6 ? 1 : page + 1);
@@ -62,6 +93,7 @@ function moveByHorizontalSwipe(dx){
 })();
 
 document.addEventListener('keydown', function(e){
+  if (settingsOpen) return;
   if (e.key === 'ArrowRight') {
     if (page === 0) goPage(1);
     else goPage(page === 6 ? 1 : page + 1);

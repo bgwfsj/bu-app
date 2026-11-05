@@ -260,7 +260,6 @@ body[data-page="home"]::before{
 .home-date{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:10px;color:#94a3a8}
 .home-meta{display:flex;align-items:center;gap:7px}
 .home-data-btn{width:30px;height:30px;border-radius:9px;border:1px solid var(--line2);background:rgba(255,255,255,.7);color:#87979c;font-size:15px;line-height:1;cursor:pointer}
-.home-update-btn{height:30px;padding:0 9px;border-radius:9px;border:1px solid rgba(78,148,188,.16);background:rgba(255,255,255,.64);color:rgba(78,148,188,.85);font-size:9.5px;letter-spacing:.05em;cursor:pointer}
 .home-hero{flex:0 0 auto;margin-bottom:23px}
 .home-eyebrow{font-size:10px;letter-spacing:.24em;color:var(--acc);font-weight:600;margin-bottom:9px}
 .home-title{font-size:36px;line-height:1.18;letter-spacing:-.045em;font-weight:400;color:#10241d;margin:0}
@@ -305,6 +304,32 @@ body[data-page="home"]::before{
 .home-card.compact b{font-size:14px}
 .home-card.compact small{font-size:9px}
 .home-footnote{font-size:9.5px;color:#9aa8ad;text-align:center;margin-top:auto;padding-top:25px;letter-spacing:.08em}
+
+/* 15-settings.css */
+/* ---------- 设置 ---------- */
+body[data-page="settings"] #page-pager{opacity:0;pointer-events:none}
+.settings-back{
+  width:34px;height:34px;padding:0;border:1px solid var(--line2);border-radius:10px;
+  background:rgba(255,255,255,.66);color:#71868f;font-size:23px;line-height:1;cursor:pointer
+}
+.settings-top-space{width:34px;height:34px}
+.settings-hero{margin:24px 0 20px}
+.settings-kicker{font-size:var(--fs-meta);letter-spacing:.16em;color:#5d97b7;font-weight:600;margin-bottom:7px}
+.settings-title{font-size:27px;line-height:1.22;font-weight:500;letter-spacing:-.035em;color:#0b1b22;margin:0}
+.settings-sub{font-size:var(--fs-body);line-height:1.65;color:#71838e;margin:8px 0 0}
+.settings-group{margin-bottom:18px;background:rgba(255,255,255,.82);border:1px solid var(--line2);border-radius:15px;overflow:hidden}
+.settings-group-title{padding:11px 14px 7px;font-size:var(--fs-caption);letter-spacing:.13em;color:#8b9da3}
+.settings-row{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;width:100%;
+  padding:13px 14px;border:0;border-top:1px solid var(--line2);background:transparent;
+  text-align:left;color:#31483e;cursor:pointer
+}
+.settings-group-title + .settings-row{border-top:0}
+.settings-row span{flex:1;min-width:0}
+.settings-row b{display:block;font-size:var(--fs-card);font-weight:500}
+.settings-row small{display:block;font-size:var(--fs-caption);line-height:1.55;color:#8b9ba2;margin-top:4px}
+.settings-row em{font-style:normal;font-size:10px;color:#6594aa;white-space:nowrap}
+.settings-row:active{background:rgba(78,148,188,.045)}
 
 /* 20-todo.css */
 /* ---------- 每日待办 ---------- */
@@ -944,7 +969,7 @@ body[data-page="fitness"]::before{
     <section class="page on" id="p-home">
       <div class="home-top">
         <div class="home-mark">补<span>每天补一点</span></div>
-        <div class="home-meta"><div class="home-date" id="home-date"></div><button class="home-update-btn" data-action="checkAppUpdate" title="检查更新">更新</button><button class="home-data-btn" id="btn-app-data" title="数据备份" aria-label="数据备份">⋯</button></div>
+        <div class="home-meta"><div class="home-date" id="home-date"></div><button class="home-data-btn" id="btn-app-settings" data-action="openSettingsPage" title="设置" aria-label="设置">⋯</button></div>
       </div>
       <div class="home-hero">
         <div class="home-eyebrow">TODAY</div>
@@ -986,6 +1011,35 @@ body[data-page="fitness"]::before{
         </button>
       </div>
       <div class="home-footnote">点击进入，功能页之间可以滑动切换</div>
+    </section>
+
+    <!-- ================= 设置 ================= -->
+    <section class="page" id="p-settings">
+      <div class="top">
+        <button class="settings-back" data-action="closeSettingsPage" aria-label="返回首页">&#8249;</button>
+        <div class="brand"><span class="led"></span>设置</div>
+        <span class="settings-top-space"></span>
+      </div>
+      <div class="settings-hero">
+        <div class="settings-kicker">应用设置</div>
+        <h1 class="settings-title">管理与更新</h1>
+        <p class="settings-sub">数据备份、恢复和安装包更新集中在这里。</p>
+      </div>
+      <div class="settings-group">
+        <div class="settings-group-title">数据</div>
+        <button class="settings-row" data-action="exportAppBackup">
+          <span><b>导出完整备份</b><small>训练、喝水、戒烟、待办、提醒和记账</small></span><em>导出 ›</em>
+        </button>
+        <button class="settings-row" data-action="chooseAppBackup">
+          <span><b>恢复完整备份</b><small>使用之前导出的 JSON 备份文件</small></span><em>选择文件 ›</em>
+        </button>
+      </div>
+      <div class="settings-group">
+        <div class="settings-group-title">应用</div>
+        <button class="settings-row" data-action="checkAppUpdate">
+          <span><b>检查更新</b><small>从 GitHub 下载并安装新版本</small></span><em>检查 ›</em>
+        </button>
+      </div>
     </section>
 
     <!-- ================= 戒烟页 ================= -->
@@ -1393,6 +1447,7 @@ var ledgerCollapsed = {};
 var workoutFrameId = 0;
 var workoutLastPaint = 0;
 var page = 0;
+var settingsOpen = false;
 var sheetRequired = false;
 var lastStageIdx = -99;
 var lastDLen = -1;   // 天数位数，用于触发字号重算
@@ -1473,6 +1528,8 @@ var APP_ACTION_NAMES = {
   dismissHomeNoticeToday: true,
   saveSnooze: true,
   checkAppUpdate: true,
+  openSettingsPage: true,
+  closeSettingsPage: true,
   openLedgerMonthReport: true,
   toggleLedgerNode: true,
   selectLedgerBook: true,
@@ -1696,16 +1753,6 @@ function receiveAppBackup(text){
       location.reload();
     },
     { title: '恢复全部数据', confirmLabel: '覆盖并恢复' }
-  );
-}
-
-function openAppDataSheet(){
-  openSheet(
-    '<h3>数据与备份</h3>' +
-    '<p>完整备份包含训练、喝水、戒烟、待办、提醒和记账。备份文件只保存在你选择的位置。</p>' +
-    '<button class="primary" style="width:100%;margin-bottom:8px"' + actionAttrs('exportAppBackup') + '>导出完整备份</button>' +
-    '<button class="ghost" style="width:100%;margin-bottom:8px"' + actionAttrs('chooseAppBackup') + '>从完整备份恢复</button>' +
-    '<div class="row"><button class="ghost" style="flex:1"' + actionAttrs('closeSheet') + '>关闭</button></div>'
   );
 }
 
@@ -2154,6 +2201,7 @@ function setQuitFromInput(){
    7. 页面切换
    ============================================================ */
 function goPage(i){
+  settingsOpen = false;
   page = i < 0 ? 0 : (i > 6 ? 6 : i);
   var pages = ['home', 'fitness', 'water', 'quit', 'todo', 'reminder', 'ledger'];
   document.body.dataset.page = pages[page];
@@ -2167,16 +2215,46 @@ function goPage(i){
   each(byId('page-pager').querySelectorAll('button'), function(btn){
     btn.classList.toggle('on', parseInt(btn.getAttribute('data-page-index'), 10) === page);
   });
+  var settings = byId('p-settings');
+  if (settings) {
+    settings.classList.remove('on');
+    settings.setAttribute('aria-hidden', 'true');
+  }
   if (page === 3 && !S.quitDate && !sheetRequired) firstRunSheet();
   if (page === 1) ensureWorkoutTicker();
   if (page === 5 && reminderData) renderReminderPage();
   if (page === 0) renderDashboard();
 }
 
+function openSettingsPage(){
+  goPage(0);
+  settingsOpen = true;
+  document.body.dataset.page = 'settings';
+  var home = byId('p-home');
+  if (home) {
+    home.classList.remove('on');
+    home.setAttribute('aria-hidden', 'true');
+  }
+  var settings = byId('p-settings');
+  if (settings) {
+    settings.classList.add('on');
+    settings.setAttribute('aria-hidden', 'false');
+  }
+}
+
+function closeSettingsPage(){
+  settingsOpen = false;
+  goPage(0);
+}
+
 function handleBackNavigation(){
   var sheet = byId('sheet');
   if (sheet && sheet.classList.contains('on')) {
     if (!sheetRequired) closeSheet();
+    return true;
+  }
+  if (settingsOpen) {
+    closeSettingsPage();
     return true;
   }
   if (page > 0) {
@@ -2187,7 +2265,7 @@ function handleBackNavigation(){
 }
 
 function moveByHorizontalSwipe(dx){
-  if (page === 0) {
+  if (page === 0 || settingsOpen) {
     return;
   }
   if (dx < 0) goPage(page === 6 ? 1 : page + 1);
@@ -2214,6 +2292,7 @@ function moveByHorizontalSwipe(dx){
 })();
 
 document.addEventListener('keydown', function(e){
+  if (settingsOpen) return;
   if (e.key === 'ArrowRight') {
     if (page === 0) goPage(1);
     else goPage(page === 6 ? 1 : page + 1);
@@ -4740,7 +4819,22 @@ function loadLedgerState(){
   var old = current ? null : storeGet(LOLDKEY, null);
   ledgerData = normalizeLedgerState(current || old);
   ledgerData.migrated = !current && !!old;
+  collapseAllLedgerNodes();
+  var selected = ledgerBookById(ledgerData.selectedId);
+  if (selected && selected.parentId) {
+    ledgerData.selectedId = ledgerRootBook(selected).id;
+  }
   saveLedgerState();
+}
+
+function collapseAllLedgerNodes(){
+  ledgerCollapsed = {};
+  each(ledgerData.books, function(book){
+    var hasChildren = ledgerData.books.some(function(child){
+      return child.parentId === book.id;
+    });
+    if (hasChildren) ledgerCollapsed[book.id] = true;
+  });
 }
 
 function saveLedgerState(){ ledgerData.schemaVersion = 2; storeSet(LKEY, ledgerData); }
@@ -5234,6 +5328,7 @@ function importLedgerCsvText(text){
     while (selected.parentId) selected = ledgerBookById(selected.parentId) || selected;
     ledgerData.selectedId = selected.id;
   }
+  collapseAllLedgerNodes();
   saveLedgerState();
   renderLedgerPage();
   return { imported: imported, skipped: skipped, total: rows.length - 1 };
@@ -5457,7 +5552,6 @@ function saveSnooze(){
    ============================================================ */
 function boot(){
   var ok = loadState();
-  byId('btn-app-data').addEventListener('click', openAppDataSheet);
   setView(S.view || 'round');
   if (flipLen === 0) buildFlip(2);
   var clkBox = byId('clocks');

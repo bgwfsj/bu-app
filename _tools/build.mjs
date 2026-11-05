@@ -8,6 +8,7 @@ const outputPath = path.join(root, 'quit-app.html');
 const styleNames = [
   '00-base.css',
   '10-home.css',
+  '15-settings.css',
   '20-todo.css',
   '25-reminder.css',
   '30-ledger.css',
