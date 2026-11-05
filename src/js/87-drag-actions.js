@@ -60,15 +60,18 @@ function bindDragGestures(){
       startY: e.clientY,
       activated: false,
       holding: false,
-      timer: setTimeout(function(){
+      timer: null
+    };
+    if (dragGesture.kind === 'todo') {
+      dragGesture.timer = setTimeout(function(){
         if (!dragGesture || dragGesture.row !== row) return;
         dragGesture.holding = true;
         dragGesture.activated = true;
         row.classList.add('drag-holding');
         try { row.setPointerCapture(dragGesture.pointerId); } catch (error) {}
         if (navigator.vibrate) navigator.vibrate(10);
-      }, 320)
-    };
+      }, 320);
+    }
   });
 
   app.addEventListener('pointermove', function(e){

@@ -1,6 +1,9 @@
 /* ============================================================
    8.7 记账
    ============================================================ */
+var ledgerEditingTag = null;
+var LEDGER_PIE_COLORS = ['#d49a69', '#72a78d', '#7d9fc2', '#c17f7f', '#9d8bb5', '#b0a264', '#75aab0', '#b48765'];
+
 function ledgerDefaultState(){
   return {
     books: [{ id: 'book_daily', name: '日常账本', parentId: null, records: [] }],
@@ -218,6 +221,9 @@ function openLedgerMonthReport(key){
       return '<div class="ledger-report-check"><span>' + escHtml(group.name) + ' · ' + group.count +
         ' 笔</span><span>' + ledgerMoney(group.total) + '</span></div>';
     }).join('');
+  var categoryRows = ledgerCategoryRows(entries);
+  var categoryHtml = ledgerPieMarkup(categoryRows, total, '分类', ledgerMoney(total));
+  var categoryLegend = ledgerCategoryLegend(categoryRows, total);
   var recordRows = entries.map(function(entry){
     return '<div class="ledger-report-record"><span class="date">' +
       escHtml(String(entry.record.date).slice(5)) + '</span><span class="path">' +
@@ -228,6 +234,8 @@ function openLedgerMonthReport(key){
     '<h3>' + ledgerMonthLabel(key) + '支出</h3>' +
     '<div class="ledger-report-total"><span>' + entries.length + ' 笔 · ' +
       Object.keys(rootIds).length + ' 个根事件</span><b>' + ledgerMoney(total) + '</b></div>' +
+    '<div class="ledger-analysis-head"><span>本月分类占比</span><small>' + categoryRows.length + ' 个分类</small></div>' +
+    categoryHtml + categoryLegend +
     groupRows +
     '<div class="ledger-report-records">' + recordRows + '</div>' +
     '<div class="row"><button class="ghost" style="flex:1"' + actionAttrs('closeSheet') + '>关闭</button></div>'
@@ -298,6 +306,69 @@ function ledgerMoney(value){
   return '¥' + (Number(value) || 0).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+function ledgerCategoryRows(entries){
+  var map = {};
+  each(entries, function(entry){
+    var tag = String(entry.record.tag || '未分类');
+    map[tag] = map[tag] || { tag: tag, total: 0, count: 0 };
+    map[tag].total += Number(entry.record.amount) || 0;
+    map[tag].count++;
+  });
+  return Object.keys(map).map(function(tag){ return map[tag]; })
+    .sort(function(a, b){ return b.total - a.total; });
+}
+
+function ledgerPieMarkup(rows, total, centerLabel, centerValue){
+  if (!rows.length || !(total > 0)) return '<div class="ledger-empty-mini">有记录后会显示分类占比</div>';
+  var radius = 70, circumference = 2 * Math.PI * radius, offset = 0;
+  var segments = rows.map(function(row, index){
+    var length = circumference * row.total / total;
+    var dash = '<circle cx="100" cy="100" r="' + radius + '" fill="none" stroke="' +
+      LEDGER_PIE_COLORS[index % LEDGER_PIE_COLORS.length] + '" stroke-width="20" stroke-dasharray="' +
+      length.toFixed(2) + ' ' + (circumference - length).toFixed(2) +
+      '" stroke-dashoffset="' + (-offset).toFixed(2) + '" transform="rotate(-90 100 100)"></circle>';
+    offset += length;
+    return dash;
+  }).join('');
+  return '<div class="ledger-pie-wrap"><div class="ledger-pie"><svg viewBox="0 0 200 200" role="img" aria-label="' +
+    escHtml(centerLabel) + '占比"><circle cx="100" cy="100" r="' + radius +
+    '" fill="none" stroke="#edf1ef" stroke-width="20"></circle>' + segments +
+    '</svg><div class="ledger-pie-center"><span>' + escHtml(centerLabel) + '</span><b>' +
+    escHtml(centerValue) + '</b></div></div></div>';
+}
+
+function ledgerCategoryLegend(rows, total){
+  if (!rows.length) return '';
+  return '<div class="ledger-category-list">' + rows.map(function(row, index){
+    return '<div class="ledger-category-row"><i style="background:' +
+      LEDGER_PIE_COLORS[index % LEDGER_PIE_COLORS.length] + '"></i><span>' +
+      escHtml(row.tag) + '</span><small>' + (row.total / total * 100).toFixed(1) +
+      '%</small><b>' + ledgerMoney(row.total) + '</b></div>';
+  }).join('') + '</div>';
+}
+
+function renderLedgerAnalysis(entries, bookTotal, monthTotal, monthPrefix){
+  setTxt('ledger-analysis-total', ledgerMoney(bookTotal));
+  setTxt('ledger-analysis-month', ledgerMoney(monthTotal));
+  var rows = ledgerCategoryRows(entries);
+  byId('ledger-category-pie').innerHTML = ledgerPieMarkup(rows, bookTotal, '事件花费', ledgerMoney(bookTotal));
+  byId('ledger-category-list').innerHTML = ledgerCategoryLegend(rows, bookTotal);
+  var months = {};
+  each(entries, function(entry){
+    var key = String(entry.record.date).slice(0, 7);
+    if (!/^\d{4}-\d{2}$/.test(key)) return;
+    months[key] = months[key] || { total: 0, count: 0 };
+    months[key].total += Number(entry.record.amount) || 0;
+    months[key].count++;
+  });
+  var keys = Object.keys(months).sort().reverse();
+  setTxt('ledger-event-month-count', keys.length + ' 个月');
+  byId('ledger-event-month-list').innerHTML = keys.length ? keys.map(function(key){
+    return '<div class="ledger-event-month-row"><span>' + ledgerMonthLabel(key) + ' · ' +
+      months[key].count + ' 笔</span><b>' + ledgerMoney(months[key].total) + '</b></div>';
+  }).join('') : '<div class="ledger-empty-mini">还没有月度记录</div>';
+}
+
 function ledgerRecordTime(record){
   if (!record.createdAt) return '旧记录 · 时间未记录';
   var d = new Date(record.createdAt);
@@ -330,6 +401,7 @@ function renderLedgerPage(){
   setTxt('ledger-today-total', ledgerMoney(todayTotal));
   setTxt('ledger-book-total', ledgerMoney(bookTotal));
   setTxt('ledger-branch-path', ledgerBookPath(book));
+  renderLedgerAnalysis(entries, bookTotal, monthTotal, monthPrefix);
   renderLedgerMonths();
 
   byId('ledger-tree-summary').textContent = ledgerBookPath(book) + ' · ' + ledgerData.books.length + ' 个事件';
@@ -399,6 +471,102 @@ function renderLedgerTags(){
 function pickLedgerTag(tag){
   ledgerPickedTag = ledgerPickedTag === tag ? '' : tag;
   renderLedgerTags();
+}
+
+function ledgerTagUsage(name){
+  var count = 0;
+  each(ledgerAllEntries(), function(entry){
+    if (String(entry.record.tag || '未分类') === name) count++;
+  });
+  return count;
+}
+
+function openLedgerTagManager(){
+  ledgerEditingTag = null;
+  openSheet(
+    '<h3>分类管理</h3>' +
+    '<p>编辑分类会同步更新历史记录；删除分类不会删除已有账目。</p>' +
+    '<div class="ledger-tag-manager-list" id="ledger-tag-manager-list"></div>' +
+    '<label class="todo-form-label">新增分类</label>' +
+    '<div class="new-exercise"><input id="ledger-tag-manager-new" maxlength="12" placeholder="例如：咖啡、打车"><button type="button"' +
+      actionAttrs('addLedgerTag') + '>添加</button></div>' +
+    '<div class="row"><button class="ghost" style="flex:1"' + actionAttrs('closeSheet') + '>关闭</button></div>'
+  );
+  renderLedgerTagManager();
+}
+
+function renderLedgerTagManager(){
+  var box = byId('ledger-tag-manager-list');
+  if (!box) return;
+  box.innerHTML = ledgerData.tags.length ? ledgerData.tags.map(function(tag){
+    return '<div class="ledger-tag-manager-row"><span><b>' + escHtml(tag) + '</b><small>' +
+      ledgerTagUsage(tag) + ' 笔记录</small></span>' +
+      '<button' + actionAttrs('editLedgerTag', [tag]) + '>编辑</button>' +
+      '<button class="danger"' + actionAttrs('deleteLedgerTag', [tag]) + '>删除</button></div>';
+  }).join('') : '<div class="ledger-empty-mini">还没有分类</div>';
+}
+
+function editLedgerTag(name){
+  if (ledgerData.tags.indexOf(name) < 0) return;
+  ledgerEditingTag = name;
+  openSheet(
+    '<h3>编辑分类</h3>' +
+    '<p>修改后，已有账目的分类名称会一起更新。</p>' +
+    '<input class="todo-form-input" id="ledger-tag-edit" maxlength="12" value="' + escHtml(name) + '">' +
+    '<div class="row"><button class="ghost"' + actionAttrs('openLedgerTagManager') + '>取消</button>' +
+    '<button class="primary"' + actionAttrs('saveLedgerTagEdit') + '>保存</button></div>'
+  );
+  byId('ledger-tag-edit').focus();
+}
+
+function saveLedgerTagEdit(){
+  var oldName = ledgerEditingTag;
+  var newName = byId('ledger-tag-edit').value.trim();
+  if (!oldName || !newName) { toast('请输入分类名称'); return; }
+  if (newName !== oldName && ledgerData.tags.indexOf(newName) >= 0) {
+    toast('这个分类已经存在');
+    return;
+  }
+  ledgerData.tags = ledgerData.tags.map(function(tag){ return tag === oldName ? newName : tag; });
+  each(ledgerData.books, function(book){
+    each(book.records, function(record){
+      if (String(record.tag || '未分类') === oldName) record.tag = newName;
+    });
+  });
+  if (ledgerPickedTag === oldName) ledgerPickedTag = newName;
+  saveLedgerState();
+  renderLedgerPage();
+  toast('分类已修改');
+  ledgerEditingTag = null;
+  openLedgerTagManager();
+}
+
+function deleteLedgerTag(name){
+  if (ledgerData.tags.indexOf(name) < 0) return;
+  appConfirm(
+    '删除分类“' + name + '”？已有 ' + ledgerTagUsage(name) + ' 笔记录会保留这个分类。',
+    function(){
+      ledgerData.tags = ledgerData.tags.filter(function(tag){ return tag !== name; });
+      if (ledgerPickedTag === name) ledgerPickedTag = '';
+      saveLedgerState();
+      renderLedgerPage();
+      toast('分类已删除，历史记录未受影响');
+      openLedgerTagManager();
+    },
+    { title: '删除分类', onCancel: openLedgerTagManager }
+  );
+}
+
+function addLedgerTag(){
+  var input = byId('ledger-tag-manager-new');
+  var name = input ? input.value.trim() : '';
+  if (!name) { toast('请输入分类名称'); return; }
+  if (ledgerData.tags.indexOf(name) >= 0) { toast('这个分类已经存在'); return; }
+  ledgerData.tags.push(name);
+  saveLedgerState();
+  input.value = '';
+  renderLedgerTagManager();
+  toast('分类已添加');
 }
 
 function openLedgerRecord(recordId){
@@ -729,6 +897,7 @@ function openLedgerMenu(){
     '<h3>事件与数据</h3>' +
     '<p>新建事件，或导入、导出当前事件树的数据。</p>' +
     '<button class="primary" style="width:100%;margin-bottom:8px"' + actionAttrs('openLedgerBookSheet') + '>＋ 新建根事件</button>' +
+    '<button class="ghost" style="width:100%;margin-bottom:8px"' + actionAttrs('openLedgerTagManager') + '>分类管理</button>' +
     '<button class="ghost" style="width:100%;margin-bottom:8px"' + actionAttrs('chooseLedgerCsv') + '>导入 CSV</button>' +
     '<button class="ghost" style="width:100%;margin-bottom:8px"' + actionAttrs('exportLedgerCsv') + '>导出当前事件及子事件 CSV</button>' +
     '<button class="danger" style="width:100%;margin-bottom:8px"' + actionAttrs('deleteCurrentLedgerEvent') + '>删除当前事件及子事件</button>' +

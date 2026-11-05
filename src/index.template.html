@@ -429,6 +429,22 @@
         <div class="ledger-stat"><span>今日</span><b id="ledger-today-total">¥0.00</b></div>
         <div class="ledger-stat"><span>当前事件累计</span><b id="ledger-book-total">¥0.00</b></div>
       </div>
+      <section class="ledger-analysis-card">
+        <div class="ledger-analysis-head">
+          <span>分类分析</span>
+          <button data-action="openLedgerTagManager">分类管理</button>
+        </div>
+        <div class="ledger-analysis-summary">
+          <span>事件总花费 <b id="ledger-analysis-total">¥0.00</b></span>
+          <span>本月花费 <b id="ledger-analysis-month">¥0.00</b></span>
+        </div>
+        <div id="ledger-category-pie"></div>
+        <div class="ledger-category-list" id="ledger-category-list"></div>
+        <details class="ledger-event-months">
+          <summary><span>每月花费</span><i id="ledger-event-month-count">0 个月</i></summary>
+          <div class="ledger-event-month-list" id="ledger-event-month-list"></div>
+        </details>
+      </section>
       <details class="ledger-record-box">
         <summary><span>最近记录</span><i id="ledger-record-count">0 笔</i></summary>
         <div class="ledger-list" id="ledger-list"></div>

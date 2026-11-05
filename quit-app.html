@@ -421,10 +421,13 @@ body[data-page="settings"] #page-pager{opacity:0;pointer-events:none}
 .reminder-overview span,.reminder-overview small{font-size:var(--fs-meta);color:#82939a}
 .reminder-add{width:100%;height:44px;border-radius:12px;border:1px solid rgba(10,168,122,.24);background:rgba(10,168,122,.06);color:var(--acc);font-size:12px;letter-spacing:.12em;cursor:pointer}
 .reminder-list{display:flex;flex-direction:column;gap:8px;margin-top:13px}
+.reminder-group{display:flex;flex-direction:column;gap:7px}
+.reminder-group-head{display:flex;align-items:baseline;justify-content:space-between;padding:1px 2px 0;color:#5d747c;font-size:var(--fs-meta);letter-spacing:.07em}
+.reminder-group-head small{font-size:var(--fs-caption);color:#9aa8ad;letter-spacing:0}
+.reminder-group-list{display:flex;flex-direction:column;gap:7px}
 .reminder-item{display:flex;align-items:center;gap:10px;padding:12px;border-radius:13px;background:#fff;border:1px solid var(--line2)}
 .reminder-item,.reminder-archive-item{position:relative;touch-action:pan-y;transition:transform .18s ease,background .18s,border-color .18s;will-change:transform}
 .reminder-item.dragging,.reminder-archive-item.dragging{transition:none}
-.reminder-item.drag-holding,.reminder-archive-item.drag-holding{user-select:none;box-shadow:0 7px 20px -14px rgba(13,32,45,.45)}
 .reminder-item.drag-left,.reminder-archive-item.drag-left{border-color:rgba(229,72,77,.26);background:#fff5f5}
 .reminder-item.drag-right,.reminder-archive-item.drag-right{border-color:rgba(10,168,122,.24);background:#f3fbf8}
 .reminder-item.past{opacity:.58}
@@ -444,6 +447,7 @@ body[data-page="settings"] #page-pager{opacity:0;pointer-events:none}
 .reminder-archive-box>summary em{font-style:normal;transition:transform .2s;color:#a4b0b5}
 .reminder-archive-box[open]>summary em{transform:rotate(180deg)}
 .reminder-archive-list{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.reminder-archive-group{display:flex;flex-direction:column;gap:6px}
 .reminder-archive-item{display:flex;align-items:center;gap:9px;padding:10px 11px;border-radius:10px;background:rgba(255,255,255,.6);border:1px solid var(--line2)}
 .reminder-archive-copy{flex:1;min-width:0}
 .reminder-archive-copy b{display:block;font-size:12.5px;font-weight:500;color:#74858b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -563,6 +567,39 @@ body[data-page="settings"] #page-pager{opacity:0;pointer-events:none}
 .ledger-stat{padding:11px 12px;border-radius:12px;background:rgba(255,255,255,.78);border:1px solid var(--line2)}
 .ledger-stat span{display:block;font-size:11px;letter-spacing:.1em;color:#9a8d83;margin-bottom:4px}
 .ledger-stat b{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:13px;font-weight:500;color:#4e4035}
+.ledger-analysis-card{flex:0 0 auto;margin:0 0 16px;padding:13px 12px;border-radius:14px;background:rgba(255,255,255,.8);border:1px solid var(--line2)}
+.ledger-analysis-head,.ledger-event-months>summary{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.ledger-analysis-head span{font-size:13px;font-weight:600;color:#52675f}
+.ledger-analysis-head button{border:0;background:transparent;color:#6d9482;font-size:11px;cursor:pointer}
+.ledger-analysis-summary{display:flex;justify-content:space-between;gap:12px;margin:5px 0 9px;color:#8d9a96;font-size:11px}
+.ledger-analysis-summary b{display:block;margin-top:3px;font:600 13px var(--font-mono);color:#4d665c}
+.ledger-pie-wrap{display:flex;align-items:center;justify-content:center;padding:3px 0 7px}
+.ledger-pie{position:relative;width:176px;height:176px}
+.ledger-pie svg{width:100%;height:100%;display:block}
+.ledger-pie-center{position:absolute;inset:0;display:grid;place-content:center;text-align:center;pointer-events:none}
+.ledger-pie-center span{font-size:10px;color:#8c9a96}
+.ledger-pie-center b{display:block;margin-top:3px;font:600 14px var(--font-mono);color:#4d625a}
+.ledger-category-list{display:flex;flex-direction:column;gap:5px}
+.ledger-category-row{display:flex;align-items:center;gap:8px;padding:6px 7px;border-radius:8px;background:#f7faf8;color:#60736c;font-size:11px}
+.ledger-category-row i{width:7px;height:7px;border-radius:50%;flex:0 0 7px}
+.ledger-category-row span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ledger-category-row small{font-size:10px;color:#9aa8a3}
+.ledger-category-row b{font:600 11px var(--font-mono);color:#576b63}
+.ledger-empty-mini{text-align:center;padding:22px 8px;color:#9aa8a4;font-size:11.5px}
+.ledger-event-months{margin-top:11px;border-top:1px solid var(--line2);padding-top:9px}
+.ledger-event-months>summary{list-style:none;cursor:pointer;color:#697d7d;font-size:11px}
+.ledger-event-months>summary::-webkit-details-marker{display:none}
+.ledger-event-months>summary i{font-style:normal;font-size:10px;color:#9ba7a4}
+.ledger-event-month-list{display:flex;flex-direction:column;gap:4px;margin-top:7px;max-height:185px;overflow-y:auto}
+.ledger-event-month-row{display:flex;justify-content:space-between;gap:10px;padding:7px 5px;border-bottom:1px solid var(--line2);font-size:11px;color:#687c74}
+.ledger-event-month-row b{font:600 12px var(--font-mono);color:#806952}
+.ledger-tag-manager-list{display:flex;flex-direction:column;gap:5px;margin:8px 0 14px}
+.ledger-tag-manager-row{display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:9px;background:#f7f9f8;border:1px solid var(--line2)}
+.ledger-tag-manager-row span{flex:1;min-width:0}
+.ledger-tag-manager-row b{display:block;font-size:12px;color:#465d55;font-weight:500}
+.ledger-tag-manager-row small{display:block;font-size:10px;color:#96a4a0;margin-top:2px}
+.ledger-tag-manager-row button{border:0;background:transparent;color:#648d7c;font-size:10.5px;padding:3px;cursor:pointer}
+.ledger-tag-manager-row button.danger{color:#bd7777}
 .ledger-record-box{flex:0 0 auto;margin-top:4px}
 .ledger-record-box>summary{
   display:flex;align-items:center;justify-content:space-between;list-style:none;cursor:pointer;
@@ -1422,6 +1459,22 @@ body[data-page="fitness"]::before{
         <div class="ledger-stat"><span>今日</span><b id="ledger-today-total">¥0.00</b></div>
         <div class="ledger-stat"><span>当前事件累计</span><b id="ledger-book-total">¥0.00</b></div>
       </div>
+      <section class="ledger-analysis-card">
+        <div class="ledger-analysis-head">
+          <span>分类分析</span>
+          <button data-action="openLedgerTagManager">分类管理</button>
+        </div>
+        <div class="ledger-analysis-summary">
+          <span>事件总花费 <b id="ledger-analysis-total">¥0.00</b></span>
+          <span>本月花费 <b id="ledger-analysis-month">¥0.00</b></span>
+        </div>
+        <div id="ledger-category-pie"></div>
+        <div class="ledger-category-list" id="ledger-category-list"></div>
+        <details class="ledger-event-months">
+          <summary><span>每月花费</span><i id="ledger-event-month-count">0 个月</i></summary>
+          <div class="ledger-event-month-list" id="ledger-event-month-list"></div>
+        </details>
+      </section>
       <details class="ledger-record-box">
         <summary><span>最近记录</span><i id="ledger-record-count">0 笔</i></summary>
         <div class="ledger-list" id="ledger-list"></div>
@@ -1597,7 +1650,12 @@ var APP_ACTION_NAMES = {
   openLedgerBookSheet: true,
   chooseLedgerCsv: true,
   exportLedgerCsv: true,
-  deleteCurrentLedgerEvent: true
+  deleteCurrentLedgerEvent: true,
+  openLedgerTagManager: true,
+  editLedgerTag: true,
+  deleteLedgerTag: true,
+  saveLedgerTagEdit: true,
+  addLedgerTag: true
 };
 
 function actionAttrs(name, args, eventName){
@@ -1819,6 +1877,7 @@ byId('mask').addEventListener('click', closeSheet);
    应用版本记录
    ============================================================ */
 var APP_CHANGELOG = [
+  { version: '5.7', date: '2026-11-05', changes: ['提醒普通状态和归档按仅一次、每天、每周、每月、每年分组，空分组隐藏。', '提醒移除长按拖拽，仅保留左右滑动；待办长按拖拽保留。', '记账当前事件新增累计花费、本月花费、每月记录和分类饼图。', '记账分类支持新增、编辑和删除，编辑会同步历史记录。'] },
   { version: '5.6', date: '2026-11-05', changes: ['待办和提醒支持横向拖拽与长按拖拽。', '普通项左拖归档；归档项右拖移回、左拖彻底删除。', '保留原有按钮操作。'] },
   { version: '5.5.1', date: '2026-11-05', changes: ['待办和提醒归档列表改为单行，仅保留标题、状态和操作。'] },
   { version: '5.5', date: '2026-11-05', changes: ['待办和提醒新增归档、移回与彻底删除。', '一次性提醒完成后自动归档。', '喝水今日记录与快捷水量字号统一。', '记账事件和月度总览文字统一为 13px。', '整理项目目录并补充使用说明与 AI 开发说明。'] },
@@ -4716,29 +4775,41 @@ function renderReminderPage(){
   setTxt('reminder-count', String(reminderData.items.length));
   var active = ordered.filter(function(row){ return row.next && row.ts !== Infinity; });
   setTxt('reminder-next-summary', active.length ? '下一条 · ' + reminderShortDate(active[0].next) : '还没有安排');
-  byId('reminder-list').innerHTML = ordered.length ? ordered.map(function(row){
-    var item = row.item;
-    return '<div class="reminder-item" data-drag-kind="reminder" data-drag-state="active" data-drag-id="' +
-      escHtml(item.id) + '">' +
-      '<span class="reminder-time-chip">' + escHtml(item.time) + '</span>' +
-      '<span class="reminder-copy"><b>' + escHtml(item.title) + '</b>' +
-      '<span>' + escHtml(reminderRuleText(item)) + '</span>' +
-      '<small>' + escHtml(reminderNextText(item)) + '</small></span>' +
-      '<button class="reminder-edit"' + actionAttrs('editReminder', [item.id]) + '>改</button>' +
-      '<button class="reminder-del"' + actionAttrs('deleteReminder', [item.id]) + ' aria-label="删除提醒">×</button>' +
-      '</div>';
+  byId('reminder-list').innerHTML = ordered.length ? REMINDER_MODES.map(function(mode){
+    var rows = ordered.filter(function(row){ return row.item.mode === mode; });
+    if (!rows.length) return '';
+    return '<section class="reminder-group"><div class="reminder-group-head"><span>' +
+      REMINDER_MODE_NAMES[mode] + '</span><small>' + rows.length + ' 条</small></div>' +
+      '<div class="reminder-group-list">' + rows.map(function(row){
+        var item = row.item;
+        return '<div class="reminder-item" data-drag-kind="reminder" data-drag-state="active" data-drag-id="' +
+          escHtml(item.id) + '">' +
+          '<span class="reminder-time-chip">' + escHtml(item.time) + '</span>' +
+          '<span class="reminder-copy"><b>' + escHtml(item.title) + '</b>' +
+          '<span>' + escHtml(reminderRuleText(item)) + '</span>' +
+          '<small>' + escHtml(reminderNextText(item)) + '</small></span>' +
+          '<button class="reminder-edit"' + actionAttrs('editReminder', [item.id]) + '>改</button>' +
+          '<button class="reminder-del"' + actionAttrs('deleteReminder', [item.id]) + ' aria-label="删除提醒">×</button>' +
+          '</div>';
+      }).join('') + '</div></section>';
   }).join('') : '<div class="reminder-empty">还没有独立提醒<br>设置一次时间，让手机替你记住</div>';
 
   var archived = reminderArchivedItems();
   byId('reminder-archive-count').textContent = archived.length + ' 条';
-  byId('reminder-archive-list').innerHTML = archived.length ? archived.map(function(item){
-    var state = item.archiveReason === 'completed' ? '已提醒' : '已删除';
-    return '<div class="reminder-archive-item" data-drag-kind="reminder" data-drag-state="archive" data-drag-id="' +
-      escHtml(item.id) + '">' +
-      '<span class="reminder-archive-copy"><b>' + escHtml(item.title) + '</b></span>' +
-      '<span class="reminder-archive-actions"><span class="reminder-archive-state">' + state + '</span>' +
-      '<button' + actionAttrs('restoreReminder', [item.id]) + '>移回</button>' +
-      '<button class="danger"' + actionAttrs('permanentDeleteReminder', [item.id]) + ' aria-label="彻底删除">×</button></span></div>';
+  byId('reminder-archive-list').innerHTML = archived.length ? REMINDER_MODES.map(function(mode){
+    var rows = archived.filter(function(item){ return item.mode === mode; });
+    if (!rows.length) return '';
+    return '<div class="reminder-archive-group"><div class="reminder-group-head"><span>' +
+      REMINDER_MODE_NAMES[mode] + '</span><small>' + rows.length + ' 条</small></div>' +
+      rows.map(function(item){
+        var state = item.archiveReason === 'completed' ? '已提醒' : '已删除';
+        return '<div class="reminder-archive-item" data-drag-kind="reminder" data-drag-state="archive" data-drag-id="' +
+          escHtml(item.id) + '">' +
+          '<span class="reminder-archive-copy"><b>' + escHtml(item.title) + '</b></span>' +
+          '<span class="reminder-archive-actions"><span class="reminder-archive-state">' + state + '</span>' +
+          '<button' + actionAttrs('restoreReminder', [item.id]) + '>移回</button>' +
+          '<button class="danger"' + actionAttrs('permanentDeleteReminder', [item.id]) + ' aria-label="彻底删除">×</button></span></div>';
+      }).join('') + '</div>';
   }).join('') : '<div class="reminder-archive-empty">还没有归档提醒</div>';
   updateReminderSettings();
   renderHomeNotice();
@@ -5039,6 +5110,9 @@ function initReminder(){
 /* ============================================================
    8.7 记账
    ============================================================ */
+var ledgerEditingTag = null;
+var LEDGER_PIE_COLORS = ['#d49a69', '#72a78d', '#7d9fc2', '#c17f7f', '#9d8bb5', '#b0a264', '#75aab0', '#b48765'];
+
 function ledgerDefaultState(){
   return {
     books: [{ id: 'book_daily', name: '日常账本', parentId: null, records: [] }],
@@ -5256,6 +5330,9 @@ function openLedgerMonthReport(key){
       return '<div class="ledger-report-check"><span>' + escHtml(group.name) + ' · ' + group.count +
         ' 笔</span><span>' + ledgerMoney(group.total) + '</span></div>';
     }).join('');
+  var categoryRows = ledgerCategoryRows(entries);
+  var categoryHtml = ledgerPieMarkup(categoryRows, total, '分类', ledgerMoney(total));
+  var categoryLegend = ledgerCategoryLegend(categoryRows, total);
   var recordRows = entries.map(function(entry){
     return '<div class="ledger-report-record"><span class="date">' +
       escHtml(String(entry.record.date).slice(5)) + '</span><span class="path">' +
@@ -5266,6 +5343,8 @@ function openLedgerMonthReport(key){
     '<h3>' + ledgerMonthLabel(key) + '支出</h3>' +
     '<div class="ledger-report-total"><span>' + entries.length + ' 笔 · ' +
       Object.keys(rootIds).length + ' 个根事件</span><b>' + ledgerMoney(total) + '</b></div>' +
+    '<div class="ledger-analysis-head"><span>本月分类占比</span><small>' + categoryRows.length + ' 个分类</small></div>' +
+    categoryHtml + categoryLegend +
     groupRows +
     '<div class="ledger-report-records">' + recordRows + '</div>' +
     '<div class="row"><button class="ghost" style="flex:1"' + actionAttrs('closeSheet') + '>关闭</button></div>'
@@ -5336,6 +5415,69 @@ function ledgerMoney(value){
   return '¥' + (Number(value) || 0).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+function ledgerCategoryRows(entries){
+  var map = {};
+  each(entries, function(entry){
+    var tag = String(entry.record.tag || '未分类');
+    map[tag] = map[tag] || { tag: tag, total: 0, count: 0 };
+    map[tag].total += Number(entry.record.amount) || 0;
+    map[tag].count++;
+  });
+  return Object.keys(map).map(function(tag){ return map[tag]; })
+    .sort(function(a, b){ return b.total - a.total; });
+}
+
+function ledgerPieMarkup(rows, total, centerLabel, centerValue){
+  if (!rows.length || !(total > 0)) return '<div class="ledger-empty-mini">有记录后会显示分类占比</div>';
+  var radius = 70, circumference = 2 * Math.PI * radius, offset = 0;
+  var segments = rows.map(function(row, index){
+    var length = circumference * row.total / total;
+    var dash = '<circle cx="100" cy="100" r="' + radius + '" fill="none" stroke="' +
+      LEDGER_PIE_COLORS[index % LEDGER_PIE_COLORS.length] + '" stroke-width="20" stroke-dasharray="' +
+      length.toFixed(2) + ' ' + (circumference - length).toFixed(2) +
+      '" stroke-dashoffset="' + (-offset).toFixed(2) + '" transform="rotate(-90 100 100)"></circle>';
+    offset += length;
+    return dash;
+  }).join('');
+  return '<div class="ledger-pie-wrap"><div class="ledger-pie"><svg viewBox="0 0 200 200" role="img" aria-label="' +
+    escHtml(centerLabel) + '占比"><circle cx="100" cy="100" r="' + radius +
+    '" fill="none" stroke="#edf1ef" stroke-width="20"></circle>' + segments +
+    '</svg><div class="ledger-pie-center"><span>' + escHtml(centerLabel) + '</span><b>' +
+    escHtml(centerValue) + '</b></div></div></div>';
+}
+
+function ledgerCategoryLegend(rows, total){
+  if (!rows.length) return '';
+  return '<div class="ledger-category-list">' + rows.map(function(row, index){
+    return '<div class="ledger-category-row"><i style="background:' +
+      LEDGER_PIE_COLORS[index % LEDGER_PIE_COLORS.length] + '"></i><span>' +
+      escHtml(row.tag) + '</span><small>' + (row.total / total * 100).toFixed(1) +
+      '%</small><b>' + ledgerMoney(row.total) + '</b></div>';
+  }).join('') + '</div>';
+}
+
+function renderLedgerAnalysis(entries, bookTotal, monthTotal, monthPrefix){
+  setTxt('ledger-analysis-total', ledgerMoney(bookTotal));
+  setTxt('ledger-analysis-month', ledgerMoney(monthTotal));
+  var rows = ledgerCategoryRows(entries);
+  byId('ledger-category-pie').innerHTML = ledgerPieMarkup(rows, bookTotal, '事件花费', ledgerMoney(bookTotal));
+  byId('ledger-category-list').innerHTML = ledgerCategoryLegend(rows, bookTotal);
+  var months = {};
+  each(entries, function(entry){
+    var key = String(entry.record.date).slice(0, 7);
+    if (!/^\d{4}-\d{2}$/.test(key)) return;
+    months[key] = months[key] || { total: 0, count: 0 };
+    months[key].total += Number(entry.record.amount) || 0;
+    months[key].count++;
+  });
+  var keys = Object.keys(months).sort().reverse();
+  setTxt('ledger-event-month-count', keys.length + ' 个月');
+  byId('ledger-event-month-list').innerHTML = keys.length ? keys.map(function(key){
+    return '<div class="ledger-event-month-row"><span>' + ledgerMonthLabel(key) + ' · ' +
+      months[key].count + ' 笔</span><b>' + ledgerMoney(months[key].total) + '</b></div>';
+  }).join('') : '<div class="ledger-empty-mini">还没有月度记录</div>';
+}
+
 function ledgerRecordTime(record){
   if (!record.createdAt) return '旧记录 · 时间未记录';
   var d = new Date(record.createdAt);
@@ -5368,6 +5510,7 @@ function renderLedgerPage(){
   setTxt('ledger-today-total', ledgerMoney(todayTotal));
   setTxt('ledger-book-total', ledgerMoney(bookTotal));
   setTxt('ledger-branch-path', ledgerBookPath(book));
+  renderLedgerAnalysis(entries, bookTotal, monthTotal, monthPrefix);
   renderLedgerMonths();
 
   byId('ledger-tree-summary').textContent = ledgerBookPath(book) + ' · ' + ledgerData.books.length + ' 个事件';
@@ -5437,6 +5580,102 @@ function renderLedgerTags(){
 function pickLedgerTag(tag){
   ledgerPickedTag = ledgerPickedTag === tag ? '' : tag;
   renderLedgerTags();
+}
+
+function ledgerTagUsage(name){
+  var count = 0;
+  each(ledgerAllEntries(), function(entry){
+    if (String(entry.record.tag || '未分类') === name) count++;
+  });
+  return count;
+}
+
+function openLedgerTagManager(){
+  ledgerEditingTag = null;
+  openSheet(
+    '<h3>分类管理</h3>' +
+    '<p>编辑分类会同步更新历史记录；删除分类不会删除已有账目。</p>' +
+    '<div class="ledger-tag-manager-list" id="ledger-tag-manager-list"></div>' +
+    '<label class="todo-form-label">新增分类</label>' +
+    '<div class="new-exercise"><input id="ledger-tag-manager-new" maxlength="12" placeholder="例如：咖啡、打车"><button type="button"' +
+      actionAttrs('addLedgerTag') + '>添加</button></div>' +
+    '<div class="row"><button class="ghost" style="flex:1"' + actionAttrs('closeSheet') + '>关闭</button></div>'
+  );
+  renderLedgerTagManager();
+}
+
+function renderLedgerTagManager(){
+  var box = byId('ledger-tag-manager-list');
+  if (!box) return;
+  box.innerHTML = ledgerData.tags.length ? ledgerData.tags.map(function(tag){
+    return '<div class="ledger-tag-manager-row"><span><b>' + escHtml(tag) + '</b><small>' +
+      ledgerTagUsage(tag) + ' 笔记录</small></span>' +
+      '<button' + actionAttrs('editLedgerTag', [tag]) + '>编辑</button>' +
+      '<button class="danger"' + actionAttrs('deleteLedgerTag', [tag]) + '>删除</button></div>';
+  }).join('') : '<div class="ledger-empty-mini">还没有分类</div>';
+}
+
+function editLedgerTag(name){
+  if (ledgerData.tags.indexOf(name) < 0) return;
+  ledgerEditingTag = name;
+  openSheet(
+    '<h3>编辑分类</h3>' +
+    '<p>修改后，已有账目的分类名称会一起更新。</p>' +
+    '<input class="todo-form-input" id="ledger-tag-edit" maxlength="12" value="' + escHtml(name) + '">' +
+    '<div class="row"><button class="ghost"' + actionAttrs('openLedgerTagManager') + '>取消</button>' +
+    '<button class="primary"' + actionAttrs('saveLedgerTagEdit') + '>保存</button></div>'
+  );
+  byId('ledger-tag-edit').focus();
+}
+
+function saveLedgerTagEdit(){
+  var oldName = ledgerEditingTag;
+  var newName = byId('ledger-tag-edit').value.trim();
+  if (!oldName || !newName) { toast('请输入分类名称'); return; }
+  if (newName !== oldName && ledgerData.tags.indexOf(newName) >= 0) {
+    toast('这个分类已经存在');
+    return;
+  }
+  ledgerData.tags = ledgerData.tags.map(function(tag){ return tag === oldName ? newName : tag; });
+  each(ledgerData.books, function(book){
+    each(book.records, function(record){
+      if (String(record.tag || '未分类') === oldName) record.tag = newName;
+    });
+  });
+  if (ledgerPickedTag === oldName) ledgerPickedTag = newName;
+  saveLedgerState();
+  renderLedgerPage();
+  toast('分类已修改');
+  ledgerEditingTag = null;
+  openLedgerTagManager();
+}
+
+function deleteLedgerTag(name){
+  if (ledgerData.tags.indexOf(name) < 0) return;
+  appConfirm(
+    '删除分类“' + name + '”？已有 ' + ledgerTagUsage(name) + ' 笔记录会保留这个分类。',
+    function(){
+      ledgerData.tags = ledgerData.tags.filter(function(tag){ return tag !== name; });
+      if (ledgerPickedTag === name) ledgerPickedTag = '';
+      saveLedgerState();
+      renderLedgerPage();
+      toast('分类已删除，历史记录未受影响');
+      openLedgerTagManager();
+    },
+    { title: '删除分类', onCancel: openLedgerTagManager }
+  );
+}
+
+function addLedgerTag(){
+  var input = byId('ledger-tag-manager-new');
+  var name = input ? input.value.trim() : '';
+  if (!name) { toast('请输入分类名称'); return; }
+  if (ledgerData.tags.indexOf(name) >= 0) { toast('这个分类已经存在'); return; }
+  ledgerData.tags.push(name);
+  saveLedgerState();
+  input.value = '';
+  renderLedgerTagManager();
+  toast('分类已添加');
 }
 
 function openLedgerRecord(recordId){
@@ -5767,6 +6006,7 @@ function openLedgerMenu(){
     '<h3>事件与数据</h3>' +
     '<p>新建事件，或导入、导出当前事件树的数据。</p>' +
     '<button class="primary" style="width:100%;margin-bottom:8px"' + actionAttrs('openLedgerBookSheet') + '>＋ 新建根事件</button>' +
+    '<button class="ghost" style="width:100%;margin-bottom:8px"' + actionAttrs('openLedgerTagManager') + '>分类管理</button>' +
     '<button class="ghost" style="width:100%;margin-bottom:8px"' + actionAttrs('chooseLedgerCsv') + '>导入 CSV</button>' +
     '<button class="ghost" style="width:100%;margin-bottom:8px"' + actionAttrs('exportLedgerCsv') + '>导出当前事件及子事件 CSV</button>' +
     '<button class="danger" style="width:100%;margin-bottom:8px"' + actionAttrs('deleteCurrentLedgerEvent') + '>删除当前事件及子事件</button>' +
@@ -5903,15 +6143,18 @@ function bindDragGestures(){
       startY: e.clientY,
       activated: false,
       holding: false,
-      timer: setTimeout(function(){
+      timer: null
+    };
+    if (dragGesture.kind === 'todo') {
+      dragGesture.timer = setTimeout(function(){
         if (!dragGesture || dragGesture.row !== row) return;
         dragGesture.holding = true;
         dragGesture.activated = true;
         row.classList.add('drag-holding');
         try { row.setPointerCapture(dragGesture.pointerId); } catch (error) {}
         if (navigator.vibrate) navigator.vibrate(10);
-      }, 320)
-    };
+      }, 320);
+    }
   });
 
   app.addEventListener('pointermove', function(e){

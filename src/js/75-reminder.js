@@ -229,29 +229,41 @@ function renderReminderPage(){
   setTxt('reminder-count', String(reminderData.items.length));
   var active = ordered.filter(function(row){ return row.next && row.ts !== Infinity; });
   setTxt('reminder-next-summary', active.length ? '下一条 · ' + reminderShortDate(active[0].next) : '还没有安排');
-  byId('reminder-list').innerHTML = ordered.length ? ordered.map(function(row){
-    var item = row.item;
-    return '<div class="reminder-item" data-drag-kind="reminder" data-drag-state="active" data-drag-id="' +
-      escHtml(item.id) + '">' +
-      '<span class="reminder-time-chip">' + escHtml(item.time) + '</span>' +
-      '<span class="reminder-copy"><b>' + escHtml(item.title) + '</b>' +
-      '<span>' + escHtml(reminderRuleText(item)) + '</span>' +
-      '<small>' + escHtml(reminderNextText(item)) + '</small></span>' +
-      '<button class="reminder-edit"' + actionAttrs('editReminder', [item.id]) + '>改</button>' +
-      '<button class="reminder-del"' + actionAttrs('deleteReminder', [item.id]) + ' aria-label="删除提醒">×</button>' +
-      '</div>';
+  byId('reminder-list').innerHTML = ordered.length ? REMINDER_MODES.map(function(mode){
+    var rows = ordered.filter(function(row){ return row.item.mode === mode; });
+    if (!rows.length) return '';
+    return '<section class="reminder-group"><div class="reminder-group-head"><span>' +
+      REMINDER_MODE_NAMES[mode] + '</span><small>' + rows.length + ' 条</small></div>' +
+      '<div class="reminder-group-list">' + rows.map(function(row){
+        var item = row.item;
+        return '<div class="reminder-item" data-drag-kind="reminder" data-drag-state="active" data-drag-id="' +
+          escHtml(item.id) + '">' +
+          '<span class="reminder-time-chip">' + escHtml(item.time) + '</span>' +
+          '<span class="reminder-copy"><b>' + escHtml(item.title) + '</b>' +
+          '<span>' + escHtml(reminderRuleText(item)) + '</span>' +
+          '<small>' + escHtml(reminderNextText(item)) + '</small></span>' +
+          '<button class="reminder-edit"' + actionAttrs('editReminder', [item.id]) + '>改</button>' +
+          '<button class="reminder-del"' + actionAttrs('deleteReminder', [item.id]) + ' aria-label="删除提醒">×</button>' +
+          '</div>';
+      }).join('') + '</div></section>';
   }).join('') : '<div class="reminder-empty">还没有独立提醒<br>设置一次时间，让手机替你记住</div>';
 
   var archived = reminderArchivedItems();
   byId('reminder-archive-count').textContent = archived.length + ' 条';
-  byId('reminder-archive-list').innerHTML = archived.length ? archived.map(function(item){
-    var state = item.archiveReason === 'completed' ? '已提醒' : '已删除';
-    return '<div class="reminder-archive-item" data-drag-kind="reminder" data-drag-state="archive" data-drag-id="' +
-      escHtml(item.id) + '">' +
-      '<span class="reminder-archive-copy"><b>' + escHtml(item.title) + '</b></span>' +
-      '<span class="reminder-archive-actions"><span class="reminder-archive-state">' + state + '</span>' +
-      '<button' + actionAttrs('restoreReminder', [item.id]) + '>移回</button>' +
-      '<button class="danger"' + actionAttrs('permanentDeleteReminder', [item.id]) + ' aria-label="彻底删除">×</button></span></div>';
+  byId('reminder-archive-list').innerHTML = archived.length ? REMINDER_MODES.map(function(mode){
+    var rows = archived.filter(function(item){ return item.mode === mode; });
+    if (!rows.length) return '';
+    return '<div class="reminder-archive-group"><div class="reminder-group-head"><span>' +
+      REMINDER_MODE_NAMES[mode] + '</span><small>' + rows.length + ' 条</small></div>' +
+      rows.map(function(item){
+        var state = item.archiveReason === 'completed' ? '已提醒' : '已删除';
+        return '<div class="reminder-archive-item" data-drag-kind="reminder" data-drag-state="archive" data-drag-id="' +
+          escHtml(item.id) + '">' +
+          '<span class="reminder-archive-copy"><b>' + escHtml(item.title) + '</b></span>' +
+          '<span class="reminder-archive-actions"><span class="reminder-archive-state">' + state + '</span>' +
+          '<button' + actionAttrs('restoreReminder', [item.id]) + '>移回</button>' +
+          '<button class="danger"' + actionAttrs('permanentDeleteReminder', [item.id]) + ' aria-label="彻底删除">×</button></span></div>';
+      }).join('') + '</div>';
   }).join('') : '<div class="reminder-archive-empty">还没有归档提醒</div>';
   updateReminderSettings();
   renderHomeNotice();

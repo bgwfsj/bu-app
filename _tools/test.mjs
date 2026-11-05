@@ -287,8 +287,8 @@ async function run() {
       opened: true,
       dataActions: 2,
       aboutOpened: true,
-      changelogCount: 27,
-      aboutVersion: '5.6',
+      changelogCount: 28,
+      aboutVersion: '5.7',
       updateCalls: 1,
       handledBack: true,
       returnedHome: true
@@ -464,6 +464,14 @@ async function run() {
       permanentDeleteReminder('archive_temp');
       document.querySelector('[data-action="resolveAppConfirm"][data-args="[true]"]').click();
       var permanentlyRemoved = !reminderData.archived.some(function(item){ return item.id === 'archive_temp'; });
+      var activeGroupLabels = Array.prototype.map.call(
+        byId('reminder-list').querySelectorAll('.reminder-group-head span'),
+        function(node){ return node.textContent.trim(); }
+      );
+      var archiveGroupLabels = Array.prototype.map.call(
+        byId('reminder-archive-list').querySelectorAll('.reminder-group-head span'),
+        function(node){ return node.textContent.trim(); }
+      );
       return {
         count: reminderData.items.length,
         modes: reminderData.items.map(function(item){ return item.mode; }).sort(),
@@ -484,7 +492,9 @@ async function run() {
         manuallyArchived: manuallyArchived,
         restored: restored,
         permanentlyRemoved: permanentlyRemoved,
-        archiveCount: byId('reminder-archive-count').textContent
+        archiveCount: byId('reminder-archive-count').textContent,
+        activeGroupLabels: activeGroupLabels,
+        archiveGroupLabels: archiveGroupLabels
       };
     })()`);
     assert.equal(reminders.count, 5);
@@ -505,6 +515,8 @@ async function run() {
     assert.equal(reminders.restored, true);
     assert.equal(reminders.permanentlyRemoved, true);
     assert.equal(reminders.archiveCount, '1 条');
+    assert.deepEqual(reminders.activeGroupLabels, ['仅一次', '每天', '每周', '每月', '每年']);
+    assert.deepEqual(reminders.archiveGroupLabels, ['仅一次']);
 
     const dragActions = await evaluate(cdp, `(function(){
       todoData.items.push({
@@ -635,6 +647,22 @@ async function run() {
       var visibleRows = byId('ledger-tree').querySelectorAll('.ledger-tree-row').length;
       var eventFont = getComputedStyle(byId('ledger-tree').querySelector('.ledger-tree-select')).fontSize;
       var monthFont = getComputedStyle(byId('ledger-month-list').querySelector('.ledger-month-row b')).fontSize;
+      var pieSegments = Math.max(0, byId('ledger-category-pie').querySelectorAll('circle').length - 1);
+      var categoryRows = byId('ledger-category-list').querySelectorAll('.ledger-category-row').length;
+      var eventMonths = byId('ledger-event-month-list').querySelectorAll('.ledger-event-month-row').length;
+      openLedgerMonthReport('2026-09');
+      var reportHasPie = byId('sheet').querySelectorAll('.ledger-pie').length === 1;
+      closeSheet();
+      editLedgerTag('路费');
+      byId('ledger-tag-edit').value = '交通';
+      saveLedgerTagEdit();
+      var editedTag = ledgerData.tags.indexOf('交通') >= 0 && ledgerData.tags.indexOf('路费') < 0;
+      var recordsRenamed = ledgerAllEntries().some(function(entry){ return entry.record.tag === '交通'; });
+      deleteLedgerTag('交通');
+      document.querySelector('[data-action="resolveAppConfirm"][data-args="[true]"]').click();
+      var deletedTag = ledgerData.tags.indexOf('交通') < 0;
+      var recordsPreserved = ledgerAllEntries().some(function(entry){ return entry.record.tag === '交通'; });
+      closeSheet();
       return {
         first: first,
         second: second,
@@ -645,7 +673,15 @@ async function run() {
         visibleRows: visibleRows,
         rootCount: rootCount,
         eventFont: eventFont,
-        monthFont: monthFont
+        monthFont: monthFont,
+        pieSegments: pieSegments,
+        categoryRows: categoryRows,
+        eventMonths: eventMonths,
+        reportHasPie: reportHasPie,
+        editedTag: editedTag,
+        recordsRenamed: recordsRenamed,
+        deletedTag: deletedTag,
+        recordsPreserved: recordsPreserved
       };
     })()`);
     assert.equal(ledger.first.imported, 118);
@@ -659,6 +695,14 @@ async function run() {
     assert.equal(ledger.visibleRows, ledger.rootCount);
     assert.equal(ledger.eventFont, '13px');
     assert.equal(ledger.monthFont, '13px');
+    assert.ok(ledger.pieSegments > 0);
+    assert.ok(ledger.categoryRows > 0);
+    assert.ok(ledger.eventMonths > 0);
+    assert.equal(ledger.reportHasPie, true);
+    assert.equal(ledger.editedTag, true);
+    assert.equal(ledger.recordsRenamed, true);
+    assert.equal(ledger.deletedTag, true);
+    assert.equal(ledger.recordsPreserved, true);
 
     await evaluate(cdp, `(function(){
       S.quitDate = Date.now() - 86400000;

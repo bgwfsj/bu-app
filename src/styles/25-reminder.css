@@ -9,10 +9,13 @@
 .reminder-overview span,.reminder-overview small{font-size:var(--fs-meta);color:#82939a}
 .reminder-add{width:100%;height:44px;border-radius:12px;border:1px solid rgba(10,168,122,.24);background:rgba(10,168,122,.06);color:var(--acc);font-size:12px;letter-spacing:.12em;cursor:pointer}
 .reminder-list{display:flex;flex-direction:column;gap:8px;margin-top:13px}
+.reminder-group{display:flex;flex-direction:column;gap:7px}
+.reminder-group-head{display:flex;align-items:baseline;justify-content:space-between;padding:1px 2px 0;color:#5d747c;font-size:var(--fs-meta);letter-spacing:.07em}
+.reminder-group-head small{font-size:var(--fs-caption);color:#9aa8ad;letter-spacing:0}
+.reminder-group-list{display:flex;flex-direction:column;gap:7px}
 .reminder-item{display:flex;align-items:center;gap:10px;padding:12px;border-radius:13px;background:#fff;border:1px solid var(--line2)}
 .reminder-item,.reminder-archive-item{position:relative;touch-action:pan-y;transition:transform .18s ease,background .18s,border-color .18s;will-change:transform}
 .reminder-item.dragging,.reminder-archive-item.dragging{transition:none}
-.reminder-item.drag-holding,.reminder-archive-item.drag-holding{user-select:none;box-shadow:0 7px 20px -14px rgba(13,32,45,.45)}
 .reminder-item.drag-left,.reminder-archive-item.drag-left{border-color:rgba(229,72,77,.26);background:#fff5f5}
 .reminder-item.drag-right,.reminder-archive-item.drag-right{border-color:rgba(10,168,122,.24);background:#f3fbf8}
 .reminder-item.past{opacity:.58}
@@ -32,6 +35,7 @@
 .reminder-archive-box>summary em{font-style:normal;transition:transform .2s;color:#a4b0b5}
 .reminder-archive-box[open]>summary em{transform:rotate(180deg)}
 .reminder-archive-list{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.reminder-archive-group{display:flex;flex-direction:column;gap:6px}
 .reminder-archive-item{display:flex;align-items:center;gap:9px;padding:10px 11px;border-radius:10px;background:rgba(255,255,255,.6);border:1px solid var(--line2)}
 .reminder-archive-copy{flex:1;min-width:0}
 .reminder-archive-copy b{display:block;font-size:12.5px;font-weight:500;color:#74858b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}

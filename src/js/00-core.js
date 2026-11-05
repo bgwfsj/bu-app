@@ -148,7 +148,12 @@ var APP_ACTION_NAMES = {
   openLedgerBookSheet: true,
   chooseLedgerCsv: true,
   exportLedgerCsv: true,
-  deleteCurrentLedgerEvent: true
+  deleteCurrentLedgerEvent: true,
+  openLedgerTagManager: true,
+  editLedgerTag: true,
+  deleteLedgerTag: true,
+  saveLedgerTagEdit: true,
+  addLedgerTag: true
 };
 
 function actionAttrs(name, args, eventName){
