@@ -29,12 +29,18 @@ public class StandaloneReminderReceiver extends BroadcastReceiver {
     public static void deliverScheduled(Context context, JSONObject item) {
         String id = item.optString("id", "reminder");
         String title = item.optString("title", "提醒时间到了");
-        showNotification(context, id, title, "补 · 提醒时间到了", true);
+        showNotification(
+            context, id, title, "补 · 提醒时间到了", true, item.optString("mode"));
         StandaloneReminderScheduler.continueRecurring(context, item.toString());
     }
 
     public static boolean showNotification(
-            Context context, String id, String title, String body, boolean openReminderPage) {
+            Context context,
+            String id,
+            String title,
+            String body,
+            boolean openReminderPage,
+            String reminderMode) {
         if (Build.VERSION.SDK_INT >= 33 &&
                 ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -55,7 +61,9 @@ public class StandaloneReminderReceiver extends BroadcastReceiver {
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
         Intent confirmIntent = new Intent(context, NotificationActionReceiver.class)
-            .putExtra("notification_id", notificationId);
+            .putExtra("notification_id", notificationId)
+            .putExtra("reminder_confirm_id", id)
+            .putExtra("reminder_confirm_mode", reminderMode);
         PendingIntent confirmAction = PendingIntent.getBroadcast(
             context,
             notificationId ^ 0x434F,
@@ -83,10 +91,11 @@ public class StandaloneReminderReceiver extends BroadcastReceiver {
             .setContentText(body)
             .setStyle(new NotificationCompat.BigTextStyle().bigText(body))
             .setContentIntent(contentIntent)
-            .addAction(0, "确认", confirmAction)
             .addAction(0, "稍后", snoozeAction)
+            .addAction(0, "确认", confirmAction)
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setCategory(NotificationCompat.CATEGORY_REMINDER);
         manager.notify(notificationId, notification.build());
         return true;

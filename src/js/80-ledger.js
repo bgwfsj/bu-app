@@ -2,11 +2,13 @@
    8.7 记账
    ============================================================ */
 var ledgerEditingTag = null;
+var ledgerEditingBookId = null;
+var ledgerSearchQuery = '';
 var LEDGER_PIE_COLORS = ['#d49a69', '#72a78d', '#7d9fc2', '#c17f7f', '#9d8bb5', '#b0a264', '#75aab0', '#b48765'];
 
 function ledgerDefaultState(){
   return {
-    books: [{ id: 'book_daily', name: '日常账本', parentId: null, records: [] }],
+    books: [{ id: 'book_daily', name: '日常账本', parentId: null, records: [], archived: false }],
     selectedId: 'book_daily',
     tags: DEFAULT_LEDGER_TAGS.slice(),
     migrated: false
@@ -49,7 +51,8 @@ function normalizeLedgerState(data){
       id: id,
       name: String(book.name),
       parentId: book.parentId ? String(book.parentId) : null,
-      records: records
+      records: records,
+      archived: !!book.archived
     });
   });
   if (!out.books.length) out.books = ledgerDefaultState().books;
@@ -78,10 +81,17 @@ function loadLedgerState(){
   var old = current ? null : storeGet(LOLDKEY, null);
   ledgerData = normalizeLedgerState(current || old);
   ledgerData.migrated = !current && !!old;
-  collapseAllLedgerNodes();
+  ensureActiveLedgerRoot();
   var selected = ledgerBookById(ledgerData.selectedId);
-  if (selected && selected.parentId) {
-    ledgerData.selectedId = ledgerRootBook(selected).id;
+  if (!selected || ledgerIsArchived(selected)) {
+    ledgerData.selectedId = ledgerData.books.filter(function(book){
+      return !book.parentId && !ledgerIsArchived(book);
+    })[0].id;
+  }
+  collapseAllLedgerNodes();
+  var selectedNow = ledgerBookById(ledgerData.selectedId);
+  if (selectedNow && selectedNow.parentId) {
+    ledgerData.selectedId = ledgerRootBook(selectedNow).id;
   }
   saveLedgerState();
 }
@@ -100,9 +110,13 @@ function saveLedgerState(){ ledgerData.schemaVersion = 2; storeSet(LKEY, ledgerD
 
 function currentLedgerBook(){
   for (var i = 0; i < ledgerData.books.length; i++) {
-    if (ledgerData.books[i].id === ledgerData.selectedId) return ledgerData.books[i];
+    if (ledgerData.books[i].id === ledgerData.selectedId && !ledgerIsArchived(ledgerData.books[i])) {
+      return ledgerData.books[i];
+    }
   }
-  return ledgerData.books[0];
+  return ledgerData.books.filter(function(book){
+    return !book.parentId && !ledgerIsArchived(book);
+  })[0] || null;
 }
 
 function ledgerBookById(id){
@@ -110,8 +124,47 @@ function ledgerBookById(id){
   return null;
 }
 
-function ledgerChildBooks(id){
-  return ledgerData.books.filter(function(book){ return book.parentId === id; });
+function ledgerIsArchived(book){
+  var current = book, seen = {};
+  while (current && !seen[current.id]) {
+    if (current.archived) return true;
+    seen[current.id] = true;
+    current = current.parentId ? ledgerBookById(current.parentId) : null;
+  }
+  return false;
+}
+
+function activeLedgerRoots(){
+  return ledgerData.books.filter(function(book){
+    return !book.parentId && !ledgerIsArchived(book);
+  });
+}
+
+function archivedLedgerRoots(){
+  return ledgerData.books.filter(function(book){
+    if (!book.archived) return false;
+    var parent = book.parentId ? ledgerBookById(book.parentId) : null;
+    return !parent || !ledgerIsArchived(parent);
+  });
+}
+
+function ensureActiveLedgerRoot(){
+  if (activeLedgerRoots().length) return;
+  var root = {
+    id: 'book_' + Date.now().toString(36),
+    name: '日常账本',
+    parentId: null,
+    records: [],
+    archived: false
+  };
+  ledgerData.books.push(root);
+  ledgerData.selectedId = root.id;
+}
+
+function ledgerChildBooks(id, includeArchived){
+  return ledgerData.books.filter(function(book){
+    return book.parentId === id && (includeArchived || !ledgerIsArchived(book));
+  });
 }
 
 function ledgerBookDepth(book){
@@ -137,7 +190,7 @@ function ledgerBookPath(book){
 function ledgerOrderedBooks(){
   var out = [], seen = {};
   function walk(parentId, depth) {
-    each(ledgerData.books, function(book){
+    each(ledgerData.books.filter(function(book){ return !ledgerIsArchived(book); }), function(book){
       if ((book.parentId || null) !== parentId || seen[book.id]) return;
       seen[book.id] = true;
       out.push({ book: book, depth: depth });
@@ -151,7 +204,7 @@ function ledgerOrderedBooks(){
   return out;
 }
 
-function ledgerSubtreeBooks(id){
+function ledgerSubtreeBooks(id, includeArchived){
   var result = [], seen = {};
   function add(bookId){
     var book = ledgerBookById(bookId);
@@ -159,7 +212,7 @@ function ledgerSubtreeBooks(id){
     seen[book.id] = true;
     result.push(book);
     each(ledgerData.books, function(child){
-      if (child.parentId === book.id) add(child.id);
+      if (child.parentId === book.id && (includeArchived || !ledgerIsArchived(child))) add(child.id);
     });
   }
   add(id);
@@ -184,9 +237,10 @@ function ledgerRootBook(book){
   return current || book;
 }
 
-function ledgerAllEntries(){
+function ledgerAllEntries(includeArchived){
   var entries = [];
   each(ledgerData.books, function(owner){
+    if (!includeArchived && ledgerIsArchived(owner)) return;
     each(owner.records, function(record){ entries.push({ owner: owner, record: record }); });
   });
   return entries;
@@ -198,7 +252,7 @@ function ledgerMonthLabel(key){
 }
 
 function openLedgerMonthReport(key){
-  var entries = ledgerAllEntries().filter(function(entry){
+  var entries = ledgerAllEntries(true).filter(function(entry){
     return String(entry.record.date).slice(0, 7) === key;
   }).sort(function(a, b){
     var at = a.record.createdAt ? new Date(a.record.createdAt).getTime() : 0;
@@ -245,7 +299,7 @@ function openLedgerMonthReport(key){
 function renderLedgerMonths(){
   if (!ledgerData || !byId('ledger-month-list')) return;
   var months = {};
-  each(ledgerAllEntries(), function(entry){
+  each(ledgerAllEntries(true), function(entry){
     var key = String(entry.record.date).slice(0, 7);
     if (!/^\d{4}-\d{2}$/.test(key)) return;
     months[key] = months[key] || { total: 0, count: 0, roots: {} };
@@ -279,6 +333,7 @@ function ledgerMonthTotalForBook(id){
 function ledgerTreeHtml(parentId, depth){
   var html = '';
   each(ledgerData.books, function(book){
+    if (ledgerIsArchived(book)) return;
     if ((book.parentId || null) !== (parentId || null)) return;
     var children = ledgerChildBooks(book.id);
     var collapsed = !!ledgerCollapsed[book.id];
@@ -404,7 +459,8 @@ function renderLedgerPage(){
   renderLedgerAnalysis(entries, bookTotal, monthTotal, monthPrefix);
   renderLedgerMonths();
 
-  byId('ledger-tree-summary').textContent = ledgerBookPath(book) + ' · ' + ledgerData.books.length + ' 个事件';
+  var activeBookCount = ledgerData.books.filter(function(item){ return !ledgerIsArchived(item); }).length;
+  byId('ledger-tree-summary').textContent = ledgerBookPath(book) + ' · ' + activeBookCount + ' 个事件';
   byId('ledger-tree').innerHTML = ledgerTreeHtml(null, 0);
 
   var records = entries.slice().sort(function(a, b){
@@ -412,8 +468,20 @@ function renderLedgerPage(){
     var bt = b.record.createdAt ? new Date(b.record.createdAt).getTime() : 0;
     return String(b.record.date).localeCompare(String(a.record.date)) || bt - at;
   });
-  setTxt('ledger-record-count', records.length + ' 笔');
-  byId('ledger-list').innerHTML = records.length ? records.map(function(entry){
+  var query = ledgerSearchQuery.trim().toLocaleLowerCase();
+  var visibleRecords = query ? records.filter(function(entry){
+    var record = entry.record;
+    var haystack = [
+      record.date,
+      record.tag || '未分类',
+      record.note || '',
+      Number(record.amount).toFixed(2),
+      ledgerRecordTime(record)
+    ].join(' ').toLocaleLowerCase();
+    return haystack.indexOf(query) >= 0;
+  }) : records;
+  setTxt('ledger-record-count', visibleRecords.length + (query ? ' / ' + records.length : '') + ' 笔');
+  byId('ledger-list').innerHTML = visibleRecords.length ? visibleRecords.map(function(entry){
     var r = entry.record;
     var owner = entry.owner.id !== book.id ? ' · ' + escHtml(entry.owner.name) : '';
     return '<div class="ledger-record">' +
@@ -423,12 +491,15 @@ function renderLedgerPage(){
       '<span class="ledger-amount"><b>' + ledgerMoney(r.amount) + '</b>' +
       '<span><button' + actionAttrs('editLedgerRecord', [r.id]) + '>编辑</button>' +
       '<button' + actionAttrs('deleteLedgerRecord', [r.id]) + '>删除</button></span></span></div>';
-  }).join('') : '<div class="ledger-empty">这个事件还没有记录<br>点击“记一笔”开始</div>';
+  }).join('') : '<div class="ledger-empty">' +
+    (query ? '没有匹配的记录' : '这个事件还没有记录<br>点击“记一笔”开始') + '</div>';
   renderDashboard();
 }
 
 function selectLedgerBook(id){
   ledgerData.selectedId = id;
+  ledgerSearchQuery = '';
+  if (byId('ledger-search')) byId('ledger-search').value = '';
   saveLedgerState();
   renderLedgerPage();
 }
@@ -455,6 +526,7 @@ function saveLedgerBook(){
   saveLedgerState();
   closeSheet();
   renderLedgerPage();
+  refreshLedgerSettingsView();
   toast(ledgerNewParentId ? '子事件已创建' : '根事件已创建');
   ledgerNewParentId = null;
 }
@@ -475,7 +547,7 @@ function pickLedgerTag(tag){
 
 function ledgerTagUsage(name){
   var count = 0;
-  each(ledgerAllEntries(), function(entry){
+  each(ledgerAllEntries(true), function(entry){
     if (String(entry.record.tag || '未分类') === name) count++;
   });
   return count;
@@ -567,6 +639,102 @@ function addLedgerTag(){
   input.value = '';
   renderLedgerTagManager();
   toast('分类已添加');
+}
+
+function refreshLedgerSettingsView(){
+  var book = currentLedgerBook();
+  setTxt('ledger-settings-current', book ? '当前事件 · ' + ledgerBookPath(book) : '当前没有可用事件');
+  renderLedgerSettingsArchive();
+}
+
+function renderLedgerSettingsArchive(){
+  var box = byId('ledger-settings-archive');
+  if (!box || !ledgerData) return;
+  var roots = archivedLedgerRoots();
+  box.innerHTML = roots.length ? roots.map(function(root){
+    var subtree = ledgerSubtreeBooks(root.id, true);
+    var recordCount = subtree.reduce(function(sum, item){ return sum + item.records.length; }, 0);
+    return '<div class="ledger-archive-settings-row"><span><b>' + escHtml(ledgerBookPath(root)) +
+      '</b><small>' + recordCount + ' 笔 · ' + Math.max(1, subtree.length) + ' 个事件</small></span>' +
+      '<button' + actionAttrs('restoreLedgerEvent', [root.id]) + '>恢复</button>' +
+      '<button class="danger"' + actionAttrs('deleteArchivedLedgerEvent', [root.id]) + '>彻底删除</button></div>';
+  }).join('') : '<div class="ledger-archive-settings-empty">还没有归档事件</div>';
+}
+
+function renameCurrentLedgerEvent(){
+  var book = currentLedgerBook();
+  if (!book) return;
+  ledgerEditingBookId = book.id;
+  openSheet(
+    '<h3>修改事件名称</h3>' +
+    '<p>当前路径：' + escHtml(ledgerBookPath(book)) + '</p>' +
+    '<input class="todo-form-input" id="ledger-event-name-edit" maxlength="16" value="' + escHtml(book.name) + '">' +
+    '<div class="row"><button class="ghost"' + actionAttrs('closeSheet') + '>取消</button>' +
+    '<button class="primary"' + actionAttrs('saveLedgerEventName') + '>保存</button></div>'
+  );
+  byId('ledger-event-name-edit').focus();
+}
+
+function saveLedgerEventName(){
+  var book = ledgerEditingBookId ? ledgerBookById(ledgerEditingBookId) : null;
+  var input = byId('ledger-event-name-edit');
+  var name = input ? input.value.trim() : '';
+  if (!book || !name) { toast('请输入事件名称'); return; }
+  book.name = name;
+  ledgerEditingBookId = null;
+  saveLedgerState();
+  closeSheet();
+  renderLedgerPage();
+  refreshLedgerSettingsView();
+  toast('事件名称已修改');
+}
+
+function archiveCurrentLedgerEvent(){
+  var book = currentLedgerBook();
+  if (!book) return;
+  var parent = book.parentId ? ledgerBookById(book.parentId) : null;
+  appConfirm('将「' + ledgerBookPath(book) + '」以及它的子事件移入归档？', function(){
+    book.archived = true;
+    ensureActiveLedgerRoot();
+    ledgerData.selectedId = parent && !ledgerIsArchived(parent) ?
+      parent.id : activeLedgerRoots()[0].id;
+    saveLedgerState();
+    renderLedgerPage();
+    refreshLedgerSettingsView();
+    toast('事件已归档');
+  }, { title: '归档事件', confirmLabel: '归档' });
+}
+
+function restoreLedgerEvent(id){
+  var book = ledgerBookById(id);
+  if (!book || !book.archived) return;
+  book.archived = false;
+  ledgerData.selectedId = book.id;
+  saveLedgerState();
+  renderLedgerPage();
+  refreshLedgerSettingsView();
+  toast('事件已恢复');
+}
+
+function deleteArchivedLedgerEvent(id){
+  var root = ledgerBookById(id);
+  if (!root || !root.archived) return;
+  var subtree = ledgerSubtreeBooks(root.id, true);
+  var ids = subtree.map(function(book){ return book.id; });
+  var recordCount = subtree.reduce(function(sum, book){ return sum + book.records.length; }, 0);
+  appConfirm(
+    '彻底删除「' + root.name + '」及 ' + recordCount + ' 笔账目？删除后不能恢复。',
+    function(){
+      ledgerData.books = ledgerData.books.filter(function(book){ return ids.indexOf(book.id) < 0; });
+      each(ids, function(bookId){ delete ledgerCollapsed[bookId]; });
+      ensureActiveLedgerRoot();
+      saveLedgerState();
+      renderLedgerPage();
+      refreshLedgerSettingsView();
+      toast('归档事件已彻底删除');
+    },
+    { title: '彻底删除事件', onCancel: refreshLedgerSettingsView }
+  );
 }
 
 function openLedgerRecord(recordId){
@@ -675,6 +843,7 @@ function parseCsvRows(text){
 function ledgerFindChild(parentId, name){
   for (var i = 0; i < ledgerData.books.length; i++) {
     var book = ledgerData.books[i];
+    if (ledgerIsArchived(book)) continue;
     if ((book.parentId || null) === (parentId || null) && book.name === name) return book;
   }
   return null;
@@ -805,16 +974,18 @@ function weekdayText(date){
   return '星期' + '日一二三四五六'.charAt(d.getDay());
 }
 
-function buildLedgerCsv(){
-  var book = currentLedgerBook();
-  var entries = [];
-  each(ledgerSubtreeBooks(book.id), function(owner){
-    each(owner.records, function(record){
-      entries.push({
-        book: owner, record: record,
-        createdAt: record.createdAt ? new Date(record.createdAt).getTime() : 0
+function buildLedgerCsv(includeAll){
+  var book = includeAll ? null : currentLedgerBook();
+  var entries = includeAll ? ledgerAllEntries(true) : [];
+  if (!includeAll && book) {
+    each(ledgerSubtreeBooks(book.id), function(owner){
+      each(owner.records, function(record){
+        entries.push({ book: owner, record: record });
       });
     });
+  }
+  each(entries, function(entry){
+    entry.createdAt = entry.record.createdAt ? new Date(entry.record.createdAt).getTime() : 0;
   });
   entries.sort(function(a, b){
     return String(a.record.date).localeCompare(String(b.record.date)) ||
@@ -834,13 +1005,19 @@ function buildLedgerCsv(){
       csvCell(r.createdAt || '')
     ].join(','));
   });
-  return { csv: '\uFEFF' + lines.join('\r\n'), count: entries.length, book: book };
+  return {
+    csv: '\uFEFF' + lines.join('\r\n'),
+    count: entries.length,
+    book: book,
+    filename: includeAll ? '事件账本-全部事件-' + wTodayStr() + '.csv' :
+      '事件账本-' + book.name + '-' + wTodayStr() + '.csv'
+  };
 }
 
-function exportLedgerCsv(){
+function saveLedgerCsvExport(includeAll){
   if (byId('sheet').classList.contains('on')) closeSheet();
-  var data = buildLedgerCsv();
-  var filename = '事件账本-' + data.book.name + '-' + wTodayStr() + '.csv';
+  var data = buildLedgerCsv(includeAll);
+  var filename = data.filename;
   if (window.AppNative && window.AppNative.saveFile) {
     try {
       var bytes = new TextEncoder().encode(data.csv), binary = '';
@@ -864,6 +1041,14 @@ function exportLedgerCsv(){
   toast('已导出 ' + data.count + ' 笔');
 }
 
+function exportLedgerCsv(){
+  saveLedgerCsvExport(false);
+}
+
+function exportAllLedgerCsv(){
+  saveLedgerCsvExport(true);
+}
+
 function deleteCurrentLedgerEvent(){
   var book = currentLedgerBook();
   if (!book) return;
@@ -877,38 +1062,29 @@ function deleteCurrentLedgerEvent(){
     function(){
       ledgerData.books = ledgerData.books.filter(function(item){ return ids.indexOf(item.id) < 0; });
       each(ids, function(id){ delete ledgerCollapsed[id]; });
-      if (!ledgerData.books.length) {
-        ledgerData.books = ledgerDefaultState().books;
-        ledgerData.selectedId = ledgerData.books[0].id;
-      } else {
+      ensureActiveLedgerRoot();
+      var activeRoots = activeLedgerRoots();
+      if (activeRoots.length) {
         var parent = parentId ? ledgerBookById(parentId) : null;
-        ledgerData.selectedId = parent ? parent.id : ledgerData.books[0].id;
+        if (parent && ledgerIsArchived(parent)) parent = null;
+        ledgerData.selectedId = parent ? parent.id : activeRoots[0].id;
       }
       saveLedgerState();
       renderLedgerPage();
+      refreshLedgerSettingsView();
       toast('事件已删除');
     },
-    { title: '删除整个事件分支', confirmLabel: '删除事件', onCancel: openLedgerMenu }
-  );
-}
-
-function openLedgerMenu(){
-  openSheet(
-    '<h3>事件与数据</h3>' +
-    '<p>新建事件，或导入、导出当前事件树的数据。</p>' +
-    '<button class="primary" style="width:100%;margin-bottom:8px"' + actionAttrs('openLedgerBookSheet') + '>＋ 新建根事件</button>' +
-    '<button class="ghost" style="width:100%;margin-bottom:8px"' + actionAttrs('openLedgerTagManager') + '>分类管理</button>' +
-    '<button class="ghost" style="width:100%;margin-bottom:8px"' + actionAttrs('chooseLedgerCsv') + '>导入 CSV</button>' +
-    '<button class="ghost" style="width:100%;margin-bottom:8px"' + actionAttrs('exportLedgerCsv') + '>导出当前事件及子事件 CSV</button>' +
-    '<button class="danger" style="width:100%;margin-bottom:8px"' + actionAttrs('deleteCurrentLedgerEvent') + '>删除当前事件及子事件</button>' +
-    '<div class="row"><button class="ghost" style="flex:1"' + actionAttrs('closeSheet') + '>关闭</button></div>'
+    { title: '删除整个事件分支', confirmLabel: '删除事件', onCancel: openLedgerSettingsPage }
   );
 }
 
 function initLedger(){
   loadLedgerState();
   byId('btn-ledger-add').addEventListener('click', function(){ openLedgerRecord(); });
-  byId('btn-ledger-new-book').addEventListener('click', openLedgerMenu);
   byId('btn-ledger-add-child').addEventListener('click', function(){ openLedgerBookSheet(currentLedgerBook().id); });
+  byId('ledger-search').addEventListener('input', function(){
+    ledgerSearchQuery = this.value || '';
+    renderLedgerPage();
+  });
   renderLedgerPage();
 }

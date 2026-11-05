@@ -77,10 +77,11 @@ public class SnoozeReceiver extends BroadcastReceiver {
             .setContentText("补 · 稍后提醒时间到了")
             .setStyle(new NotificationCompat.BigTextStyle().bigText(title))
             .setContentIntent(contentIntent)
-            .addAction(0, "确认", confirmAction)
             .addAction(0, "稍后", snoozeAction)
+            .addAction(0, "确认", confirmAction)
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setCategory(NotificationCompat.CATEGORY_REMINDER);
         manager.notify(requestCode, notification.build());
     }

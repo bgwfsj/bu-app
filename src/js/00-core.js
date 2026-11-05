@@ -50,6 +50,7 @@ var workoutFrameId = 0;
 var workoutLastPaint = 0;
 var page = 0;
 var settingsOpen = false;
+var ledgerSettingsOpen = false;
 var sheetRequired = false;
 var lastStageIdx = -99;
 var lastDLen = -1;   // 天数位数，用于触发字号重算
@@ -130,6 +131,9 @@ var APP_ACTION_NAMES = {
   deleteReminder: true,
   restoreReminder: true,
   permanentDeleteReminder: true,
+  convertReminderToTodo: true,
+  convertTodoToReminder: true,
+  toggleReminderGroup: true,
   toggleReminderHomeNotice: true,
   dismissHomeNoticeToday: true,
   saveSnooze: true,
@@ -150,6 +154,14 @@ var APP_ACTION_NAMES = {
   exportLedgerCsv: true,
   deleteCurrentLedgerEvent: true,
   openLedgerTagManager: true,
+  openLedgerSettingsPage: true,
+  closeLedgerSettingsPage: true,
+  renameCurrentLedgerEvent: true,
+  saveLedgerEventName: true,
+  archiveCurrentLedgerEvent: true,
+  restoreLedgerEvent: true,
+  deleteArchivedLedgerEvent: true,
+  exportAllLedgerCsv: true,
   editLedgerTag: true,
   deleteLedgerTag: true,
   saveLedgerTagEdit: true,
@@ -303,8 +315,7 @@ function saveTextFile(filename, text, mime){
   if (window.AppNative && window.AppNative.saveFile) {
     var bytes = new TextEncoder().encode(text), binary = '';
     for (var i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
-    window.AppNative.saveFile(filename, btoa(binary), mime || 'text/plain');
-    return;
+    return window.AppNative.saveFile(filename, btoa(binary), mime || 'text/plain') !== false;
   }
   var blob = new Blob([text], { type: mime || 'text/plain;charset=utf-8' });
   var url = URL.createObjectURL(blob);
@@ -315,13 +326,18 @@ function saveTextFile(filename, text, mime){
   a.click();
   document.body.removeChild(a);
   setTimeout(function(){ URL.revokeObjectURL(url); }, 5000);
+  return true;
 }
 
 function exportAppBackup(){
   closeSheet();
   var text = JSON.stringify(appBackupPayload(), null, 2);
-  saveTextFile('补-完整备份-' + wTodayStr() + '.json', text, 'application/json');
+  if (!saveTextFile('补-完整备份-' + wTodayStr() + '.json', text, 'application/json')) {
+    toast('完整备份保存失败');
+    return false;
+  }
   toast('完整数据已导出');
+  return true;
 }
 
 function chooseAppBackup(){

@@ -23,7 +23,8 @@
 .todo-item.overdue{background:#fffaf4;border-color:rgba(210,116,34,.18)}
 .todo-item.overdue .todo-copy span{color:#b57639}
 .todo-copy span{display:block;font-size:var(--fs-caption);color:#96a4a8;margin-top:4px}
-.todo-edit{border:0;background:transparent;color:#16896a;font-size:var(--fs-meta);padding:4px 2px;cursor:pointer}
+.todo-convert,.todo-edit{border:0;background:transparent;color:#16896a;font-size:var(--fs-meta);padding:4px 2px;cursor:pointer}
+.todo-convert{color:#5f8eaa}
 .todo-del{border:0;background:transparent;color:#c5a2a2;font-size:15px;padding:3px 2px;cursor:pointer}
 .todo-empty{text-align:center;padding:24px 10px;color:#98a6aa;font-size:12.5px;line-height:1.7}
 .todo-section-title{display:flex;justify-content:space-between;align-items:baseline;margin:22px 0 8px;color:#6d8089;font-size:var(--fs-meta);letter-spacing:.12em}

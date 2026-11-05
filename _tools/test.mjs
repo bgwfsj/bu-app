@@ -267,6 +267,7 @@ async function run() {
       var aboutOpened = byId('sheet').classList.contains('on');
       var changelogCount = byId('sheet').querySelectorAll('.changelog-entry').length;
       var aboutVersion = byId('sheet').querySelector('.about-current b').textContent.trim();
+      var updateBackupExposed = typeof window.exportUpdateBackup === 'function';
       closeSheet();
       byId('p-settings').querySelector('[data-action="checkAppUpdate"]').click();
       var handledBack = handleBackNavigation();
@@ -278,6 +279,7 @@ async function run() {
         aboutOpened: aboutOpened,
         changelogCount: changelogCount,
         aboutVersion: aboutVersion,
+        updateBackupExposed: updateBackupExposed,
         updateCalls: calls,
         handledBack: handledBack,
         returnedHome: returnedHome
@@ -287,8 +289,9 @@ async function run() {
       opened: true,
       dataActions: 2,
       aboutOpened: true,
-      changelogCount: 28,
-      aboutVersion: '5.7',
+      changelogCount: 30,
+      aboutVersion: '5.8.1',
+      updateBackupExposed: true,
       updateCalls: 1,
       handledBack: true,
       returnedHome: true
@@ -307,13 +310,24 @@ async function run() {
         completeTimedExercise(id);
       });
       var last = fit.sessions[fit.sessions.length - 1];
+      openWorkoutPlan();
+      var planList = byId('plan-list');
+      var planRows = planList ? planList.querySelectorAll('.plan-row') : [];
+      var planNames = Array.prototype.map.call(planRows, function(row){
+        return row.querySelector('.plan-name').textContent.trim();
+      });
+      var planListHeight = planList ? planList.getBoundingClientRect().height : 0;
+      closeSheet();
       return {
         activeEnded: fit.activeSessionId === null,
         ended: !!last.endAt,
         setCount: last.sets.filter(function(r){ return r.kind === 'set'; }).length,
         durationCount: last.sets.filter(function(r){ return r.kind === 'duration'; }).length,
         elapsedRecorded: last.sets.every(function(r){ return r.elapsed > 0; }),
-        stored: !!JSON.parse(localStorage.getItem('fitness_app_v1')).sessions.length
+        stored: !!JSON.parse(localStorage.getItem('fitness_app_v1')).sessions.length,
+        planRows: planRows.length,
+        planNames: planNames,
+        planListHeight: planListHeight
       };
     })()`);
     assert.equal(workout.error, undefined);
@@ -323,6 +337,9 @@ async function run() {
     assert.equal(workout.durationCount, 2);
     assert.equal(workout.elapsedRecorded, true);
     assert.equal(workout.stored, true);
+    assert.ok(workout.planRows >= 5);
+    assert.ok(workout.planListHeight > 0);
+    assert.ok(workout.planNames.some(function(name){ return name.indexOf('背') === 0; }));
 
     const todo = await evaluate(cdp, `(function(){
       var today = wTodayStr();
@@ -466,12 +483,35 @@ async function run() {
       var permanentlyRemoved = !reminderData.archived.some(function(item){ return item.id === 'archive_temp'; });
       var activeGroupLabels = Array.prototype.map.call(
         byId('reminder-list').querySelectorAll('.reminder-group-head span'),
-        function(node){ return node.textContent.trim(); }
+        function(node){ return node.textContent.replace(/[▸▾]/g, '').trim(); }
       );
       var archiveGroupLabels = Array.prototype.map.call(
         byId('reminder-archive-list').querySelectorAll('.reminder-group-head span'),
-        function(node){ return node.textContent.trim(); }
+        function(node){ return node.textContent.replace(/[▸▾]/g, '').trim(); }
       );
+      toggleReminderGroup('active', 'daily');
+      var activeGroupCollapsed = reminderData.groupCollapsed.active.daily === true &&
+        byId('reminder-list').querySelectorAll('.reminder-group.collapsed').length === 1;
+      toggleReminderGroup('active', 'daily');
+      toggleReminderGroup('archived', 'once');
+      var archiveGroupCollapsed = reminderData.groupCollapsed.archived.once === true;
+      toggleReminderGroup('archived', 'once');
+      reminderData.items.push({
+        id: 'confirm_once', title: '确认完成测试', mode: 'once', time: '12:00',
+        date: '2099-01-01', createdAt: new Date().toISOString()
+      });
+      var originalNativeForConfirm = window.AppNative;
+      window.AppNative = {
+        consumeConfirmedReminderIds: function(){ return '["confirm_once"]'; }
+      };
+      applyConfirmedReminders();
+      var confirmedArchived = reminderData.archived.some(function(item){
+        return item.id === 'confirm_once' && item.archiveReason === 'completed';
+      });
+      reminderData.archived = reminderData.archived.filter(function(item){ return item.id !== 'confirm_once'; });
+      window.AppNative = originalNativeForConfirm;
+      saveReminderState(false);
+      renderReminderPage();
       return {
         count: reminderData.items.length,
         modes: reminderData.items.map(function(item){ return item.mode; }).sort(),
@@ -494,7 +534,10 @@ async function run() {
         permanentlyRemoved: permanentlyRemoved,
         archiveCount: byId('reminder-archive-count').textContent,
         activeGroupLabels: activeGroupLabels,
-        archiveGroupLabels: archiveGroupLabels
+        archiveGroupLabels: archiveGroupLabels,
+        activeGroupCollapsed: activeGroupCollapsed,
+        archiveGroupCollapsed: archiveGroupCollapsed,
+        confirmedArchived: confirmedArchived
       };
     })()`);
     assert.equal(reminders.count, 5);
@@ -517,6 +560,9 @@ async function run() {
     assert.equal(reminders.archiveCount, '1 条');
     assert.deepEqual(reminders.activeGroupLabels, ['仅一次', '每天', '每周', '每月', '每年']);
     assert.deepEqual(reminders.archiveGroupLabels, ['仅一次']);
+    assert.equal(reminders.activeGroupCollapsed, true);
+    assert.equal(reminders.archiveGroupCollapsed, true);
+    assert.equal(reminders.confirmedArchived, true);
 
     const dragActions = await evaluate(cdp, `(function(){
       todoData.items.push({
@@ -566,6 +612,82 @@ async function run() {
       activeHint: '松开归档',
       restoreHint: '松开移回',
       deleteHint: '松开彻底删除'
+    });
+
+    const customTomorrow = new Date(Date.now() + 86400000);
+    const customTomorrowStr = customTomorrow.getFullYear() + '-' +
+      String(customTomorrow.getMonth() + 1).padStart(2, '0') + '-' +
+      String(customTomorrow.getDate()).padStart(2, '0');
+    const conversions = await evaluate(cdp, `(function(){
+      todoData.items.push({
+        id: 'convert_todo_src', title: '转换待办', repeat: 'daily',
+        createdDate: wTodayStr(), done: false, doneDates: {}
+      });
+      convertTodoToReminder('convert_todo_src');
+      var todoArchived = todoData.archived.some(function(item){
+        return item.id === 'convert_todo_src' && item.archiveReason === 'converted';
+      });
+      var createdReminder = reminderData.items.filter(function(item){ return item.title === '转换待办'; })[0];
+      var reminderCreated = !!createdReminder;
+      if (createdReminder) reminderData.items = reminderData.items.filter(function(item){ return item.id !== createdReminder.id; });
+      todoData.archived = todoData.archived.filter(function(item){ return item.id !== 'convert_todo_src'; });
+
+      reminderData.items.push({
+        id: 'convert_reminder_src', title: '转换提醒', mode: 'daily', time: '09:00',
+        createdAt: new Date().toISOString()
+      });
+      convertReminderToTodo('convert_reminder_src');
+      var reminderArchived = reminderData.archived.some(function(item){
+        return item.id === 'convert_reminder_src' && item.archiveReason === 'converted';
+      });
+      var createdTodo = todoData.items.filter(function(item){ return item.title === '转换提醒'; })[0];
+      var todoCreated = !!createdTodo;
+      if (createdTodo) todoData.items = todoData.items.filter(function(item){ return item.id !== createdTodo.id; });
+      reminderData.archived = reminderData.archived.filter(function(item){ return item.id !== 'convert_reminder_src'; });
+      var tomorrow = new Date(Date.now() + 86400000);
+      var dayAfter = new Date(Date.now() + 172800000);
+      var futureOne = tomorrow.getFullYear() + '-' + pad2(tomorrow.getMonth() + 1) + '-' + pad2(tomorrow.getDate());
+      var futureTwo = dayAfter.getFullYear() + '-' + pad2(dayAfter.getMonth() + 1) + '-' + pad2(dayAfter.getDate());
+      todoData.items.push({
+        id: 'convert_custom_src', title: '多日期待办', repeat: 'custom',
+        dates: [futureOne, futureTwo], createdDate: wTodayStr(), done: false, doneDates: {}
+      });
+      var beforeCustom = reminderData.items.length;
+      convertTodoToReminder('convert_custom_src');
+      var customCreatedCount = reminderData.items.length - beforeCustom;
+      var customCreatedReminder = reminderData.items.filter(function(item){
+        return item.title === '多日期待办';
+      })[0];
+      if (customCreatedReminder) {
+        reminderData.items = reminderData.items.filter(function(item){
+          return item.id !== customCreatedReminder.id;
+        });
+      }
+      todoData.archived = todoData.archived.filter(function(item){
+        return item.id !== 'convert_custom_src';
+      });
+      saveTodoState();
+      saveReminderState(false);
+      renderTodoPage();
+      renderReminderPage();
+      return {
+        todoArchived: todoArchived,
+        reminderCreated: reminderCreated,
+        reminderArchived: reminderArchived,
+        todoCreated: todoCreated,
+        customCreatedCount: customCreatedCount,
+        customCreatedMode: customCreatedReminder && customCreatedReminder.mode,
+        customCreatedDate: customCreatedReminder && customCreatedReminder.date
+      };
+    })()`);
+    assert.deepEqual(conversions, {
+      todoArchived: true,
+      reminderCreated: true,
+      reminderArchived: true,
+      todoCreated: true,
+      customCreatedCount: 1,
+      customCreatedMode: 'once',
+      customCreatedDate: customTomorrowStr
     });
 
     const typography = await evaluate(cdp, `(function(){
@@ -663,6 +785,45 @@ async function run() {
       var deletedTag = ledgerData.tags.indexOf('交通') < 0;
       var recordsPreserved = ledgerAllEntries().some(function(entry){ return entry.record.tag === '交通'; });
       closeSheet();
+      var searchCounts = {};
+      ['2026-09', '交通', '高铁', '305.00'].forEach(function(query){
+        ledgerSearchQuery = query;
+        if (byId('ledger-search')) byId('ledger-search').value = query;
+        renderLedgerPage();
+        searchCounts[query] = byId('ledger-list').querySelectorAll('.ledger-record').length;
+      });
+      var searchRows = byId('ledger-list').querySelectorAll('.ledger-record').length;
+      var searchCountText = byId('ledger-record-count').textContent;
+      ledgerSearchQuery = '';
+      if (byId('ledger-search')) byId('ledger-search').value = '';
+      renderLedgerPage();
+      openLedgerSettingsPage();
+      var settingsOpened = byId('p-ledger-settings').classList.contains('on') &&
+        document.body.dataset.page === 'ledger-settings';
+      renameCurrentLedgerEvent();
+      byId('ledger-event-name-edit').value = '旅行';
+      saveLedgerEventName();
+      var renamedRoot = !!currentLedgerBook() && currentLedgerBook().name === '旅行';
+      var rootId = ledgerRootBook(currentLedgerBook()).id;
+      archiveCurrentLedgerEvent();
+      document.querySelector('[data-action="resolveAppConfirm"][data-args="[true]"]').click();
+      var archivedEvent = archivedLedgerRoots().some(function(book){ return book.id === rootId; });
+      var archiveButtonShown = !!byId('ledger-settings-archive').querySelector('[data-action="restoreLedgerEvent"]');
+      restoreLedgerEvent(rootId);
+      var restoredEvent = currentLedgerBook() && currentLedgerBook().id === rootId;
+      var childBook = ledgerData.books.filter(function(book){ return !!book.parentId; })[0];
+      ledgerData.selectedId = childBook.id;
+      archiveCurrentLedgerEvent();
+      document.querySelector('[data-action="resolveAppConfirm"][data-args="[true]"]').click();
+      var childArchived = ledgerIsArchived(childBook) &&
+        archivedLedgerRoots().some(function(book){ return book.id === childBook.id; });
+      var parentSelectedAfterChildArchive = currentLedgerBook() &&
+        currentLedgerBook().id === childBook.parentId;
+      restoreLedgerEvent(childBook.id);
+      var childRestored = !ledgerIsArchived(childBook) &&
+        currentLedgerBook() && currentLedgerBook().id === childBook.id;
+      var allExportCount = buildLedgerCsv(true).count;
+      closeLedgerSettingsPage();
       return {
         first: first,
         second: second,
@@ -681,7 +842,19 @@ async function run() {
         editedTag: editedTag,
         recordsRenamed: recordsRenamed,
         deletedTag: deletedTag,
-        recordsPreserved: recordsPreserved
+        recordsPreserved: recordsPreserved,
+        searchRows: searchRows,
+        searchCounts: searchCounts,
+        searchCountText: searchCountText,
+        settingsOpened: settingsOpened,
+        renamedRoot: renamedRoot,
+        archivedEvent: archivedEvent,
+        archiveButtonShown: archiveButtonShown,
+        restoredEvent: restoredEvent,
+        childArchived: childArchived,
+        parentSelectedAfterChildArchive: parentSelectedAfterChildArchive,
+        childRestored: childRestored,
+        allExportCount: allExportCount
       };
     })()`);
     assert.equal(ledger.first.imported, 118);
@@ -703,6 +876,22 @@ async function run() {
     assert.equal(ledger.recordsRenamed, true);
     assert.equal(ledger.deletedTag, true);
     assert.equal(ledger.recordsPreserved, true);
+    assert.ok(ledger.searchRows > 0);
+    assert.ok(ledger.searchRows < ledger.count);
+    assert.ok(ledger.searchCounts['2026-09'] > 0);
+    assert.ok(ledger.searchCounts['交通'] > 0);
+    assert.ok(ledger.searchCounts['高铁'] > 0);
+    assert.ok(ledger.searchCounts['305.00'] > 0);
+    assert.ok(ledger.searchCountText.indexOf('/ 118') >= 0);
+    assert.equal(ledger.settingsOpened, true);
+    assert.equal(ledger.renamedRoot, true);
+    assert.equal(ledger.archivedEvent, true);
+    assert.equal(ledger.archiveButtonShown, true);
+    assert.equal(ledger.restoredEvent, true);
+    assert.equal(ledger.childArchived, true);
+    assert.equal(ledger.parentSelectedAfterChildArchive, true);
+    assert.equal(ledger.childRestored, true);
+    assert.equal(ledger.allExportCount, 118);
 
     await evaluate(cdp, `(function(){
       S.quitDate = Date.now() - 86400000;

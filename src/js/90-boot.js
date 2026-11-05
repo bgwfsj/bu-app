@@ -80,5 +80,7 @@ function checkAppUpdate(){
   window.handleBack = handleBackNavigation;
   window.paintLiveWorkout = paintLiveWorkout;
   window.paintLiveTimers = paintLiveTimers;
+  window.applyConfirmedReminders = applyConfirmedReminders;
+  window.exportUpdateBackup = exportAppBackup;
   boot();
 })();

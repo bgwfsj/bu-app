@@ -119,6 +119,20 @@
 .ledger-tag-manager-row small{display:block;font-size:10px;color:#96a4a0;margin-top:2px}
 .ledger-tag-manager-row button{border:0;background:transparent;color:#648d7c;font-size:10.5px;padding:3px;cursor:pointer}
 .ledger-tag-manager-row button.danger{color:#bd7777}
+.ledger-search-box{display:block;flex:0 0 auto;margin:0 0 15px}
+.ledger-search-box>span{display:block;margin-bottom:6px;font-size:10.5px;letter-spacing:.08em;color:#879791}
+.ledger-search-box input{display:block;width:100%;height:39px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.82);padding:0 11px;color:#425a51;font-size:12px;outline:none}
+.ledger-search-box input:focus{border-color:rgba(92,75,61,.3);box-shadow:0 0 0 3px rgba(92,75,61,.06)}
+body[data-page="ledger-settings"] #page-pager{opacity:0;pointer-events:none}
+.ledger-settings-archive{display:flex;flex-direction:column}
+.ledger-archive-settings-row{display:flex;align-items:center;gap:10px;padding:12px 14px;border-top:1px solid var(--line2)}
+.settings-group .ledger-archive-settings-row:first-child{border-top:0}
+.ledger-archive-settings-row>span{flex:1;min-width:0}
+.ledger-archive-settings-row b{display:block;font-size:13px;font-weight:500;color:#43584f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ledger-archive-settings-row small{display:block;font-size:10.5px;color:#96a39f;margin-top:3px}
+.ledger-archive-settings-row button{border:0;background:transparent;color:#648d7c;font-size:11px;padding:3px;cursor:pointer}
+.ledger-archive-settings-row button.danger{color:#bd7777}
+.ledger-archive-settings-empty{padding:15px 14px;text-align:center;color:#9aa8a4;font-size:11.5px}
 .ledger-record-box{flex:0 0 auto;margin-top:4px}
 .ledger-record-box>summary{
   display:flex;align-items:center;justify-content:space-between;list-style:none;cursor:pointer;

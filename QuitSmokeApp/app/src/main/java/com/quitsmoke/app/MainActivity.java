@@ -37,6 +37,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.HashSet;
+import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -211,44 +213,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @JavascriptInterface
-        public String getAppVersion() {
-            try {
-                android.content.pm.PackageInfo info = getPackageManager()
-                    .getPackageInfo(getPackageName(), 0);
-                return info.versionName == null ? "" : info.versionName;
-            } catch (Exception error) {
-                return "";
-            }
-        }
-
-        @JavascriptInterface
-        public void pickCsvFile() {
-            runOnUiThread(() -> {
-                filePickerPurpose = "csv";
-                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-                intent.addCategory(Intent.CATEGORY_OPENABLE);
-                intent.setType("*/*");
-                intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{
-                    "text/csv", "text/comma-separated-values", "text/plain"
-                });
-                filePickerLauncher.launch(intent);
-            });
-        }
-
-        @JavascriptInterface
-        public void pickBackupFile() {
-            runOnUiThread(() -> {
-                filePickerPurpose = "backup";
-                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-                intent.addCategory(Intent.CATEGORY_OPENABLE);
-                intent.setType("*/*");
-                intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"application/json", "text/plain"});
-                filePickerLauncher.launch(intent);
-            });
-        }
-
-        @JavascriptInterface
-        public void saveFile(String name, String base64, String mime) {
+        public boolean saveFile(String name, String base64, String mime) {
             try {
                 byte[] data = Base64.decode(base64, Base64.DEFAULT);
                 String safeName = (name == null || name.trim().isEmpty()) ? "事件账本.csv" : name;
@@ -276,10 +241,77 @@ public class MainActivity extends AppCompatActivity {
                     output.close();
                 }
                 toast("已保存到手机的下载目录：" + safeName);
+                return true;
             } catch (Exception e) {
                 toast("保存失败：" + e.getMessage());
+                return false;
             }
         }
+
+        @JavascriptInterface
+        public String getAppVersion() {
+            try {
+                android.content.pm.PackageInfo info = getPackageManager()
+                    .getPackageInfo(getPackageName(), 0);
+                return info.versionName == null ? "" : info.versionName;
+            } catch (Exception error) {
+                return "";
+            }
+        }
+
+        @JavascriptInterface
+        public String consumeConfirmedReminderIds() {
+            android.content.SharedPreferences prefs = getSharedPreferences(
+                "notification_confirmations", MODE_PRIVATE);
+            Set<String> ids = new HashSet<>(prefs.getStringSet("reminder_ids", new HashSet<>()));
+            prefs.edit().remove("reminder_ids").apply();
+            return new org.json.JSONArray(ids).toString();
+        }
+
+        @JavascriptInterface
+        public void pickCsvFile() {
+            runOnUiThread(() -> {
+                filePickerPurpose = "csv";
+                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("*/*");
+                intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{
+                    "text/csv", "text/comma-separated-values", "text/plain"
+                });
+                filePickerLauncher.launch(intent);
+            });
+        }
+
+        @JavascriptInterface
+        public void pickBackupFile() {
+            runOnUiThread(() -> {
+                filePickerPurpose = "backup";
+                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("*/*");
+                intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"application/json", "text/plain"});
+                filePickerLauncher.launch(intent);
+            });
+        }
+    }
+
+    void backupBeforeUpdate(Runnable afterBackup) {
+        if (webView == null) {
+            toast("更新前备份失败，已停止下载");
+            return;
+        }
+        webView.evaluateJavascript(
+            "(function(){try{return !!(window.exportUpdateBackup && window.exportUpdateBackup());}" +
+                "catch(e){return false;}})()",
+            value -> {
+                if ("true".equals(value)) {
+                    toast("更新前备份已保存，开始下载新版本");
+                    afterBackup.run();
+                } else {
+                    toast("更新前备份失败，已停止下载");
+                }
+            }
+        );
     }
 
     @Override
@@ -386,6 +418,12 @@ public class MainActivity extends AppCompatActivity {
         liveTimerHandler.post(liveTimerTick);
         ReminderScheduler.schedule(this);
         StandaloneReminderScheduler.rescheduleAll(this);
+        if (webView != null) {
+            webView.evaluateJavascript(
+                "(window.applyConfirmedReminders && window.applyConfirmedReminders(), true)",
+                null
+            );
+        }
         if (webView != null) webView.onResume();
     }
 

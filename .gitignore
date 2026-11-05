@@ -6,6 +6,9 @@
 
 # Machine-specific Android configuration
 /QuitSmokeApp/local.properties
+signing.properties
+*.jks
+*.keystore
 
 # Personal import data and local-only test fixtures
 /_local-data/

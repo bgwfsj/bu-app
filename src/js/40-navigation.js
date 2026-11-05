@@ -3,6 +3,7 @@
    ============================================================ */
 function goPage(i){
   settingsOpen = false;
+  ledgerSettingsOpen = false;
   page = i < 0 ? 0 : (i > 6 ? 6 : i);
   var pages = ['home', 'fitness', 'water', 'quit', 'todo', 'ledger', 'reminder'];
   document.body.dataset.page = pages[page];
@@ -20,6 +21,11 @@ function goPage(i){
   if (settings) {
     settings.classList.remove('on');
     settings.setAttribute('aria-hidden', 'true');
+  }
+  var ledgerSettings = byId('p-ledger-settings');
+  if (ledgerSettings) {
+    ledgerSettings.classList.remove('on');
+    ledgerSettings.setAttribute('aria-hidden', 'true');
   }
   if (page === 3 && !S.quitDate && !sheetRequired) firstRunSheet();
   if (page === 1) ensureWorkoutTicker();
@@ -49,6 +55,27 @@ function closeSettingsPage(){
   goPage(0);
 }
 
+function openLedgerSettingsPage(){
+  ledgerSettingsOpen = true;
+  document.body.dataset.page = 'ledger-settings';
+  var ledger = byId('p-ledger');
+  if (ledger) {
+    ledger.classList.remove('on');
+    ledger.setAttribute('aria-hidden', 'true');
+  }
+  var settings = byId('p-ledger-settings');
+  if (settings) {
+    settings.classList.add('on');
+    settings.setAttribute('aria-hidden', 'false');
+  }
+  refreshLedgerSettingsView();
+}
+
+function closeLedgerSettingsPage(){
+  ledgerSettingsOpen = false;
+  goPage(5);
+}
+
 function handleBackNavigation(){
   var sheet = byId('sheet');
   if (sheet && sheet.classList.contains('on')) {
@@ -59,6 +86,10 @@ function handleBackNavigation(){
     closeSettingsPage();
     return true;
   }
+  if (ledgerSettingsOpen) {
+    closeLedgerSettingsPage();
+    return true;
+  }
   if (page > 0) {
     goPage(0);
     return true;
@@ -67,7 +98,7 @@ function handleBackNavigation(){
 }
 
 function moveByHorizontalSwipe(dx){
-  if (page === 0 || settingsOpen) {
+  if (page === 0 || settingsOpen || ledgerSettingsOpen) {
     return;
   }
   if (dx < 0) goPage(page === 6 ? 1 : page + 1);
@@ -94,7 +125,7 @@ function moveByHorizontalSwipe(dx){
 })();
 
 document.addEventListener('keydown', function(e){
-  if (settingsOpen) return;
+  if (settingsOpen || ledgerSettingsOpen) return;
   if (e.key === 'ArrowRight') {
     if (page === 0) goPage(1);
     else goPage(page === 6 ? 1 : page + 1);

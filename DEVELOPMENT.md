@@ -6,7 +6,7 @@
 
 - 应用名：补
 - 包名：`com.quitsmoke.app`
-- 当前版本：5.7
+- 当前版本：5.8.1
 - 最低 Android：API 24
 - Target SDK：34
 - 仓库：`bgwfsj/bu-app`（公开）
@@ -74,13 +74,13 @@ Copy-Item .\quit-app.html .\QuitSmokeApp\app\src\main\assets\index.html -Force
 $env:JAVA_HOME='C:\Users\公鸡舞翩迁\Android\jdk17\jdk-17.0.13+11'
 $env:GRADLE_USER_HOME='C:\Users\公鸡舞翩迁\.gradle'
 $env:TEMP=$env:TMP='C:\Users\公鸡舞翩迁\AppData\Local\Temp'
-& 'C:\Users\公鸡舞翩迁\Android\gradle\gradle-8.5\bin\gradle.bat' -p .\QuitSmokeApp clean assembleDebug
+& 'C:\Users\公鸡舞翩迁\Android\gradle\gradle-8.5\bin\gradle.bat' -p .\QuitSmokeApp clean assembleRelease
 ```
 
 产物：
 
 ```text
-QuitSmokeApp/app/build/outputs/apk/debug/app-debug.apk
+QuitSmokeApp/app/build/outputs/apk/release/app-release.apk
 ```
 
 复制为根目录 `补.apk` 后，必须用 `apksigner verify` 和包内 `assets/index.html` SHA-256 做一致性检查。
@@ -100,6 +100,7 @@ QuitSmokeApp/app/build/outputs/apk/debug/app-debug.apk
 ```
 
 首页不参与滑动。1–6 首尾循环。设置页是独立覆盖页，不参与循环，系统返回先回首页。
+记账设置页 `p-ledger-settings` 也是独立覆盖页，返回时回到记账页。
 
 底部单字入口和滑动顺序必须保持一致：练、水、戒、记、账、醒。
 
@@ -138,6 +139,7 @@ bu_pre_restore_v1    完整恢复前的安全副本
 - 归档可移回或彻底删除。
 - 移回过期项目时，会赋予今天或未来日期，避免立刻重新归档。
 - 每日、工作日、周末任务不会整体过期。
+- 转换提醒时可无损使用 weekly、monthly、yearly 三类规则。
 - 支持手势：普通项左拖归档；归档项右拖移回、左拖彻底删除；长按后进入增强拖拽反馈，原按钮保留。
 
 ## 提醒规则
@@ -149,14 +151,21 @@ bu_pre_restore_v1    完整恢复前的安全副本
 - 归档可移回或彻底删除。
 - 移回已过期的一次性提醒时，会安排最近的未来同名时间。
 - 提醒仅支持短距离横向滑动，不启用长按拖拽。
+- 普通状态和归档均按 once、daily、weekly、monthly、yearly 分组；折叠状态保存在 `reminderData.groupCollapsed`。
+- 通知“确认”只会对一次性提醒记录完成 ID；App 回到前台后 `applyConfirmedReminders()` 将对应提醒移入归档并标记 `archiveReason = completed`。
+- 待办与提醒可以一对一互相转换。转换后源项目进入归档并标记 `archiveReason = converted`。可一一对应的重复规则会直接保留；工作日、周末、自定义多日期待办转换为一条 `once` 提醒，日期取最近一次。
 
 ## 记账分析
 
+- 每个事件有 `archived` 标记；归档根事件及其子树不进入主事件树，但保留在设置页归档列表和数据文件中。
+- 归档可以作用于根事件或任意子事件；恢复与彻底删除以归档边界为准。全局月度总览和分类占比继续包含归档记录。
+- 当前事件的记录搜索覆盖日期、精确创建时间、分类、备注和两位小数金额。
 - 当前事件按整棵子树汇总：累计花费、本月花费、每月历史、分类金额和分类饼图。
 - 月度总览同时展示当月根事件汇总和分类占比。
 - 分类数据为 `ledgerData.tags`，记录上的 `tag` 为实际引用。
 - 编辑分类会修改 `tags` 并同步全部历史记录的 `tag`。
 - 删除分类只从 `tags` 移除，历史记录仍保留原分类字符串。
+- 记账设置页 `p-ledger-settings` 负责事件改名、归档、恢复、彻底删除、分类管理、CSV 导入和两种导出。导出全部事件时包含普通事件与归档事件。
 
 ## Android 通知架构
 
@@ -166,6 +175,8 @@ bu_pre_restore_v1    完整恢复前的安全副本
 - `StandaloneReminderReceiver`：显示独立提醒。
 - `SnoozeScheduler` / `SnoozeReceiver`：一次性稍后提醒。
 - `NotificationActionReceiver`：通知“确认”动作，收起通知。
+
+提醒通知的操作顺序固定为“稍后”在前、“确认”在后。部分国产系统在折叠通知中只显示第一个操作，调整顺序后无需展开即可直接稍后提醒。
 
 通知点击：
 
@@ -195,13 +206,15 @@ bu_pre_restore_v1    完整恢复前的安全副本
 
 下载时必须在通知栏显示进度百分比和已下载/总大小。下载完成后同一条通知更新状态。
 
+用户确认更新后，`AppUpdater` 先调用 `MainActivity.backupBeforeUpdate()`，由 WebView 执行 `window.exportUpdateBackup()` 并保存完整 JSON。只有备份返回成功才进入下载；备份失败时停止更新。
+
 ## 发版流程
 
 1. 修改 `QuitSmokeApp/app/build.gradle` 的 `versionCode` 和 `versionName`
 2. 在 `src/js/05-app-info.js` 增加当前版本更新记录
 3. 更新 `HANDOFF.md`
 4. 运行 `verify.ps1`
-5. 构建 APK 并复制为 `补.apk`
+5. 构建 release APK 并复制为 `补.apk`
 6. 校验签名、版本号和包内 HTML hash
 7. 提交并推送 `main`
 8. 创建 `v<version>` 标签
@@ -213,7 +226,8 @@ bu_pre_restore_v1    完整恢复前的安全副本
 - 小米/Redmi 必须开启自启动和省电无限制。
 - Android“强行停止”会清除闹钟，只能重新打开 App 恢复。
 - 安装更新需要用户允许安装未知应用。
-- APK 使用 debug 签名，适合个人覆盖安装，不适合商店发布。
+- APK 使用本机专用 release 证书。私钥位于 `_local-data/signing/bu-release-v1.jks`，密码配置位于已忽略的 `QuitSmokeApp/signing.properties`。两者不得提交或公开。
+- 发布签名一经使用必须长期保持不变；更换证书会导致 Android 拒绝覆盖安装，只能卸载后重装并恢复数据。
 - 用户 CSV 和本地资料不得提交到 Git。
 
 ## 提交前检查
@@ -222,4 +236,4 @@ bu_pre_restore_v1    完整恢复前的安全副本
 - 设置页更新和关于正常
 - APK 内 HTML 与根目录 HTML hash 一致
 - Release 的 digest 与本地 SHA-256 一致
-- 没有提交 APK、CSV、`local.properties` 或历史签名文件
+- 没有提交 APK、CSV、`local.properties`、`signing.properties` 或签名密钥

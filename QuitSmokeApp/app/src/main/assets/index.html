@@ -370,7 +370,8 @@ body[data-page="settings"] #page-pager{opacity:0;pointer-events:none}
 .todo-item.overdue{background:#fffaf4;border-color:rgba(210,116,34,.18)}
 .todo-item.overdue .todo-copy span{color:#b57639}
 .todo-copy span{display:block;font-size:var(--fs-caption);color:#96a4a8;margin-top:4px}
-.todo-edit{border:0;background:transparent;color:#16896a;font-size:var(--fs-meta);padding:4px 2px;cursor:pointer}
+.todo-convert,.todo-edit{border:0;background:transparent;color:#16896a;font-size:var(--fs-meta);padding:4px 2px;cursor:pointer}
+.todo-convert{color:#5f8eaa}
 .todo-del{border:0;background:transparent;color:#c5a2a2;font-size:15px;padding:3px 2px;cursor:pointer}
 .todo-empty{text-align:center;padding:24px 10px;color:#98a6aa;font-size:12.5px;line-height:1.7}
 .todo-section-title{display:flex;justify-content:space-between;align-items:baseline;margin:22px 0 8px;color:#6d8089;font-size:var(--fs-meta);letter-spacing:.12em}
@@ -422,8 +423,11 @@ body[data-page="settings"] #page-pager{opacity:0;pointer-events:none}
 .reminder-add{width:100%;height:44px;border-radius:12px;border:1px solid rgba(10,168,122,.24);background:rgba(10,168,122,.06);color:var(--acc);font-size:12px;letter-spacing:.12em;cursor:pointer}
 .reminder-list{display:flex;flex-direction:column;gap:8px;margin-top:13px}
 .reminder-group{display:flex;flex-direction:column;gap:7px}
-.reminder-group-head{display:flex;align-items:baseline;justify-content:space-between;padding:1px 2px 0;color:#5d747c;font-size:var(--fs-meta);letter-spacing:.07em}
+.reminder-group-head{display:flex;align-items:baseline;justify-content:space-between;width:100%;padding:4px 2px 3px;border:0;background:transparent;color:#5d747c;font-size:var(--fs-meta);letter-spacing:.07em;text-align:left;cursor:pointer}
+.reminder-group-head span{display:flex;align-items:center;gap:5px}
+.reminder-group-head i{font-style:normal;color:#9aa8ad}
 .reminder-group-head small{font-size:var(--fs-caption);color:#9aa8ad;letter-spacing:0}
+.reminder-group.collapsed .reminder-group-list,.reminder-archive-group.collapsed .reminder-archive-item{display:none}
 .reminder-group-list{display:flex;flex-direction:column;gap:7px}
 .reminder-item{display:flex;align-items:center;gap:10px;padding:12px;border-radius:13px;background:#fff;border:1px solid var(--line2)}
 .reminder-item,.reminder-archive-item{position:relative;touch-action:pan-y;transition:transform .18s ease,background .18s,border-color .18s;will-change:transform}
@@ -436,7 +440,8 @@ body[data-page="settings"] #page-pager{opacity:0;pointer-events:none}
 .reminder-copy b{display:block;font-size:var(--fs-card);font-weight:500;color:#334b42;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .reminder-copy span{display:block;font-size:var(--fs-caption);color:#84959b;margin-top:4px}
 .reminder-copy small{display:block;font-size:10px;color:#a1adb1;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.reminder-edit{border:0;background:transparent;color:#16896a;font-size:var(--fs-meta);padding:4px 2px;cursor:pointer}
+.reminder-convert,.reminder-edit{border:0;background:transparent;color:#16896a;font-size:var(--fs-meta);padding:4px 2px;cursor:pointer}
+.reminder-convert{color:#5f8eaa}
 .reminder-del{border:0;background:transparent;color:#c5a2a2;font-size:15px;padding:3px 2px;cursor:pointer}
 .reminder-empty{text-align:center;padding:27px 10px;color:#98a6aa;font-size:12.5px;line-height:1.8;background:rgba(255,255,255,.55);border:1px dashed var(--line);border-radius:13px}
 .reminder-archive-box{margin-top:18px;border-top:1px solid var(--line2);padding-top:10px}
@@ -600,6 +605,20 @@ body[data-page="settings"] #page-pager{opacity:0;pointer-events:none}
 .ledger-tag-manager-row small{display:block;font-size:10px;color:#96a4a0;margin-top:2px}
 .ledger-tag-manager-row button{border:0;background:transparent;color:#648d7c;font-size:10.5px;padding:3px;cursor:pointer}
 .ledger-tag-manager-row button.danger{color:#bd7777}
+.ledger-search-box{display:block;flex:0 0 auto;margin:0 0 15px}
+.ledger-search-box>span{display:block;margin-bottom:6px;font-size:10.5px;letter-spacing:.08em;color:#879791}
+.ledger-search-box input{display:block;width:100%;height:39px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.82);padding:0 11px;color:#425a51;font-size:12px;outline:none}
+.ledger-search-box input:focus{border-color:rgba(92,75,61,.3);box-shadow:0 0 0 3px rgba(92,75,61,.06)}
+body[data-page="ledger-settings"] #page-pager{opacity:0;pointer-events:none}
+.ledger-settings-archive{display:flex;flex-direction:column}
+.ledger-archive-settings-row{display:flex;align-items:center;gap:10px;padding:12px 14px;border-top:1px solid var(--line2)}
+.settings-group .ledger-archive-settings-row:first-child{border-top:0}
+.ledger-archive-settings-row>span{flex:1;min-width:0}
+.ledger-archive-settings-row b{display:block;font-size:13px;font-weight:500;color:#43584f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ledger-archive-settings-row small{display:block;font-size:10.5px;color:#96a39f;margin-top:3px}
+.ledger-archive-settings-row button{border:0;background:transparent;color:#648d7c;font-size:11px;padding:3px;cursor:pointer}
+.ledger-archive-settings-row button.danger{color:#bd7777}
+.ledger-archive-settings-empty{padding:15px 14px;text-align:center;color:#9aa8a4;font-size:11.5px}
 .ledger-record-box{flex:0 0 auto;margin-top:4px}
 .ledger-record-box>summary{
   display:flex;align-items:center;justify-content:space-between;list-style:none;cursor:pointer;
@@ -1433,7 +1452,7 @@ body[data-page="fitness"]::before{
     <section class="page" id="p-ledger">
       <div class="top">
         <div class="brand"><span class="led"></span>记账</div>
-        <button class="iconbtn" id="btn-ledger-new-book" title="事件与数据">＋</button>
+        <button class="iconbtn" id="btn-ledger-settings" data-action="openLedgerSettingsPage" title="记账设置">⋯</button>
       </div>
       <div class="ledger-hero">
         <div class="ledger-kicker">所选事件本月支出</div>
@@ -1475,10 +1494,65 @@ body[data-page="fitness"]::before{
           <div class="ledger-event-month-list" id="ledger-event-month-list"></div>
         </details>
       </section>
+      <label class="ledger-search-box">
+        <span>搜索当前事件</span>
+        <input id="ledger-search" type="search" autocomplete="off" placeholder="时间、分类、备注或金额">
+      </label>
       <details class="ledger-record-box">
         <summary><span>最近记录</span><i id="ledger-record-count">0 笔</i></summary>
         <div class="ledger-list" id="ledger-list"></div>
       </details>
+    </section>
+
+    <!-- ================= 记账设置 ================= -->
+    <section class="page" id="p-ledger-settings">
+      <div class="top">
+        <button class="settings-back" data-action="closeLedgerSettingsPage" aria-label="返回记账">&#8249;</button>
+        <div class="brand"><span class="led"></span>记账设置</div>
+        <span class="settings-top-space"></span>
+      </div>
+      <div class="settings-hero">
+        <div class="settings-kicker">事件账本</div>
+        <h1 class="settings-title">事件与数据</h1>
+        <p class="settings-sub" id="ledger-settings-current">当前事件</p>
+      </div>
+      <div class="settings-group">
+        <div class="settings-group-title">当前事件</div>
+        <button class="settings-row" data-action="openLedgerBookSheet">
+          <span><b>新建根事件</b><small>创建一个新的事件账本</small></span><em>新建 ›</em>
+        </button>
+        <button class="settings-row" data-action="renameCurrentLedgerEvent">
+          <span><b>修改事件名称</b><small>重命名当前选中的事件</small></span><em>修改 ›</em>
+        </button>
+        <button class="settings-row" data-action="archiveCurrentLedgerEvent">
+          <span><b>归档当前事件</b><small>从主事件树移到归档</small></span><em>归档 ›</em>
+        </button>
+        <button class="settings-row" data-action="deleteCurrentLedgerEvent">
+          <span><b>删除当前事件</b><small>删除当前事件及全部子事件</small></span><em>删除 ›</em>
+        </button>
+      </div>
+      <div class="settings-group">
+        <div class="settings-group-title">分类</div>
+        <button class="settings-row" data-action="openLedgerTagManager">
+          <span><b>分类管理</b><small>新增、编辑或删除记账分类</small></span><em>管理 ›</em>
+        </button>
+      </div>
+      <div class="settings-group">
+        <div class="settings-group-title">数据</div>
+        <button class="settings-row" data-action="chooseLedgerCsv">
+          <span><b>导入 CSV</b><small>兼容旧版事件账本 CSV</small></span><em>导入 ›</em>
+        </button>
+        <button class="settings-row" data-action="exportLedgerCsv">
+          <span><b>导出当前事件</b><small>包含当前事件及其全部子事件</small></span><em>导出 ›</em>
+        </button>
+        <button class="settings-row" data-action="exportAllLedgerCsv">
+          <span><b>导出全部事件</b><small>包括普通事件和归档事件</small></span><em>全部导出 ›</em>
+        </button>
+      </div>
+      <div class="settings-group">
+        <div class="settings-group-title">归档事件</div>
+        <div class="ledger-settings-archive" id="ledger-settings-archive"></div>
+      </div>
     </section>
 
   </div>
@@ -1552,6 +1626,7 @@ var workoutFrameId = 0;
 var workoutLastPaint = 0;
 var page = 0;
 var settingsOpen = false;
+var ledgerSettingsOpen = false;
 var sheetRequired = false;
 var lastStageIdx = -99;
 var lastDLen = -1;   // 天数位数，用于触发字号重算
@@ -1632,6 +1707,9 @@ var APP_ACTION_NAMES = {
   deleteReminder: true,
   restoreReminder: true,
   permanentDeleteReminder: true,
+  convertReminderToTodo: true,
+  convertTodoToReminder: true,
+  toggleReminderGroup: true,
   toggleReminderHomeNotice: true,
   dismissHomeNoticeToday: true,
   saveSnooze: true,
@@ -1652,6 +1730,14 @@ var APP_ACTION_NAMES = {
   exportLedgerCsv: true,
   deleteCurrentLedgerEvent: true,
   openLedgerTagManager: true,
+  openLedgerSettingsPage: true,
+  closeLedgerSettingsPage: true,
+  renameCurrentLedgerEvent: true,
+  saveLedgerEventName: true,
+  archiveCurrentLedgerEvent: true,
+  restoreLedgerEvent: true,
+  deleteArchivedLedgerEvent: true,
+  exportAllLedgerCsv: true,
   editLedgerTag: true,
   deleteLedgerTag: true,
   saveLedgerTagEdit: true,
@@ -1805,8 +1891,7 @@ function saveTextFile(filename, text, mime){
   if (window.AppNative && window.AppNative.saveFile) {
     var bytes = new TextEncoder().encode(text), binary = '';
     for (var i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
-    window.AppNative.saveFile(filename, btoa(binary), mime || 'text/plain');
-    return;
+    return window.AppNative.saveFile(filename, btoa(binary), mime || 'text/plain') !== false;
   }
   var blob = new Blob([text], { type: mime || 'text/plain;charset=utf-8' });
   var url = URL.createObjectURL(blob);
@@ -1817,13 +1902,18 @@ function saveTextFile(filename, text, mime){
   a.click();
   document.body.removeChild(a);
   setTimeout(function(){ URL.revokeObjectURL(url); }, 5000);
+  return true;
 }
 
 function exportAppBackup(){
   closeSheet();
   var text = JSON.stringify(appBackupPayload(), null, 2);
-  saveTextFile('补-完整备份-' + wTodayStr() + '.json', text, 'application/json');
+  if (!saveTextFile('补-完整备份-' + wTodayStr() + '.json', text, 'application/json')) {
+    toast('完整备份保存失败');
+    return false;
+  }
   toast('完整数据已导出');
+  return true;
 }
 
 function chooseAppBackup(){
@@ -1877,6 +1967,8 @@ byId('mask').addEventListener('click', closeSheet);
    应用版本记录
    ============================================================ */
 var APP_CHANGELOG = [
+  { version: '5.8.1', date: '2026-11-05', changes: ['提醒通知把“稍后”调整为首个操作，小米折叠通知也能直接看到。', '提醒、待办和补发通知都支持锁屏可见。'] },
+  { version: '5.8', date: '2026-11-05', changes: ['记账支持修改事件名称、按日期/分类/备注/金额搜索和事件归档恢复。', '记账设置页集中管理事件、分类、CSV 导入导出，并可导出全部事件。', '提醒与待办支持一对一转换；一次性提醒点“确认”后归档为已完成。', '提醒分组记住展开或折叠状态，训练计划动作列表显示恢复。', '应用内更新会先自动导出完整备份，备份成功后才开始下载。', '安装包改用专用发布签名，后续更新固定使用同一签名。'] },
   { version: '5.7', date: '2026-11-05', changes: ['提醒普通状态和归档按仅一次、每天、每周、每月、每年分组，空分组隐藏。', '提醒移除长按拖拽，仅保留左右滑动；待办长按拖拽保留。', '记账当前事件新增累计花费、本月花费、每月记录和分类饼图。', '记账分类支持新增、编辑和删除，编辑会同步历史记录。'] },
   { version: '5.6', date: '2026-11-05', changes: ['待办和提醒支持横向拖拽与长按拖拽。', '普通项左拖归档；归档项右拖移回、左拖彻底删除。', '保留原有按钮操作。'] },
   { version: '5.5.1', date: '2026-11-05', changes: ['待办和提醒归档列表改为单行，仅保留标题、状态和操作。'] },
@@ -2379,6 +2471,7 @@ function setQuitFromInput(){
    ============================================================ */
 function goPage(i){
   settingsOpen = false;
+  ledgerSettingsOpen = false;
   page = i < 0 ? 0 : (i > 6 ? 6 : i);
   var pages = ['home', 'fitness', 'water', 'quit', 'todo', 'ledger', 'reminder'];
   document.body.dataset.page = pages[page];
@@ -2396,6 +2489,11 @@ function goPage(i){
   if (settings) {
     settings.classList.remove('on');
     settings.setAttribute('aria-hidden', 'true');
+  }
+  var ledgerSettings = byId('p-ledger-settings');
+  if (ledgerSettings) {
+    ledgerSettings.classList.remove('on');
+    ledgerSettings.setAttribute('aria-hidden', 'true');
   }
   if (page === 3 && !S.quitDate && !sheetRequired) firstRunSheet();
   if (page === 1) ensureWorkoutTicker();
@@ -2425,6 +2523,27 @@ function closeSettingsPage(){
   goPage(0);
 }
 
+function openLedgerSettingsPage(){
+  ledgerSettingsOpen = true;
+  document.body.dataset.page = 'ledger-settings';
+  var ledger = byId('p-ledger');
+  if (ledger) {
+    ledger.classList.remove('on');
+    ledger.setAttribute('aria-hidden', 'true');
+  }
+  var settings = byId('p-ledger-settings');
+  if (settings) {
+    settings.classList.add('on');
+    settings.setAttribute('aria-hidden', 'false');
+  }
+  refreshLedgerSettingsView();
+}
+
+function closeLedgerSettingsPage(){
+  ledgerSettingsOpen = false;
+  goPage(5);
+}
+
 function handleBackNavigation(){
   var sheet = byId('sheet');
   if (sheet && sheet.classList.contains('on')) {
@@ -2435,6 +2554,10 @@ function handleBackNavigation(){
     closeSettingsPage();
     return true;
   }
+  if (ledgerSettingsOpen) {
+    closeLedgerSettingsPage();
+    return true;
+  }
   if (page > 0) {
     goPage(0);
     return true;
@@ -2443,7 +2566,7 @@ function handleBackNavigation(){
 }
 
 function moveByHorizontalSwipe(dx){
-  if (page === 0 || settingsOpen) {
+  if (page === 0 || settingsOpen || ledgerSettingsOpen) {
     return;
   }
   if (dx < 0) goPage(page === 6 ? 1 : page + 1);
@@ -2470,7 +2593,7 @@ function moveByHorizontalSwipe(dx){
 })();
 
 document.addEventListener('keydown', function(e){
-  if (settingsOpen) return;
+  if (settingsOpen || ledgerSettingsOpen) return;
   if (e.key === 'ArrowRight') {
     if (page === 0) goPage(1);
     else goPage(page === 6 ? 1 : page + 1);
@@ -3341,10 +3464,10 @@ function openWorkoutPlan(planId){
 function renderPlanRows(){
   var list = byId('plan-list');
   if (!list) return;
-  var byId = {};
-  each(planDraft, function(p){ byId[p.exerciseId] = p; });
+  var draftById = {};
+  each(planDraft, function(p){ draftById[p.exerciseId] = p; });
   list.innerHTML = fit.exercises.map(function(e){
-    var selected = byId[e.id];
+    var selected = draftById[e.id];
     var target = selected ? (e.type === 'duration' ? selected.minutes : selected.sets) : (e.type === 'duration' ? 20 : 4);
     var unit = e.type === 'duration' ? '分钟' : '组';
     return '<div class="plan-row' + (selected ? ' active' : '') + '">' +
@@ -4049,7 +4172,7 @@ function loadTodoState(){
   d.reminder.enabled = !!d.reminder.enabled;
   function normalizeItem(item){
     return item && typeof item.id === 'string' && typeof item.title === 'string' &&
-      ['once','daily','weekdays','weekends','custom'].indexOf(item.repeat) >= 0;
+      ['once','daily','weekdays','weekends','custom','weekly','monthly','yearly'].indexOf(item.repeat) >= 0;
   }
   d.items = d.items.filter(normalizeItem);
   d.archived = d.archived.filter(normalizeItem);
@@ -4083,10 +4206,21 @@ function todoMatchesDate(item, date){
   if (item.repeat === 'once') return item.date === date;
   if (item.repeat === 'custom') return (item.dates || []).indexOf(date) >= 0;
   if (date < item.createdDate) return false;
-  var day = todoDateObject(date).getDay();
+  var dateObject = todoDateObject(date);
+  var day = dateObject.getDay();
   if (item.repeat === 'daily') return true;
   if (item.repeat === 'weekdays') return day >= 1 && day <= 5;
   if (item.repeat === 'weekends') return day === 0 || day === 6;
+  if (item.repeat === 'weekly') return day === item.weekday;
+  if (item.repeat === 'monthly') {
+    var monthLast = new Date(dateObject.getFullYear(), dateObject.getMonth() + 1, 0).getDate();
+    return dateObject.getDate() === Math.min(item.day || 1, monthLast);
+  }
+  if (item.repeat === 'yearly') {
+    var yearLast = new Date(dateObject.getFullYear(), item.month || 1, 0).getDate();
+    return dateObject.getMonth() + 1 === item.month &&
+      dateObject.getDate() === Math.min(item.day || 1, yearLast);
+  }
   return false;
 }
 
@@ -4153,6 +4287,9 @@ function todoRepeatText(item){
   if (item.repeat === 'daily') return '每天';
   if (item.repeat === 'weekdays') return '工作日';
   if (item.repeat === 'weekends') return '周末';
+  if (item.repeat === 'weekly') return '每周' + REMINDER_WEEKDAYS[item.weekday || 0];
+  if (item.repeat === 'monthly') return '每月 ' + (item.day || 1) + ' 日';
+  if (item.repeat === 'yearly') return '每年 ' + (item.month || 1) + ' 月 ' + (item.day || 1) + ' 日';
   return '自定义 · ' + (item.dates || []).length + ' 个日期';
 }
 
@@ -4177,6 +4314,7 @@ function renderTodoPage(){
       '" data-drag-kind="todo" data-drag-state="active" data-drag-id="' + escHtml(item.id) + '">' +
       '<button class="todo-check"' + actionAttrs('toggleTodo', [item.id]) + ' aria-label="切换完成">✓</button>' +
       '<span class="todo-copy"><b>' + escHtml(item.title) + '</b><span>' + todoRepeatText(item) + '</span></span>' +
+      '<button class="todo-convert"' + actionAttrs('convertTodoToReminder', [item.id]) + ' aria-label="转为提醒">转</button>' +
       '<button class="todo-edit"' + actionAttrs('editTodo', [item.id]) + ' aria-label="编辑待办">改</button>' +
       '<button class="todo-del"' + actionAttrs('deleteTodo', [item.id]) + ' aria-label="删除待办">×</button></div>';
   }).join('') : '<div class="todo-empty">今天还没有待办<br>添加一件需要每天完成的小事</div>';
@@ -4203,6 +4341,7 @@ function renderTodoPage(){
   byId('todo-archive-list').innerHTML = archived.length ? archived.map(function(item){
     var state;
     if (item.archiveReason === 'deleted') state = '已删除';
+    else if (item.archiveReason === 'converted') state = '已转提醒';
     else if (item.repeat === 'once') state = item.done ? '已完成' : '未完成';
     else state = '已结束';
     return '<div class="todo-archive-item" data-drag-kind="todo" data-drag-state="archive" data-drag-id="' +
@@ -4228,12 +4367,29 @@ function setTodoRepeat(repeat){
   renderTodoEditorState();
 }
 
+function todoNumberOptions(start, end, selected){
+  var out = '';
+  for (var i = start; i <= end; i++) {
+    out += '<option value="' + i + '"' + (i === Number(selected) ? ' selected' : '') + '>' + i + '</option>';
+  }
+  return out;
+}
+
+function todoWeekdayOptions(selected){
+  return REMINDER_WEEKDAYS.map(function(label, index){
+    return '<option value="' + index + '"' + (index === Number(selected) ? ' selected' : '') + '>' + label + '</option>';
+  }).join('');
+}
+
 function renderTodoEditorState(){
   each(byId('todo-repeat-buttons').querySelectorAll('button'), function(btn){
     btn.classList.toggle('on', btn.getAttribute('data-repeat') === todoDraftRepeat);
   });
   byId('todo-once-wrap').style.display = todoDraftRepeat === 'once' ? '' : 'none';
   byId('todo-custom-wrap').style.display = todoDraftRepeat === 'custom' ? '' : 'none';
+  byId('todo-weekly-wrap').style.display = todoDraftRepeat === 'weekly' ? '' : 'none';
+  byId('todo-monthly-wrap').style.display = todoDraftRepeat === 'monthly' ? '' : 'none';
+  byId('todo-yearly-wrap').style.display = todoDraftRepeat === 'yearly' ? '' : 'none';
   byId('todo-custom-dates').innerHTML = todoDraftDates.map(function(date){
     return '<span>' + workoutDateLabel(date) + '<button' + actionAttrs('removeTodoDraftDate', [date]) + '>×</button></span>';
   }).join('');
@@ -4268,11 +4424,21 @@ function openTodoEditor(id){
       '<button type="button" data-repeat="weekdays"' + actionAttrs('setTodoRepeat', ['weekdays']) + '>工作日</button>' +
       '<button type="button" data-repeat="weekends"' + actionAttrs('setTodoRepeat', ['weekends']) + '>周末</button>' +
       '<button type="button" data-repeat="custom"' + actionAttrs('setTodoRepeat', ['custom']) + '>自定义日期</button>' +
+      '<button type="button" data-repeat="weekly"' + actionAttrs('setTodoRepeat', ['weekly']) + '>每周</button>' +
+      '<button type="button" data-repeat="monthly"' + actionAttrs('setTodoRepeat', ['monthly']) + '>每月</button>' +
+      '<button type="button" data-repeat="yearly"' + actionAttrs('setTodoRepeat', ['yearly']) + '>每年</button>' +
     '</div>' +
     '<div id="todo-once-wrap" style="display:none"><label class="todo-form-label">日期</label><input class="todo-form-input" type="date" id="todo-once-date" value="' + onceDate + '"></div>' +
     '<div id="todo-custom-wrap" style="display:none"><label class="todo-form-label">选择一个日期后添加</label>' +
       '<div class="new-exercise"><input id="todo-custom-date" type="date" value="' + wTodayStr() + '"><button type="button"' + actionAttrs('addTodoDraftDate') + '>添加日期</button></div>' +
       '<div class="todo-custom-dates" id="todo-custom-dates"></div></div>' +
+    '<div id="todo-weekly-wrap" style="display:none"><label class="todo-form-label">星期</label><select class="todo-form-input" id="todo-weekday">' +
+      todoWeekdayOptions(existing && existing.weekday !== undefined ? existing.weekday : new Date().getDay()) + '</select></div>' +
+    '<div id="todo-monthly-wrap" style="display:none"><label class="todo-form-label">每月第几天</label><select class="todo-form-input" id="todo-month-day">' +
+      todoNumberOptions(1, 31, existing && existing.day ? existing.day : new Date().getDate()) + '</select></div>' +
+    '<div id="todo-yearly-wrap" style="display:none"><label class="todo-form-label">每年的日期</label><div class="reminder-select-row">' +
+      '<select id="todo-year-month">' + todoNumberOptions(1, 12, existing && existing.month ? existing.month : new Date().getMonth() + 1) + '</select>' +
+      '<select id="todo-year-day">' + todoNumberOptions(1, 31, existing && existing.day ? existing.day : new Date().getDate()) + '</select></div></div>' +
     '<div class="row"><button class="ghost"' + actionAttrs('closeSheet') + '>取消</button>' +
     '<button class="primary"' + actionAttrs('saveTodoItem') + '>' + (existing ? '保存修改' : '保存待办') + '</button></div>'
   );
@@ -4330,6 +4496,21 @@ function saveTodoItem(){
     item.dates = todoDraftDates.slice();
   } else {
     delete item.dates;
+  }
+  if (todoDraftRepeat === 'weekly') {
+    item.weekday = parseInt(byId('todo-weekday').value, 10);
+  } else {
+    delete item.weekday;
+  }
+  if (todoDraftRepeat === 'monthly' || todoDraftRepeat === 'yearly') {
+    item.day = parseInt(todoDraftRepeat === 'monthly' ? byId('todo-month-day').value : byId('todo-year-day').value, 10);
+  } else {
+    delete item.day;
+  }
+  if (todoDraftRepeat === 'yearly') {
+    item.month = parseInt(byId('todo-year-month').value, 10);
+  } else {
+    delete item.month;
   }
   if (existing && (previousRepeat !== item.repeat || (item.repeat === 'once' && previousDate !== item.date))) {
     item.done = false;
@@ -4415,6 +4596,54 @@ function permanentDeleteTodo(id){
     renderTodoPage();
     toast('待办已彻底删除');
   }, { title: '彻底删除待办' });
+}
+
+function convertTodoToReminder(id){
+  var item = null;
+  each(todoData.items, function(saved){ if (saved.id === id) item = saved; });
+  if (!item) return;
+  var time = reminderDefaultTime();
+  var mode = item.repeat;
+  var extra = {};
+  var simplified = false;
+  if (item.repeat === 'once') {
+    extra.date = item.date;
+  } else if (item.repeat === 'weekly') {
+    extra.weekday = item.weekday;
+  } else if (item.repeat === 'monthly') {
+    extra.day = item.day;
+  } else if (item.repeat === 'yearly') {
+    extra = { month: item.month, day: item.day };
+  } else if (item.repeat === 'weekdays' || item.repeat === 'weekends' || item.repeat === 'custom') {
+    var start = todoDateObject(wTodayStr()), nextDate = '';
+    for (var offset = 0; offset < 370; offset++) {
+      var candidate = new Date(start.getFullYear(), start.getMonth(), start.getDate() + offset);
+      var date = candidate.getFullYear() + '-' + pad2(candidate.getMonth() + 1) + '-' + pad2(candidate.getDate());
+      if (todoMatchesDate(item, date)) { nextDate = date; break; }
+    }
+    if (!nextDate) { toast('这条待办没有可转换的未来日期'); return; }
+    mode = 'once';
+    extra.date = nextDate;
+    simplified = true;
+  }
+  var reminder = Object.assign({
+    id: 'reminder_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 5),
+    title: item.title,
+    mode: mode,
+    time: time,
+    createdAt: new Date().toISOString()
+  }, extra);
+  todoData.items = todoData.items.filter(function(saved){ return saved.id !== id; });
+  item.archivedAt = Date.now();
+  item.archiveReason = 'converted';
+  todoData.archived.push(item);
+  reminderData.items.push(reminder);
+  saveTodoState();
+  saveReminderState(true);
+  renderTodoPage();
+  renderReminderPage();
+  syncTodoReminder();
+  toast('已转为 1 条提醒' + (simplified ? '（取最近日期）' : ''));
 }
 
 function openReminderSettings(){
@@ -4559,7 +4788,8 @@ function reminderDefaultState(){
     items: [],
     archived: [],
     homeNoticeEnabled: true,
-    homeNoticeDismissedDate: ''
+    homeNoticeDismissedDate: '',
+    groupCollapsed: { active: {}, archived: {} }
   };
 }
 
@@ -4614,6 +4844,11 @@ function loadReminderState(){
   if (!Array.isArray(d.archived)) d.archived = [];
   if (typeof d.homeNoticeEnabled !== 'boolean') d.homeNoticeEnabled = true;
   if (typeof d.homeNoticeDismissedDate !== 'string') d.homeNoticeDismissedDate = '';
+  if (!d.groupCollapsed || typeof d.groupCollapsed !== 'object') {
+    d.groupCollapsed = { active: {}, archived: {} };
+  }
+  if (!d.groupCollapsed.active || typeof d.groupCollapsed.active !== 'object') d.groupCollapsed.active = {};
+  if (!d.groupCollapsed.archived || typeof d.groupCollapsed.archived !== 'object') d.groupCollapsed.archived = {};
   delete d.backgroundGuardEnabled;
   d.items = d.items.map(normalizeReminderItem).filter(Boolean);
   d.archived = d.archived.map(function(item){
@@ -4778,8 +5013,11 @@ function renderReminderPage(){
   byId('reminder-list').innerHTML = ordered.length ? REMINDER_MODES.map(function(mode){
     var rows = ordered.filter(function(row){ return row.item.mode === mode; });
     if (!rows.length) return '';
-    return '<section class="reminder-group"><div class="reminder-group-head"><span>' +
-      REMINDER_MODE_NAMES[mode] + '</span><small>' + rows.length + ' 条</small></div>' +
+    var collapsed = !!reminderData.groupCollapsed.active[mode];
+    return '<section class="reminder-group' + (collapsed ? ' collapsed' : '') + '">' +
+      '<button type="button" class="reminder-group-head"' + actionAttrs('toggleReminderGroup', ['active', mode]) +
+      ' aria-expanded="' + (!collapsed) + '"><span><i>' + (collapsed ? '▸' : '▾') + '</i>' +
+      REMINDER_MODE_NAMES[mode] + '</span><small>' + rows.length + ' 条</small></button>' +
       '<div class="reminder-group-list">' + rows.map(function(row){
         var item = row.item;
         return '<div class="reminder-item" data-drag-kind="reminder" data-drag-state="active" data-drag-id="' +
@@ -4788,6 +5026,7 @@ function renderReminderPage(){
           '<span class="reminder-copy"><b>' + escHtml(item.title) + '</b>' +
           '<span>' + escHtml(reminderRuleText(item)) + '</span>' +
           '<small>' + escHtml(reminderNextText(item)) + '</small></span>' +
+          '<button class="reminder-convert"' + actionAttrs('convertReminderToTodo', [item.id]) + ' aria-label="转为待办">转</button>' +
           '<button class="reminder-edit"' + actionAttrs('editReminder', [item.id]) + '>改</button>' +
           '<button class="reminder-del"' + actionAttrs('deleteReminder', [item.id]) + ' aria-label="删除提醒">×</button>' +
           '</div>';
@@ -4799,10 +5038,14 @@ function renderReminderPage(){
   byId('reminder-archive-list').innerHTML = archived.length ? REMINDER_MODES.map(function(mode){
     var rows = archived.filter(function(item){ return item.mode === mode; });
     if (!rows.length) return '';
-    return '<div class="reminder-archive-group"><div class="reminder-group-head"><span>' +
-      REMINDER_MODE_NAMES[mode] + '</span><small>' + rows.length + ' 条</small></div>' +
+    var collapsed = !!reminderData.groupCollapsed.archived[mode];
+    return '<div class="reminder-archive-group' + (collapsed ? ' collapsed' : '') + '">' +
+      '<button type="button" class="reminder-group-head"' + actionAttrs('toggleReminderGroup', ['archived', mode]) +
+      ' aria-expanded="' + (!collapsed) + '"><span><i>' + (collapsed ? '▸' : '▾') + '</i>' +
+      REMINDER_MODE_NAMES[mode] + '</span><small>' + rows.length + ' 条</small></button>' +
       rows.map(function(item){
-        var state = item.archiveReason === 'completed' ? '已提醒' : '已删除';
+        var state = item.archiveReason === 'completed' ? '已提醒' :
+          (item.archiveReason === 'converted' ? '已转待办' : '已删除');
         return '<div class="reminder-archive-item" data-drag-kind="reminder" data-drag-state="archive" data-drag-id="' +
           escHtml(item.id) + '">' +
           '<span class="reminder-archive-copy"><b>' + escHtml(item.title) + '</b></span>' +
@@ -4814,6 +5057,37 @@ function renderReminderPage(){
   updateReminderSettings();
   renderHomeNotice();
   renderDashboard();
+}
+
+function toggleReminderGroup(scope, mode){
+  if (!reminderData.groupCollapsed || !reminderData.groupCollapsed[scope]) return;
+  reminderData.groupCollapsed[scope][mode] = !reminderData.groupCollapsed[scope][mode];
+  storeSet(RKEY, reminderData);
+  renderReminderPage();
+}
+
+function applyConfirmedReminders(){
+  if (!reminderData || !window.AppNative || !window.AppNative.consumeConfirmedReminderIds) return;
+  var ids = [];
+  try { ids = JSON.parse(window.AppNative.consumeConfirmedReminderIds() || '[]'); }
+  catch (error) { return; }
+  if (!Array.isArray(ids) || !ids.length) return;
+  var keep = [], changed = false;
+  each(reminderData.items, function(item){
+    if (item.mode === 'once' && ids.indexOf(item.id) >= 0) {
+      item.archivedAt = Date.now();
+      item.archiveReason = 'completed';
+      reminderData.archived.push(item);
+      changed = true;
+    } else {
+      keep.push(item);
+    }
+  });
+  if (!changed) return;
+  reminderData.items = keep;
+  saveReminderState(false);
+  renderReminderPage();
+  toast('提醒已确认完成并归档');
 }
 
 function reminderOptions(start, end, selected){
@@ -5058,6 +5332,34 @@ function permanentDeleteReminder(id){
   }, { title: '彻底删除提醒' });
 }
 
+function convertReminderToTodo(id){
+  var item = reminderItemById(id);
+  if (!item) return;
+  var todo = {
+    id: 'todo_' + Date.now().toString(36),
+    title: item.title,
+    repeat: item.mode,
+    createdDate: wTodayStr(),
+    done: false,
+    doneDates: {}
+  };
+  if (item.mode === 'once') todo.date = item.date;
+  if (item.mode === 'weekly') todo.weekday = item.weekday;
+  if (item.mode === 'monthly' || item.mode === 'yearly') todo.day = item.day;
+  if (item.mode === 'yearly') todo.month = item.month;
+  reminderData.items = reminderData.items.filter(function(saved){ return saved.id !== id; });
+  item.archivedAt = Date.now();
+  item.archiveReason = 'converted';
+  reminderData.archived.push(item);
+  todoData.items.push(todo);
+  saveReminderState(false);
+  saveTodoState();
+  renderReminderPage();
+  renderTodoPage();
+  syncTodoReminder();
+  toast('已转为待办，原提醒时间未保留');
+}
+
 function toggleReminderHomeNotice(){
   reminderData.homeNoticeEnabled = reminderData.homeNoticeEnabled === false;
   if (reminderData.homeNoticeEnabled) reminderData.homeNoticeDismissedDate = '';
@@ -5101,6 +5403,7 @@ function syncStandaloneReminders(requestPermission){
 
 function initReminder(){
   loadReminderState();
+  applyConfirmedReminders();
   byId('btn-reminder-add').addEventListener('click', function(){ openReminderForm(); });
   byId('btn-reminder-add-top').addEventListener('click', function(){ openReminderForm(); });
   renderReminderPage();
@@ -5111,11 +5414,13 @@ function initReminder(){
    8.7 记账
    ============================================================ */
 var ledgerEditingTag = null;
+var ledgerEditingBookId = null;
+var ledgerSearchQuery = '';
 var LEDGER_PIE_COLORS = ['#d49a69', '#72a78d', '#7d9fc2', '#c17f7f', '#9d8bb5', '#b0a264', '#75aab0', '#b48765'];
 
 function ledgerDefaultState(){
   return {
-    books: [{ id: 'book_daily', name: '日常账本', parentId: null, records: [] }],
+    books: [{ id: 'book_daily', name: '日常账本', parentId: null, records: [], archived: false }],
     selectedId: 'book_daily',
     tags: DEFAULT_LEDGER_TAGS.slice(),
     migrated: false
@@ -5158,7 +5463,8 @@ function normalizeLedgerState(data){
       id: id,
       name: String(book.name),
       parentId: book.parentId ? String(book.parentId) : null,
-      records: records
+      records: records,
+      archived: !!book.archived
     });
   });
   if (!out.books.length) out.books = ledgerDefaultState().books;
@@ -5187,10 +5493,17 @@ function loadLedgerState(){
   var old = current ? null : storeGet(LOLDKEY, null);
   ledgerData = normalizeLedgerState(current || old);
   ledgerData.migrated = !current && !!old;
-  collapseAllLedgerNodes();
+  ensureActiveLedgerRoot();
   var selected = ledgerBookById(ledgerData.selectedId);
-  if (selected && selected.parentId) {
-    ledgerData.selectedId = ledgerRootBook(selected).id;
+  if (!selected || ledgerIsArchived(selected)) {
+    ledgerData.selectedId = ledgerData.books.filter(function(book){
+      return !book.parentId && !ledgerIsArchived(book);
+    })[0].id;
+  }
+  collapseAllLedgerNodes();
+  var selectedNow = ledgerBookById(ledgerData.selectedId);
+  if (selectedNow && selectedNow.parentId) {
+    ledgerData.selectedId = ledgerRootBook(selectedNow).id;
   }
   saveLedgerState();
 }
@@ -5209,9 +5522,13 @@ function saveLedgerState(){ ledgerData.schemaVersion = 2; storeSet(LKEY, ledgerD
 
 function currentLedgerBook(){
   for (var i = 0; i < ledgerData.books.length; i++) {
-    if (ledgerData.books[i].id === ledgerData.selectedId) return ledgerData.books[i];
+    if (ledgerData.books[i].id === ledgerData.selectedId && !ledgerIsArchived(ledgerData.books[i])) {
+      return ledgerData.books[i];
+    }
   }
-  return ledgerData.books[0];
+  return ledgerData.books.filter(function(book){
+    return !book.parentId && !ledgerIsArchived(book);
+  })[0] || null;
 }
 
 function ledgerBookById(id){
@@ -5219,8 +5536,47 @@ function ledgerBookById(id){
   return null;
 }
 
-function ledgerChildBooks(id){
-  return ledgerData.books.filter(function(book){ return book.parentId === id; });
+function ledgerIsArchived(book){
+  var current = book, seen = {};
+  while (current && !seen[current.id]) {
+    if (current.archived) return true;
+    seen[current.id] = true;
+    current = current.parentId ? ledgerBookById(current.parentId) : null;
+  }
+  return false;
+}
+
+function activeLedgerRoots(){
+  return ledgerData.books.filter(function(book){
+    return !book.parentId && !ledgerIsArchived(book);
+  });
+}
+
+function archivedLedgerRoots(){
+  return ledgerData.books.filter(function(book){
+    if (!book.archived) return false;
+    var parent = book.parentId ? ledgerBookById(book.parentId) : null;
+    return !parent || !ledgerIsArchived(parent);
+  });
+}
+
+function ensureActiveLedgerRoot(){
+  if (activeLedgerRoots().length) return;
+  var root = {
+    id: 'book_' + Date.now().toString(36),
+    name: '日常账本',
+    parentId: null,
+    records: [],
+    archived: false
+  };
+  ledgerData.books.push(root);
+  ledgerData.selectedId = root.id;
+}
+
+function ledgerChildBooks(id, includeArchived){
+  return ledgerData.books.filter(function(book){
+    return book.parentId === id && (includeArchived || !ledgerIsArchived(book));
+  });
 }
 
 function ledgerBookDepth(book){
@@ -5246,7 +5602,7 @@ function ledgerBookPath(book){
 function ledgerOrderedBooks(){
   var out = [], seen = {};
   function walk(parentId, depth) {
-    each(ledgerData.books, function(book){
+    each(ledgerData.books.filter(function(book){ return !ledgerIsArchived(book); }), function(book){
       if ((book.parentId || null) !== parentId || seen[book.id]) return;
       seen[book.id] = true;
       out.push({ book: book, depth: depth });
@@ -5260,7 +5616,7 @@ function ledgerOrderedBooks(){
   return out;
 }
 
-function ledgerSubtreeBooks(id){
+function ledgerSubtreeBooks(id, includeArchived){
   var result = [], seen = {};
   function add(bookId){
     var book = ledgerBookById(bookId);
@@ -5268,7 +5624,7 @@ function ledgerSubtreeBooks(id){
     seen[book.id] = true;
     result.push(book);
     each(ledgerData.books, function(child){
-      if (child.parentId === book.id) add(child.id);
+      if (child.parentId === book.id && (includeArchived || !ledgerIsArchived(child))) add(child.id);
     });
   }
   add(id);
@@ -5293,9 +5649,10 @@ function ledgerRootBook(book){
   return current || book;
 }
 
-function ledgerAllEntries(){
+function ledgerAllEntries(includeArchived){
   var entries = [];
   each(ledgerData.books, function(owner){
+    if (!includeArchived && ledgerIsArchived(owner)) return;
     each(owner.records, function(record){ entries.push({ owner: owner, record: record }); });
   });
   return entries;
@@ -5307,7 +5664,7 @@ function ledgerMonthLabel(key){
 }
 
 function openLedgerMonthReport(key){
-  var entries = ledgerAllEntries().filter(function(entry){
+  var entries = ledgerAllEntries(true).filter(function(entry){
     return String(entry.record.date).slice(0, 7) === key;
   }).sort(function(a, b){
     var at = a.record.createdAt ? new Date(a.record.createdAt).getTime() : 0;
@@ -5354,7 +5711,7 @@ function openLedgerMonthReport(key){
 function renderLedgerMonths(){
   if (!ledgerData || !byId('ledger-month-list')) return;
   var months = {};
-  each(ledgerAllEntries(), function(entry){
+  each(ledgerAllEntries(true), function(entry){
     var key = String(entry.record.date).slice(0, 7);
     if (!/^\d{4}-\d{2}$/.test(key)) return;
     months[key] = months[key] || { total: 0, count: 0, roots: {} };
@@ -5388,6 +5745,7 @@ function ledgerMonthTotalForBook(id){
 function ledgerTreeHtml(parentId, depth){
   var html = '';
   each(ledgerData.books, function(book){
+    if (ledgerIsArchived(book)) return;
     if ((book.parentId || null) !== (parentId || null)) return;
     var children = ledgerChildBooks(book.id);
     var collapsed = !!ledgerCollapsed[book.id];
@@ -5513,7 +5871,8 @@ function renderLedgerPage(){
   renderLedgerAnalysis(entries, bookTotal, monthTotal, monthPrefix);
   renderLedgerMonths();
 
-  byId('ledger-tree-summary').textContent = ledgerBookPath(book) + ' · ' + ledgerData.books.length + ' 个事件';
+  var activeBookCount = ledgerData.books.filter(function(item){ return !ledgerIsArchived(item); }).length;
+  byId('ledger-tree-summary').textContent = ledgerBookPath(book) + ' · ' + activeBookCount + ' 个事件';
   byId('ledger-tree').innerHTML = ledgerTreeHtml(null, 0);
 
   var records = entries.slice().sort(function(a, b){
@@ -5521,8 +5880,20 @@ function renderLedgerPage(){
     var bt = b.record.createdAt ? new Date(b.record.createdAt).getTime() : 0;
     return String(b.record.date).localeCompare(String(a.record.date)) || bt - at;
   });
-  setTxt('ledger-record-count', records.length + ' 笔');
-  byId('ledger-list').innerHTML = records.length ? records.map(function(entry){
+  var query = ledgerSearchQuery.trim().toLocaleLowerCase();
+  var visibleRecords = query ? records.filter(function(entry){
+    var record = entry.record;
+    var haystack = [
+      record.date,
+      record.tag || '未分类',
+      record.note || '',
+      Number(record.amount).toFixed(2),
+      ledgerRecordTime(record)
+    ].join(' ').toLocaleLowerCase();
+    return haystack.indexOf(query) >= 0;
+  }) : records;
+  setTxt('ledger-record-count', visibleRecords.length + (query ? ' / ' + records.length : '') + ' 笔');
+  byId('ledger-list').innerHTML = visibleRecords.length ? visibleRecords.map(function(entry){
     var r = entry.record;
     var owner = entry.owner.id !== book.id ? ' · ' + escHtml(entry.owner.name) : '';
     return '<div class="ledger-record">' +
@@ -5532,12 +5903,15 @@ function renderLedgerPage(){
       '<span class="ledger-amount"><b>' + ledgerMoney(r.amount) + '</b>' +
       '<span><button' + actionAttrs('editLedgerRecord', [r.id]) + '>编辑</button>' +
       '<button' + actionAttrs('deleteLedgerRecord', [r.id]) + '>删除</button></span></span></div>';
-  }).join('') : '<div class="ledger-empty">这个事件还没有记录<br>点击“记一笔”开始</div>';
+  }).join('') : '<div class="ledger-empty">' +
+    (query ? '没有匹配的记录' : '这个事件还没有记录<br>点击“记一笔”开始') + '</div>';
   renderDashboard();
 }
 
 function selectLedgerBook(id){
   ledgerData.selectedId = id;
+  ledgerSearchQuery = '';
+  if (byId('ledger-search')) byId('ledger-search').value = '';
   saveLedgerState();
   renderLedgerPage();
 }
@@ -5564,6 +5938,7 @@ function saveLedgerBook(){
   saveLedgerState();
   closeSheet();
   renderLedgerPage();
+  refreshLedgerSettingsView();
   toast(ledgerNewParentId ? '子事件已创建' : '根事件已创建');
   ledgerNewParentId = null;
 }
@@ -5584,7 +5959,7 @@ function pickLedgerTag(tag){
 
 function ledgerTagUsage(name){
   var count = 0;
-  each(ledgerAllEntries(), function(entry){
+  each(ledgerAllEntries(true), function(entry){
     if (String(entry.record.tag || '未分类') === name) count++;
   });
   return count;
@@ -5676,6 +6051,102 @@ function addLedgerTag(){
   input.value = '';
   renderLedgerTagManager();
   toast('分类已添加');
+}
+
+function refreshLedgerSettingsView(){
+  var book = currentLedgerBook();
+  setTxt('ledger-settings-current', book ? '当前事件 · ' + ledgerBookPath(book) : '当前没有可用事件');
+  renderLedgerSettingsArchive();
+}
+
+function renderLedgerSettingsArchive(){
+  var box = byId('ledger-settings-archive');
+  if (!box || !ledgerData) return;
+  var roots = archivedLedgerRoots();
+  box.innerHTML = roots.length ? roots.map(function(root){
+    var subtree = ledgerSubtreeBooks(root.id, true);
+    var recordCount = subtree.reduce(function(sum, item){ return sum + item.records.length; }, 0);
+    return '<div class="ledger-archive-settings-row"><span><b>' + escHtml(ledgerBookPath(root)) +
+      '</b><small>' + recordCount + ' 笔 · ' + Math.max(1, subtree.length) + ' 个事件</small></span>' +
+      '<button' + actionAttrs('restoreLedgerEvent', [root.id]) + '>恢复</button>' +
+      '<button class="danger"' + actionAttrs('deleteArchivedLedgerEvent', [root.id]) + '>彻底删除</button></div>';
+  }).join('') : '<div class="ledger-archive-settings-empty">还没有归档事件</div>';
+}
+
+function renameCurrentLedgerEvent(){
+  var book = currentLedgerBook();
+  if (!book) return;
+  ledgerEditingBookId = book.id;
+  openSheet(
+    '<h3>修改事件名称</h3>' +
+    '<p>当前路径：' + escHtml(ledgerBookPath(book)) + '</p>' +
+    '<input class="todo-form-input" id="ledger-event-name-edit" maxlength="16" value="' + escHtml(book.name) + '">' +
+    '<div class="row"><button class="ghost"' + actionAttrs('closeSheet') + '>取消</button>' +
+    '<button class="primary"' + actionAttrs('saveLedgerEventName') + '>保存</button></div>'
+  );
+  byId('ledger-event-name-edit').focus();
+}
+
+function saveLedgerEventName(){
+  var book = ledgerEditingBookId ? ledgerBookById(ledgerEditingBookId) : null;
+  var input = byId('ledger-event-name-edit');
+  var name = input ? input.value.trim() : '';
+  if (!book || !name) { toast('请输入事件名称'); return; }
+  book.name = name;
+  ledgerEditingBookId = null;
+  saveLedgerState();
+  closeSheet();
+  renderLedgerPage();
+  refreshLedgerSettingsView();
+  toast('事件名称已修改');
+}
+
+function archiveCurrentLedgerEvent(){
+  var book = currentLedgerBook();
+  if (!book) return;
+  var parent = book.parentId ? ledgerBookById(book.parentId) : null;
+  appConfirm('将「' + ledgerBookPath(book) + '」以及它的子事件移入归档？', function(){
+    book.archived = true;
+    ensureActiveLedgerRoot();
+    ledgerData.selectedId = parent && !ledgerIsArchived(parent) ?
+      parent.id : activeLedgerRoots()[0].id;
+    saveLedgerState();
+    renderLedgerPage();
+    refreshLedgerSettingsView();
+    toast('事件已归档');
+  }, { title: '归档事件', confirmLabel: '归档' });
+}
+
+function restoreLedgerEvent(id){
+  var book = ledgerBookById(id);
+  if (!book || !book.archived) return;
+  book.archived = false;
+  ledgerData.selectedId = book.id;
+  saveLedgerState();
+  renderLedgerPage();
+  refreshLedgerSettingsView();
+  toast('事件已恢复');
+}
+
+function deleteArchivedLedgerEvent(id){
+  var root = ledgerBookById(id);
+  if (!root || !root.archived) return;
+  var subtree = ledgerSubtreeBooks(root.id, true);
+  var ids = subtree.map(function(book){ return book.id; });
+  var recordCount = subtree.reduce(function(sum, book){ return sum + book.records.length; }, 0);
+  appConfirm(
+    '彻底删除「' + root.name + '」及 ' + recordCount + ' 笔账目？删除后不能恢复。',
+    function(){
+      ledgerData.books = ledgerData.books.filter(function(book){ return ids.indexOf(book.id) < 0; });
+      each(ids, function(bookId){ delete ledgerCollapsed[bookId]; });
+      ensureActiveLedgerRoot();
+      saveLedgerState();
+      renderLedgerPage();
+      refreshLedgerSettingsView();
+      toast('归档事件已彻底删除');
+    },
+    { title: '彻底删除事件', onCancel: refreshLedgerSettingsView }
+  );
 }
 
 function openLedgerRecord(recordId){
@@ -5784,6 +6255,7 @@ function parseCsvRows(text){
 function ledgerFindChild(parentId, name){
   for (var i = 0; i < ledgerData.books.length; i++) {
     var book = ledgerData.books[i];
+    if (ledgerIsArchived(book)) continue;
     if ((book.parentId || null) === (parentId || null) && book.name === name) return book;
   }
   return null;
@@ -5914,16 +6386,18 @@ function weekdayText(date){
   return '星期' + '日一二三四五六'.charAt(d.getDay());
 }
 
-function buildLedgerCsv(){
-  var book = currentLedgerBook();
-  var entries = [];
-  each(ledgerSubtreeBooks(book.id), function(owner){
-    each(owner.records, function(record){
-      entries.push({
-        book: owner, record: record,
-        createdAt: record.createdAt ? new Date(record.createdAt).getTime() : 0
+function buildLedgerCsv(includeAll){
+  var book = includeAll ? null : currentLedgerBook();
+  var entries = includeAll ? ledgerAllEntries(true) : [];
+  if (!includeAll && book) {
+    each(ledgerSubtreeBooks(book.id), function(owner){
+      each(owner.records, function(record){
+        entries.push({ book: owner, record: record });
       });
     });
+  }
+  each(entries, function(entry){
+    entry.createdAt = entry.record.createdAt ? new Date(entry.record.createdAt).getTime() : 0;
   });
   entries.sort(function(a, b){
     return String(a.record.date).localeCompare(String(b.record.date)) ||
@@ -5943,13 +6417,19 @@ function buildLedgerCsv(){
       csvCell(r.createdAt || '')
     ].join(','));
   });
-  return { csv: '\uFEFF' + lines.join('\r\n'), count: entries.length, book: book };
+  return {
+    csv: '\uFEFF' + lines.join('\r\n'),
+    count: entries.length,
+    book: book,
+    filename: includeAll ? '事件账本-全部事件-' + wTodayStr() + '.csv' :
+      '事件账本-' + book.name + '-' + wTodayStr() + '.csv'
+  };
 }
 
-function exportLedgerCsv(){
+function saveLedgerCsvExport(includeAll){
   if (byId('sheet').classList.contains('on')) closeSheet();
-  var data = buildLedgerCsv();
-  var filename = '事件账本-' + data.book.name + '-' + wTodayStr() + '.csv';
+  var data = buildLedgerCsv(includeAll);
+  var filename = data.filename;
   if (window.AppNative && window.AppNative.saveFile) {
     try {
       var bytes = new TextEncoder().encode(data.csv), binary = '';
@@ -5973,6 +6453,14 @@ function exportLedgerCsv(){
   toast('已导出 ' + data.count + ' 笔');
 }
 
+function exportLedgerCsv(){
+  saveLedgerCsvExport(false);
+}
+
+function exportAllLedgerCsv(){
+  saveLedgerCsvExport(true);
+}
+
 function deleteCurrentLedgerEvent(){
   var book = currentLedgerBook();
   if (!book) return;
@@ -5986,39 +6474,30 @@ function deleteCurrentLedgerEvent(){
     function(){
       ledgerData.books = ledgerData.books.filter(function(item){ return ids.indexOf(item.id) < 0; });
       each(ids, function(id){ delete ledgerCollapsed[id]; });
-      if (!ledgerData.books.length) {
-        ledgerData.books = ledgerDefaultState().books;
-        ledgerData.selectedId = ledgerData.books[0].id;
-      } else {
+      ensureActiveLedgerRoot();
+      var activeRoots = activeLedgerRoots();
+      if (activeRoots.length) {
         var parent = parentId ? ledgerBookById(parentId) : null;
-        ledgerData.selectedId = parent ? parent.id : ledgerData.books[0].id;
+        if (parent && ledgerIsArchived(parent)) parent = null;
+        ledgerData.selectedId = parent ? parent.id : activeRoots[0].id;
       }
       saveLedgerState();
       renderLedgerPage();
+      refreshLedgerSettingsView();
       toast('事件已删除');
     },
-    { title: '删除整个事件分支', confirmLabel: '删除事件', onCancel: openLedgerMenu }
-  );
-}
-
-function openLedgerMenu(){
-  openSheet(
-    '<h3>事件与数据</h3>' +
-    '<p>新建事件，或导入、导出当前事件树的数据。</p>' +
-    '<button class="primary" style="width:100%;margin-bottom:8px"' + actionAttrs('openLedgerBookSheet') + '>＋ 新建根事件</button>' +
-    '<button class="ghost" style="width:100%;margin-bottom:8px"' + actionAttrs('openLedgerTagManager') + '>分类管理</button>' +
-    '<button class="ghost" style="width:100%;margin-bottom:8px"' + actionAttrs('chooseLedgerCsv') + '>导入 CSV</button>' +
-    '<button class="ghost" style="width:100%;margin-bottom:8px"' + actionAttrs('exportLedgerCsv') + '>导出当前事件及子事件 CSV</button>' +
-    '<button class="danger" style="width:100%;margin-bottom:8px"' + actionAttrs('deleteCurrentLedgerEvent') + '>删除当前事件及子事件</button>' +
-    '<div class="row"><button class="ghost" style="flex:1"' + actionAttrs('closeSheet') + '>关闭</button></div>'
+    { title: '删除整个事件分支', confirmLabel: '删除事件', onCancel: openLedgerSettingsPage }
   );
 }
 
 function initLedger(){
   loadLedgerState();
   byId('btn-ledger-add').addEventListener('click', function(){ openLedgerRecord(); });
-  byId('btn-ledger-new-book').addEventListener('click', openLedgerMenu);
   byId('btn-ledger-add-child').addEventListener('click', function(){ openLedgerBookSheet(currentLedgerBook().id); });
+  byId('ledger-search').addEventListener('input', function(){
+    ledgerSearchQuery = this.value || '';
+    renderLedgerPage();
+  });
   renderLedgerPage();
 }
 
@@ -6284,6 +6763,8 @@ function checkAppUpdate(){
   window.handleBack = handleBackNavigation;
   window.paintLiveWorkout = paintLiveWorkout;
   window.paintLiveTimers = paintLiveTimers;
+  window.applyConfirmedReminders = applyConfirmedReminders;
+  window.exportUpdateBackup = exportAppBackup;
   boot();
 })();
 

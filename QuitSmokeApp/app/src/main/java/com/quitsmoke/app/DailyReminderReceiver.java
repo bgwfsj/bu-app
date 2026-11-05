@@ -75,10 +75,12 @@ public class DailyReminderReceiver extends BroadcastReceiver {
             .setContentText(body)
             .setStyle(new NotificationCompat.BigTextStyle().bigText(body))
             .setContentIntent(contentIntent)
-            .addAction(0, "确认", confirmAction)
             .addAction(0, "稍后", snoozeAction)
+            .addAction(0, "确认", confirmAction)
             .setAutoCancel(true)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setCategory(NotificationCompat.CATEGORY_REMINDER);
 
         NotificationManagerCompat.from(context).notify(4101, notification.build());
         // This is a one-shot alarm. Schedule tomorrow's occurrence now that

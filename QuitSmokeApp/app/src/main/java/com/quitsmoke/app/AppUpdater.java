@@ -89,15 +89,17 @@ public final class AppUpdater {
         if (activity.isFinishing() || activity.isDestroyed()) return;
         new AlertDialog.Builder(activity)
             .setTitle("发现新版本 " + version)
-            .setMessage("是否从 GitHub 下载并安装？")
+            .setMessage("更新前会自动导出一份完整数据备份。是否从 GitHub 下载并安装？")
             .setNegativeButton("取消", null)
-            .setPositiveButton("下载并安装", (dialog, which) -> downloadAndInstall(
-                activity,
-                version,
-                asset.optString("url"),
-                asset.optString("browser_download_url"),
-                asset.optString("digest"),
-                asset.optLong("size", -1)
+            .setPositiveButton("备份并更新", (dialog, which) -> activity.backupBeforeUpdate(
+                () -> downloadAndInstall(
+                    activity,
+                    version,
+                    asset.optString("url"),
+                    asset.optString("browser_download_url"),
+                    asset.optString("digest"),
+                    asset.optLong("size", -1)
+                )
             ))
             .show();
     }

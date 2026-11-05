@@ -20,7 +20,7 @@ function loadTodoState(){
   d.reminder.enabled = !!d.reminder.enabled;
   function normalizeItem(item){
     return item && typeof item.id === 'string' && typeof item.title === 'string' &&
-      ['once','daily','weekdays','weekends','custom'].indexOf(item.repeat) >= 0;
+      ['once','daily','weekdays','weekends','custom','weekly','monthly','yearly'].indexOf(item.repeat) >= 0;
   }
   d.items = d.items.filter(normalizeItem);
   d.archived = d.archived.filter(normalizeItem);
@@ -54,10 +54,21 @@ function todoMatchesDate(item, date){
   if (item.repeat === 'once') return item.date === date;
   if (item.repeat === 'custom') return (item.dates || []).indexOf(date) >= 0;
   if (date < item.createdDate) return false;
-  var day = todoDateObject(date).getDay();
+  var dateObject = todoDateObject(date);
+  var day = dateObject.getDay();
   if (item.repeat === 'daily') return true;
   if (item.repeat === 'weekdays') return day >= 1 && day <= 5;
   if (item.repeat === 'weekends') return day === 0 || day === 6;
+  if (item.repeat === 'weekly') return day === item.weekday;
+  if (item.repeat === 'monthly') {
+    var monthLast = new Date(dateObject.getFullYear(), dateObject.getMonth() + 1, 0).getDate();
+    return dateObject.getDate() === Math.min(item.day || 1, monthLast);
+  }
+  if (item.repeat === 'yearly') {
+    var yearLast = new Date(dateObject.getFullYear(), item.month || 1, 0).getDate();
+    return dateObject.getMonth() + 1 === item.month &&
+      dateObject.getDate() === Math.min(item.day || 1, yearLast);
+  }
   return false;
 }
 
@@ -124,6 +135,9 @@ function todoRepeatText(item){
   if (item.repeat === 'daily') return '每天';
   if (item.repeat === 'weekdays') return '工作日';
   if (item.repeat === 'weekends') return '周末';
+  if (item.repeat === 'weekly') return '每周' + REMINDER_WEEKDAYS[item.weekday || 0];
+  if (item.repeat === 'monthly') return '每月 ' + (item.day || 1) + ' 日';
+  if (item.repeat === 'yearly') return '每年 ' + (item.month || 1) + ' 月 ' + (item.day || 1) + ' 日';
   return '自定义 · ' + (item.dates || []).length + ' 个日期';
 }
 
@@ -148,6 +162,7 @@ function renderTodoPage(){
       '" data-drag-kind="todo" data-drag-state="active" data-drag-id="' + escHtml(item.id) + '">' +
       '<button class="todo-check"' + actionAttrs('toggleTodo', [item.id]) + ' aria-label="切换完成">✓</button>' +
       '<span class="todo-copy"><b>' + escHtml(item.title) + '</b><span>' + todoRepeatText(item) + '</span></span>' +
+      '<button class="todo-convert"' + actionAttrs('convertTodoToReminder', [item.id]) + ' aria-label="转为提醒">转</button>' +
       '<button class="todo-edit"' + actionAttrs('editTodo', [item.id]) + ' aria-label="编辑待办">改</button>' +
       '<button class="todo-del"' + actionAttrs('deleteTodo', [item.id]) + ' aria-label="删除待办">×</button></div>';
   }).join('') : '<div class="todo-empty">今天还没有待办<br>添加一件需要每天完成的小事</div>';
@@ -174,6 +189,7 @@ function renderTodoPage(){
   byId('todo-archive-list').innerHTML = archived.length ? archived.map(function(item){
     var state;
     if (item.archiveReason === 'deleted') state = '已删除';
+    else if (item.archiveReason === 'converted') state = '已转提醒';
     else if (item.repeat === 'once') state = item.done ? '已完成' : '未完成';
     else state = '已结束';
     return '<div class="todo-archive-item" data-drag-kind="todo" data-drag-state="archive" data-drag-id="' +
@@ -199,12 +215,29 @@ function setTodoRepeat(repeat){
   renderTodoEditorState();
 }
 
+function todoNumberOptions(start, end, selected){
+  var out = '';
+  for (var i = start; i <= end; i++) {
+    out += '<option value="' + i + '"' + (i === Number(selected) ? ' selected' : '') + '>' + i + '</option>';
+  }
+  return out;
+}
+
+function todoWeekdayOptions(selected){
+  return REMINDER_WEEKDAYS.map(function(label, index){
+    return '<option value="' + index + '"' + (index === Number(selected) ? ' selected' : '') + '>' + label + '</option>';
+  }).join('');
+}
+
 function renderTodoEditorState(){
   each(byId('todo-repeat-buttons').querySelectorAll('button'), function(btn){
     btn.classList.toggle('on', btn.getAttribute('data-repeat') === todoDraftRepeat);
   });
   byId('todo-once-wrap').style.display = todoDraftRepeat === 'once' ? '' : 'none';
   byId('todo-custom-wrap').style.display = todoDraftRepeat === 'custom' ? '' : 'none';
+  byId('todo-weekly-wrap').style.display = todoDraftRepeat === 'weekly' ? '' : 'none';
+  byId('todo-monthly-wrap').style.display = todoDraftRepeat === 'monthly' ? '' : 'none';
+  byId('todo-yearly-wrap').style.display = todoDraftRepeat === 'yearly' ? '' : 'none';
   byId('todo-custom-dates').innerHTML = todoDraftDates.map(function(date){
     return '<span>' + workoutDateLabel(date) + '<button' + actionAttrs('removeTodoDraftDate', [date]) + '>×</button></span>';
   }).join('');
@@ -239,11 +272,21 @@ function openTodoEditor(id){
       '<button type="button" data-repeat="weekdays"' + actionAttrs('setTodoRepeat', ['weekdays']) + '>工作日</button>' +
       '<button type="button" data-repeat="weekends"' + actionAttrs('setTodoRepeat', ['weekends']) + '>周末</button>' +
       '<button type="button" data-repeat="custom"' + actionAttrs('setTodoRepeat', ['custom']) + '>自定义日期</button>' +
+      '<button type="button" data-repeat="weekly"' + actionAttrs('setTodoRepeat', ['weekly']) + '>每周</button>' +
+      '<button type="button" data-repeat="monthly"' + actionAttrs('setTodoRepeat', ['monthly']) + '>每月</button>' +
+      '<button type="button" data-repeat="yearly"' + actionAttrs('setTodoRepeat', ['yearly']) + '>每年</button>' +
     '</div>' +
     '<div id="todo-once-wrap" style="display:none"><label class="todo-form-label">日期</label><input class="todo-form-input" type="date" id="todo-once-date" value="' + onceDate + '"></div>' +
     '<div id="todo-custom-wrap" style="display:none"><label class="todo-form-label">选择一个日期后添加</label>' +
       '<div class="new-exercise"><input id="todo-custom-date" type="date" value="' + wTodayStr() + '"><button type="button"' + actionAttrs('addTodoDraftDate') + '>添加日期</button></div>' +
       '<div class="todo-custom-dates" id="todo-custom-dates"></div></div>' +
+    '<div id="todo-weekly-wrap" style="display:none"><label class="todo-form-label">星期</label><select class="todo-form-input" id="todo-weekday">' +
+      todoWeekdayOptions(existing && existing.weekday !== undefined ? existing.weekday : new Date().getDay()) + '</select></div>' +
+    '<div id="todo-monthly-wrap" style="display:none"><label class="todo-form-label">每月第几天</label><select class="todo-form-input" id="todo-month-day">' +
+      todoNumberOptions(1, 31, existing && existing.day ? existing.day : new Date().getDate()) + '</select></div>' +
+    '<div id="todo-yearly-wrap" style="display:none"><label class="todo-form-label">每年的日期</label><div class="reminder-select-row">' +
+      '<select id="todo-year-month">' + todoNumberOptions(1, 12, existing && existing.month ? existing.month : new Date().getMonth() + 1) + '</select>' +
+      '<select id="todo-year-day">' + todoNumberOptions(1, 31, existing && existing.day ? existing.day : new Date().getDate()) + '</select></div></div>' +
     '<div class="row"><button class="ghost"' + actionAttrs('closeSheet') + '>取消</button>' +
     '<button class="primary"' + actionAttrs('saveTodoItem') + '>' + (existing ? '保存修改' : '保存待办') + '</button></div>'
   );
@@ -301,6 +344,21 @@ function saveTodoItem(){
     item.dates = todoDraftDates.slice();
   } else {
     delete item.dates;
+  }
+  if (todoDraftRepeat === 'weekly') {
+    item.weekday = parseInt(byId('todo-weekday').value, 10);
+  } else {
+    delete item.weekday;
+  }
+  if (todoDraftRepeat === 'monthly' || todoDraftRepeat === 'yearly') {
+    item.day = parseInt(todoDraftRepeat === 'monthly' ? byId('todo-month-day').value : byId('todo-year-day').value, 10);
+  } else {
+    delete item.day;
+  }
+  if (todoDraftRepeat === 'yearly') {
+    item.month = parseInt(byId('todo-year-month').value, 10);
+  } else {
+    delete item.month;
   }
   if (existing && (previousRepeat !== item.repeat || (item.repeat === 'once' && previousDate !== item.date))) {
     item.done = false;
@@ -386,6 +444,54 @@ function permanentDeleteTodo(id){
     renderTodoPage();
     toast('待办已彻底删除');
   }, { title: '彻底删除待办' });
+}
+
+function convertTodoToReminder(id){
+  var item = null;
+  each(todoData.items, function(saved){ if (saved.id === id) item = saved; });
+  if (!item) return;
+  var time = reminderDefaultTime();
+  var mode = item.repeat;
+  var extra = {};
+  var simplified = false;
+  if (item.repeat === 'once') {
+    extra.date = item.date;
+  } else if (item.repeat === 'weekly') {
+    extra.weekday = item.weekday;
+  } else if (item.repeat === 'monthly') {
+    extra.day = item.day;
+  } else if (item.repeat === 'yearly') {
+    extra = { month: item.month, day: item.day };
+  } else if (item.repeat === 'weekdays' || item.repeat === 'weekends' || item.repeat === 'custom') {
+    var start = todoDateObject(wTodayStr()), nextDate = '';
+    for (var offset = 0; offset < 370; offset++) {
+      var candidate = new Date(start.getFullYear(), start.getMonth(), start.getDate() + offset);
+      var date = candidate.getFullYear() + '-' + pad2(candidate.getMonth() + 1) + '-' + pad2(candidate.getDate());
+      if (todoMatchesDate(item, date)) { nextDate = date; break; }
+    }
+    if (!nextDate) { toast('这条待办没有可转换的未来日期'); return; }
+    mode = 'once';
+    extra.date = nextDate;
+    simplified = true;
+  }
+  var reminder = Object.assign({
+    id: 'reminder_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 5),
+    title: item.title,
+    mode: mode,
+    time: time,
+    createdAt: new Date().toISOString()
+  }, extra);
+  todoData.items = todoData.items.filter(function(saved){ return saved.id !== id; });
+  item.archivedAt = Date.now();
+  item.archiveReason = 'converted';
+  todoData.archived.push(item);
+  reminderData.items.push(reminder);
+  saveTodoState();
+  saveReminderState(true);
+  renderTodoPage();
+  renderReminderPage();
+  syncTodoReminder();
+  toast('已转为 1 条提醒' + (simplified ? '（取最近日期）' : ''));
 }
 
 function openReminderSettings(){

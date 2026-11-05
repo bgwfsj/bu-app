@@ -546,10 +546,10 @@ function openWorkoutPlan(planId){
 function renderPlanRows(){
   var list = byId('plan-list');
   if (!list) return;
-  var byId = {};
-  each(planDraft, function(p){ byId[p.exerciseId] = p; });
+  var draftById = {};
+  each(planDraft, function(p){ draftById[p.exerciseId] = p; });
   list.innerHTML = fit.exercises.map(function(e){
-    var selected = byId[e.id];
+    var selected = draftById[e.id];
     var target = selected ? (e.type === 'duration' ? selected.minutes : selected.sets) : (e.type === 'duration' ? 20 : 4);
     var unit = e.type === 'duration' ? '分钟' : '组';
     return '<div class="plan-row' + (selected ? ' active' : '') + '">' +
