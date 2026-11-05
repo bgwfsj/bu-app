@@ -1,9 +1,11 @@
 /* ============================================================
    8.65 独立提醒
    ============================================================ */
-var REMINDER_MODES = ['once', 'weekly', 'monthly', 'yearly'];
+var REMINDER_MODES = ['once', 'daily', 'weekly', 'monthly', 'yearly'];
 var REMINDER_WEEKDAYS = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
-var REMINDER_MODE_NAMES = { once: '仅一次', weekly: '每周', monthly: '每月', yearly: '每年' };
+var REMINDER_MODE_NAMES = {
+  once: '仅一次', daily: '每天', weekly: '每周', monthly: '每月', yearly: '每年'
+};
 
 function reminderDefaultState(){
   return {
@@ -88,6 +90,11 @@ function reminderNextDate(item, from){
     var once = new Date(item.date + 'T' + item.time + ':00');
     return isNaN(once.getTime()) ? null : once;
   }
+  if (item.mode === 'daily') {
+    var daily = reminderAtTime(new Date(now), item.time);
+    if (daily.getTime() <= now.getTime()) daily.setDate(daily.getDate() + 1);
+    return daily;
+  }
   if (item.mode === 'weekly') {
     var weekly = reminderAtTime(new Date(now), item.time);
     var delta = (item.weekday - weekly.getDay() + 7) % 7;
@@ -123,6 +130,7 @@ function reminderShortDate(date){
 
 function reminderRuleText(item){
   if (item.mode === 'once') return '仅一次 · ' + item.date;
+  if (item.mode === 'daily') return '每天';
   if (item.mode === 'weekly') return '每周' + REMINDER_WEEKDAYS[item.weekday].slice(1);
   if (item.mode === 'monthly') return '每月 ' + item.day + ' 日';
   return '每年 ' + item.month + ' 月 ' + item.day + ' 日';
@@ -140,6 +148,7 @@ function reminderOccursOnDate(item, date){
   var month = date.getMonth() + 1;
   var day = date.getDate();
   if (item.mode === 'once') return item.date === year + '-' + pad2(month) + '-' + pad2(day);
+  if (item.mode === 'daily') return true;
   if (item.mode === 'weekly') return item.weekday === date.getDay();
   if (item.mode === 'monthly') {
     return day === Math.min(item.day, reminderDaysInMonth(year, month));
@@ -271,6 +280,7 @@ function openReminderForm(id){
     '<label class="todo-form-label">提醒模式</label>' +
     '<div class="reminder-mode-grid" id="reminder-mode-buttons">' +
       '<button type="button" data-reminder-mode="once"' + actionAttrs('setReminderMode', ['once']) + '>仅一次</button>' +
+      '<button type="button" data-reminder-mode="daily"' + actionAttrs('setReminderMode', ['daily']) + '>每天</button>' +
       '<button type="button" data-reminder-mode="weekly"' + actionAttrs('setReminderMode', ['weekly']) + '>每周</button>' +
       '<button type="button" data-reminder-mode="monthly"' + actionAttrs('setReminderMode', ['monthly']) + '>每月</button>' +
       '<button type="button" data-reminder-mode="yearly"' + actionAttrs('setReminderMode', ['yearly']) + '>每年</button>' +
@@ -363,7 +373,7 @@ function saveReminder(){
     item.weekday = reminderDraftWeekday;
   } else if (item.mode === 'monthly') {
     item.day = parseInt(byId('reminder-month-day').value, 10);
-  } else {
+  } else if (item.mode === 'yearly') {
     item.month = parseInt(byId('reminder-year-month').value, 10);
     item.day = parseInt(byId('reminder-year-day').value, 10);
   }

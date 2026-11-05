@@ -155,6 +155,18 @@ public final class StandaloneReminderScheduler {
             Calendar current = Calendar.getInstance();
             current.setTimeInMillis(now);
 
+            if ("daily".equals(mode)) {
+                Calendar candidate = (Calendar) current.clone();
+                candidate.set(Calendar.HOUR_OF_DAY, hour);
+                candidate.set(Calendar.MINUTE, minute);
+                candidate.set(Calendar.SECOND, 0);
+                candidate.set(Calendar.MILLISECOND, 0);
+                if (candidate.getTimeInMillis() <= now) {
+                    candidate.add(Calendar.DAY_OF_YEAR, 1);
+                }
+                return candidate.getTimeInMillis();
+            }
+
             if ("weekly".equals(mode)) {
                 int targetJsDay = Math.max(0, Math.min(6, item.optInt("weekday", 1)));
                 int currentJsDay = current.get(Calendar.DAY_OF_WEEK) - 1;

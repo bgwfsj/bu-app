@@ -198,6 +198,13 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @JavascriptInterface
+        public boolean scheduleSnoozeNotification(
+                String type, String id, String title, int minutes) {
+            return SnoozeScheduler.schedule(
+                MainActivity.this, type, id, title, minutes);
+        }
+
+        @JavascriptInterface
         public void pickCsvFile() {
             runOnUiThread(() -> {
                 filePickerPurpose = "csv";
@@ -272,12 +279,31 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = getIntent();
         if (intent == null) return;
         String page = intent.getStringExtra("open_page");
-        if (!"reminder".equals(page) && !"todo".equals(page)) return;
+        String snoozeType = intent.getStringExtra("snooze_type");
+        String snoozeId = intent.getStringExtra("snooze_id");
+        String snoozeTitle = intent.getStringExtra("snooze_title");
+        if (!"reminder".equals(page) && !"todo".equals(page) &&
+                snoozeType == null) return;
+        StringBuilder script = new StringBuilder();
+        if ("reminder".equals(page) || "todo".equals(page)) {
+            script.append("window.goPage&&window.goPage(")
+                .append("todo".equals(page) ? "4" : "5")
+                .append(");");
+        }
+        if (snoozeType != null && snoozeId != null && snoozeTitle != null) {
+            script.append("window.openSnoozeDialog&&window.openSnoozeDialog(")
+                .append(JSONObject.quote(snoozeType)).append(',')
+                .append(JSONObject.quote(snoozeId)).append(',')
+                .append(JSONObject.quote(snoozeTitle)).append(");");
+        }
         intent.removeExtra("open_page");
         view.evaluateJavascript(
-            "(window.goPage && window.goPage(" + ("todo".equals(page) ? "4" : "5") + "), true)",
+            "(function(){" + script + "}()),true",
             null
         );
+        intent.removeExtra("snooze_type");
+        intent.removeExtra("snooze_id");
+        intent.removeExtra("snooze_title");
     }
 
     @Override

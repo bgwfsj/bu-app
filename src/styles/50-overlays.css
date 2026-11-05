@@ -21,6 +21,10 @@
 .sheet button.ghost{background:#f4f7f9;border:1px solid var(--line);color:#4d6070}
 .sheet button.primary{background:rgba(10,168,122,.08);border:1px solid rgba(10,168,122,.32);color:var(--acc)}
 .sheet button.danger{background:#fff5f5;border:1px solid rgba(229,72,77,.3);color:var(--danger)}
+.snooze-title{font-size:var(--fs-card);font-weight:500;color:#30473d;padding:11px 12px;border-radius:10px;background:#f5f8f7;border:1px solid var(--line2);margin-bottom:15px}
+.snooze-input-wrap{display:flex;align-items:center;gap:9px;margin-bottom:15px}
+.snooze-input-wrap .todo-form-input{margin-bottom:0}
+.snooze-input-wrap span{font-size:var(--fs-meta);color:#74878e;white-space:nowrap}
 .presets{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
 .presets button{
   height:46px;border-radius:12px;background:#f7f9fb;border:1px solid var(--line);

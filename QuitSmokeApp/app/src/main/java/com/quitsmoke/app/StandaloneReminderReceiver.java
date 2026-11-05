@@ -46,7 +46,12 @@ public class StandaloneReminderReceiver extends BroadcastReceiver {
 
         Intent openIntent = new Intent(context, MainActivity.class)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        if (openReminderPage) openIntent.putExtra("open_page", "reminder");
+        if (openReminderPage) {
+            openIntent.putExtra("open_page", "reminder")
+                .putExtra("snooze_type", "standalone")
+                .putExtra("snooze_id", id)
+                .putExtra("snooze_title", title);
+        }
         PendingIntent contentIntent = PendingIntent.getActivity(
             context,
             StandaloneReminderScheduler.requestCode(id),

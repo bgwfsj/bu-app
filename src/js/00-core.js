@@ -127,6 +127,7 @@ var APP_ACTION_NAMES = {
   deleteReminder: true,
   toggleReminderHomeNotice: true,
   dismissHomeNoticeToday: true,
+  saveSnooze: true,
   openLedgerMonthReport: true,
   toggleLedgerNode: true,
   selectLedgerBook: true,

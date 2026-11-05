@@ -336,6 +336,7 @@ async function run() {
         saveReminder();
       }
       add('once');
+      add('daily');
       add('weekly');
       add('monthly');
       add('yearly');
@@ -344,6 +345,7 @@ async function run() {
       byId('reminder-title').value = '提醒-每周（已编辑）';
       saveReminder();
       var edited = reminderItemById(weekly.id);
+      var dailyItem = reminderData.items.filter(function(item){ return item.mode === 'daily'; })[0];
       var rows = reminderSortedItems();
       var homeNoticeVisible = !byId('home-notice').hidden;
       document.querySelector('.home-notice-close').click();
@@ -360,6 +362,7 @@ async function run() {
         count: reminderData.items.length,
         modes: reminderData.items.map(function(item){ return item.mode; }).sort(),
         title: edited && edited.title,
+        dailyRule: dailyItem && reminderRuleText(dailyItem),
         allHaveNext: rows.every(function(row){ return !!row.next; }),
         orderValid: rows.every(function(row, index){
           return index === 0 || rows[index - 1].ts <= row.ts;
@@ -373,12 +376,13 @@ async function run() {
         compactCards: document.querySelectorAll('.home-grid .home-card.compact').length
       };
     })()`);
-    assert.equal(reminders.count, 4);
-    assert.deepEqual(reminders.modes, ['monthly', 'once', 'weekly', 'yearly']);
+    assert.equal(reminders.count, 5);
+    assert.deepEqual(reminders.modes, ['daily', 'monthly', 'once', 'weekly', 'yearly']);
     assert.equal(reminders.title, '提醒-每周（已编辑）');
+    assert.equal(reminders.dailyRule, '每天');
     assert.equal(reminders.allHaveNext, true);
     assert.equal(reminders.orderValid, true);
-    assert.equal(reminders.stored, 4);
+    assert.equal(reminders.stored, 5);
     assert.equal(reminders.homeNoticeVisible, true);
     assert.equal(reminders.dismissedToday, true);
     assert.equal(reminders.returnedNextCycle, true);
@@ -410,6 +414,30 @@ async function run() {
     assert.equal(typography.homeCardLabel, '16px');
     assert.equal(typography.pageTitle, '27px');
     assert.equal(typography.waterFont, typography.commonFont);
+
+    const snooze = await evaluate(cdp, `(function(){
+      var originalNative = window.AppNative;
+      var calls = [];
+      window.AppNative = {
+        scheduleSnoozeNotification: function(type, id, title, minutes){
+          calls.push({ type: type, id: id, title: title, minutes: minutes });
+          return true;
+        }
+      };
+      openSnoozeDialog('todo', 'todo_daily', '今晚的待办');
+      byId('snooze-minutes').value = '17';
+      saveSnooze();
+      openSnoozeDialog('standalone', 'reminder_1', '测试提醒');
+      byId('snooze-minutes').value = '30';
+      saveSnooze();
+      window.AppNative = originalNative;
+      return { calls: calls, sheetClosed: !byId('sheet').classList.contains('on') };
+    })()`);
+    assert.deepEqual(snooze.calls, [
+      { type: 'todo', id: 'todo_daily', title: '今晚的待办', minutes: 17 },
+      { type: 'standalone', id: 'reminder_1', title: '测试提醒', minutes: 30 }
+    ]);
+    assert.equal(snooze.sheetClosed, true);
 
     const csv = fs.readFileSync(csvPath, 'utf8');
     const ledger = await evaluate(cdp, `(function(){
@@ -478,11 +506,11 @@ async function run() {
     assert.equal(restored.waterGoal, 2600);
     assert.equal(restored.fitnessSessions, 1);
     assert.equal(restored.todoItems, 2);
-    assert.equal(restored.reminderItems, 4);
+    assert.equal(restored.reminderItems, 5);
     assert.equal(restored.ledgerRecords, 118);
     assert.ok(restored.quitDate > 0);
     assert.equal(restored.previousGoal, 2345);
-    assert.equal(restored.previousReminders, 4);
+    assert.equal(restored.previousReminders, 5);
 
     const legacyQuit = Date.now() - 48 * 3600000;
     await evaluate(cdp, `(function(){

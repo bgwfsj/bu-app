@@ -378,7 +378,7 @@ body[data-page="home"]::before{
 .reminder-setting-row small{display:block;font-size:var(--fs-caption);line-height:1.55;color:#93a2a7;margin-top:4px}
 .reminder-setting-row button{height:31px;padding:0 11px;border-radius:9px;border:1px solid rgba(10,168,122,.22);background:rgba(10,168,122,.06);color:#09805e;font-size:var(--fs-meta);cursor:pointer;white-space:nowrap}
 .reminder-setting-row button.off{border-color:var(--line);background:#f5f7f8;color:#8c9a9f}
-.reminder-mode-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:13px}
+.reminder-mode-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:13px}
 .reminder-mode-grid button{height:38px;border-radius:9px;border:1px solid var(--line);background:#f8faf9;color:#71858b;font-size:11.5px;cursor:pointer}
 .reminder-mode-grid button.on{border-color:rgba(10,168,122,.30);background:rgba(10,168,122,.08);color:#087e5d}
 .reminder-weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:13px}
@@ -728,6 +728,10 @@ body[data-page="fitness"]::before{
 .sheet button.ghost{background:#f4f7f9;border:1px solid var(--line);color:#4d6070}
 .sheet button.primary{background:rgba(10,168,122,.08);border:1px solid rgba(10,168,122,.32);color:var(--acc)}
 .sheet button.danger{background:#fff5f5;border:1px solid rgba(229,72,77,.3);color:var(--danger)}
+.snooze-title{font-size:var(--fs-card);font-weight:500;color:#30473d;padding:11px 12px;border-radius:10px;background:#f5f8f7;border:1px solid var(--line2);margin-bottom:15px}
+.snooze-input-wrap{display:flex;align-items:center;gap:9px;margin-bottom:15px}
+.snooze-input-wrap .todo-form-input{margin-bottom:0}
+.snooze-input-wrap span{font-size:var(--fs-meta);color:#74878e;white-space:nowrap}
 .presets{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
 .presets button{
   height:46px;border-radius:12px;background:#f7f9fb;border:1px solid var(--line);
@@ -1448,6 +1452,7 @@ var APP_ACTION_NAMES = {
   deleteReminder: true,
   toggleReminderHomeNotice: true,
   dismissHomeNoticeToday: true,
+  saveSnooze: true,
   openLedgerMonthReport: true,
   toggleLedgerNode: true,
   selectLedgerBook: true,
@@ -4145,9 +4150,11 @@ function initTodo(){
 /* ============================================================
    8.65 独立提醒
    ============================================================ */
-var REMINDER_MODES = ['once', 'weekly', 'monthly', 'yearly'];
+var REMINDER_MODES = ['once', 'daily', 'weekly', 'monthly', 'yearly'];
 var REMINDER_WEEKDAYS = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
-var REMINDER_MODE_NAMES = { once: '仅一次', weekly: '每周', monthly: '每月', yearly: '每年' };
+var REMINDER_MODE_NAMES = {
+  once: '仅一次', daily: '每天', weekly: '每周', monthly: '每月', yearly: '每年'
+};
 
 function reminderDefaultState(){
   return {
@@ -4232,6 +4239,11 @@ function reminderNextDate(item, from){
     var once = new Date(item.date + 'T' + item.time + ':00');
     return isNaN(once.getTime()) ? null : once;
   }
+  if (item.mode === 'daily') {
+    var daily = reminderAtTime(new Date(now), item.time);
+    if (daily.getTime() <= now.getTime()) daily.setDate(daily.getDate() + 1);
+    return daily;
+  }
   if (item.mode === 'weekly') {
     var weekly = reminderAtTime(new Date(now), item.time);
     var delta = (item.weekday - weekly.getDay() + 7) % 7;
@@ -4267,6 +4279,7 @@ function reminderShortDate(date){
 
 function reminderRuleText(item){
   if (item.mode === 'once') return '仅一次 · ' + item.date;
+  if (item.mode === 'daily') return '每天';
   if (item.mode === 'weekly') return '每周' + REMINDER_WEEKDAYS[item.weekday].slice(1);
   if (item.mode === 'monthly') return '每月 ' + item.day + ' 日';
   return '每年 ' + item.month + ' 月 ' + item.day + ' 日';
@@ -4284,6 +4297,7 @@ function reminderOccursOnDate(item, date){
   var month = date.getMonth() + 1;
   var day = date.getDate();
   if (item.mode === 'once') return item.date === year + '-' + pad2(month) + '-' + pad2(day);
+  if (item.mode === 'daily') return true;
   if (item.mode === 'weekly') return item.weekday === date.getDay();
   if (item.mode === 'monthly') {
     return day === Math.min(item.day, reminderDaysInMonth(year, month));
@@ -4415,6 +4429,7 @@ function openReminderForm(id){
     '<label class="todo-form-label">提醒模式</label>' +
     '<div class="reminder-mode-grid" id="reminder-mode-buttons">' +
       '<button type="button" data-reminder-mode="once"' + actionAttrs('setReminderMode', ['once']) + '>仅一次</button>' +
+      '<button type="button" data-reminder-mode="daily"' + actionAttrs('setReminderMode', ['daily']) + '>每天</button>' +
       '<button type="button" data-reminder-mode="weekly"' + actionAttrs('setReminderMode', ['weekly']) + '>每周</button>' +
       '<button type="button" data-reminder-mode="monthly"' + actionAttrs('setReminderMode', ['monthly']) + '>每月</button>' +
       '<button type="button" data-reminder-mode="yearly"' + actionAttrs('setReminderMode', ['yearly']) + '>每年</button>' +
@@ -4507,7 +4522,7 @@ function saveReminder(){
     item.weekday = reminderDraftWeekday;
   } else if (item.mode === 'monthly') {
     item.day = parseInt(byId('reminder-month-day').value, 10);
-  } else {
+  } else if (item.mode === 'yearly') {
     item.month = parseInt(byId('reminder-year-month').value, 10);
     item.day = parseInt(byId('reminder-year-day').value, 10);
   }
@@ -5318,6 +5333,64 @@ function initLedger(){
   byId('btn-ledger-new-book').addEventListener('click', openLedgerMenu);
   byId('btn-ledger-add-child').addEventListener('click', function(){ openLedgerBookSheet(currentLedgerBook().id); });
   renderLedgerPage();
+}
+
+/* 85-snooze.js */
+/* ============================================================
+   8.8 稍后提醒
+   ============================================================ */
+var snoozeDraft = null;
+
+function openSnoozeDialog(type, id, title){
+  if ((type !== 'todo' && type !== 'standalone') || !id || !title) return;
+  snoozeDraft = { type: type, id: String(id), title: String(title) };
+  openSheet(
+    '<h3>稍后提醒</h3>' +
+    '<p>输入分钟后再次提醒。原来的待办或提醒周期不会改变。</p>' +
+    '<div class="snooze-title">' + escHtml(snoozeDraft.title) + '</div>' +
+    '<label class="todo-form-label">稍后多久</label>' +
+    '<div class="snooze-input-wrap"><input class="todo-form-input" id="snooze-minutes" type="number" inputmode="numeric" min="1" max="1440" step="1" value="10"><span>分钟后</span></div>' +
+    '<div class="row"><button class="ghost"' + actionAttrs('closeSheet') + '>取消</button>' +
+    '<button class="primary"' + actionAttrs('saveSnooze') + '>稍后提醒</button></div>'
+  );
+  var input = byId('snooze-minutes');
+  if (input) {
+    input.addEventListener('keydown', function(e){
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        saveSnooze();
+      }
+    });
+    input.focus();
+    input.select();
+  }
+}
+
+function saveSnooze(){
+  if (!snoozeDraft) return;
+  var minutes = parseInt(byId('snooze-minutes').value, 10);
+  if (isNaN(minutes) || minutes < 1 || minutes > 1440) {
+    toast('请输入 1 到 1440 分钟');
+    return;
+  }
+  if (!window.AppNative || !window.AppNative.scheduleSnoozeNotification) {
+    closeSheet();
+    toast('网页预览不能安排稍后提醒');
+    return;
+  }
+  var scheduled = window.AppNative.scheduleSnoozeNotification(
+    snoozeDraft.type,
+    snoozeDraft.id,
+    snoozeDraft.title,
+    minutes
+  );
+  if (!scheduled) {
+    toast('安排稍后提醒失败，请检查通知权限');
+    return;
+  }
+  closeSheet();
+  toast(minutes + ' 分钟后再次提醒');
+  snoozeDraft = null;
 }
 
 /* 90-boot.js */
