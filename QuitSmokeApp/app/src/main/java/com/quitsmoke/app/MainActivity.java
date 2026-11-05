@@ -297,7 +297,7 @@ public class MainActivity extends AppCompatActivity {
         StringBuilder script = new StringBuilder();
         if ("reminder".equals(page) || "todo".equals(page)) {
             script.append("window.goPage&&window.goPage(")
-                .append("todo".equals(page) ? "4" : "5")
+                .append("todo".equals(page) ? "4" : "6")
                 .append(");");
         }
         if (snoozeType != null && snoozeId != null && snoozeTitle != null) {

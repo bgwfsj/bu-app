@@ -211,6 +211,13 @@ async function run() {
       goPage(1);
       moveByHorizontalSwipe(1);
       var wrappedBackward = page === 6;
+      goPage(4);
+      moveByHorizontalSwipe(-1);
+      var todoNext = page === 5 &&
+        byId('page-pager').querySelector('button.on').textContent.trim() === '账';
+      moveByHorizontalSwipe(-1);
+      var ledgerNext = page === 6 &&
+        byId('page-pager').querySelector('button.on').textContent.trim() === '醒';
       var pagerLabels = Array.prototype.map.call(
         byId('page-pager').querySelectorAll('button'),
         function(btn){ return btn.textContent.trim(); }
@@ -228,6 +235,8 @@ async function run() {
         homeLocked: homeLocked,
         wrappedForward: wrappedForward,
         wrappedBackward: wrappedBackward,
+        todoNext: todoNext,
+        ledgerNext: ledgerNext,
         handledBack: handledBack,
         pagerLabels: pagerLabels,
         controlsSeparate: controlsSeparate,
@@ -238,6 +247,8 @@ async function run() {
       homeLocked: true,
       wrappedForward: true,
       wrappedBackward: true,
+      todoNext: true,
+      ledgerNext: true,
       handledBack: true,
       pagerLabels: ['练', '水', '戒', '记', '账', '醒'],
       controlsSeparate: true,
@@ -462,7 +473,7 @@ async function run() {
     assert.equal(typography.reminderCard, '14px');
     assert.equal(typography.homeCardLabel, '16px');
     assert.equal(typography.pageTitle, '27px');
-    assert.equal(typography.waterQuick, '14px');
+    assert.equal(typography.waterQuick, '13px');
     assert.equal(typography.waterInput, '14px');
     assert.equal(typography.waterFont, typography.commonFont);
 

@@ -52,7 +52,7 @@ function boot(){
       renderWorkoutHome();
     }
     if (todoData && page === 4) renderTodoPage();
-    if (reminderData && page === 5) renderReminderPage();
+    if (reminderData && page === 6) renderReminderPage();
     checkTodoReminder();
   }, 30000);
 }

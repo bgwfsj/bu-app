@@ -4,9 +4,9 @@
 function goPage(i){
   settingsOpen = false;
   page = i < 0 ? 0 : (i > 6 ? 6 : i);
-  var pages = ['home', 'fitness', 'water', 'quit', 'todo', 'reminder', 'ledger'];
+  var pages = ['home', 'fitness', 'water', 'quit', 'todo', 'ledger', 'reminder'];
   document.body.dataset.page = pages[page];
-  var sections = ['p-home', 'p-fitness', 'p-water', 'p-quit', 'p-todo', 'p-reminder', 'p-ledger'];
+  var sections = ['p-home', 'p-fitness', 'p-water', 'p-quit', 'p-todo', 'p-ledger', 'p-reminder'];
   each(sections, function(id, index){
     var section = byId(id);
     if (!section) return;
@@ -23,7 +23,8 @@ function goPage(i){
   }
   if (page === 3 && !S.quitDate && !sheetRequired) firstRunSheet();
   if (page === 1) ensureWorkoutTicker();
-  if (page === 5 && reminderData) renderReminderPage();
+  if (page === 5) renderLedgerPage();
+  if (page === 6 && reminderData) renderReminderPage();
   if (page === 0) renderDashboard();
 }
 

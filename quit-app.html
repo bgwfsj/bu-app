@@ -184,7 +184,7 @@ body[data-page="water"] .section-kicker{color:var(--acc2)}
 .qgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px;flex:0 0 auto}
 .qbtn{
   height:50px;border-radius:12px;cursor:pointer;background:#fff;
-  border:1px solid var(--line);color:#3d5468;font-size:var(--fs-card);font-weight:500;
+  border:1px solid var(--line);color:#3d5468;font-size:var(--fs-body);font-weight:400;
   font-family:var(--font-ui);
   box-shadow:0 1px 2px rgba(13,32,45,.04);transition:.16s;
 }
@@ -977,7 +977,7 @@ body[data-page="fitness"]::before{
         <p class="home-sub">人生难求圆满，日日可补。把训练、喝水、戒烟和每一件小事，一点点补回来。</p>
       </div>
       <div class="home-notice" id="home-notice" hidden>
-        <button class="home-notice-main" data-action="goPage" data-args="[5]">
+        <button class="home-notice-main" data-action="goPage" data-args="[6]">
           <span class="home-notice-dot"></span>
           <span><b id="home-notice-title">今天的提醒</b><small id="home-notice-copy"></small></span>
           <em>查看</em>
@@ -1001,11 +1001,11 @@ body[data-page="fitness"]::before{
           <span class="home-icon">记</span><b>待办</b>
           <small id="home-todo-copy">今天没有待办</small>
         </button>
-        <button class="home-card compact ledger-card" data-action="goPage" data-args="[6]">
+        <button class="home-card compact ledger-card" data-action="goPage" data-args="[5]">
           <span class="home-icon">账</span><b>记账</b>
           <small id="home-ledger-copy">本月还没有记录</small>
         </button>
-        <button class="home-card compact reminder-card" data-action="goPage" data-args="[5]">
+        <button class="home-card compact reminder-card" data-action="goPage" data-args="[6]">
           <span class="home-icon">醒</span><b>提醒</b>
           <small id="home-reminder-copy">没有独立提醒</small>
         </button>
@@ -1384,8 +1384,8 @@ body[data-page="fitness"]::before{
     <button data-page-index="2" data-action="goPage" data-args="[2]" aria-label="喝水"><span>水</span></button>
     <button data-page-index="3" data-action="goPage" data-args="[3]" aria-label="戒烟"><span>戒</span></button>
     <button data-page-index="4" data-action="goPage" data-args="[4]" aria-label="待办"><span>记</span></button>
-    <button data-page-index="6" data-action="goPage" data-args="[6]" aria-label="记账"><span>账</span></button>
-    <button data-page-index="5" data-action="goPage" data-args="[5]" aria-label="提醒"><span>醒</span></button>
+    <button data-page-index="5" data-action="goPage" data-args="[5]" aria-label="记账"><span>账</span></button>
+    <button data-page-index="6" data-action="goPage" data-args="[6]" aria-label="提醒"><span>醒</span></button>
   </nav>
 
 </div>
@@ -2203,9 +2203,9 @@ function setQuitFromInput(){
 function goPage(i){
   settingsOpen = false;
   page = i < 0 ? 0 : (i > 6 ? 6 : i);
-  var pages = ['home', 'fitness', 'water', 'quit', 'todo', 'reminder', 'ledger'];
+  var pages = ['home', 'fitness', 'water', 'quit', 'todo', 'ledger', 'reminder'];
   document.body.dataset.page = pages[page];
-  var sections = ['p-home', 'p-fitness', 'p-water', 'p-quit', 'p-todo', 'p-reminder', 'p-ledger'];
+  var sections = ['p-home', 'p-fitness', 'p-water', 'p-quit', 'p-todo', 'p-ledger', 'p-reminder'];
   each(sections, function(id, index){
     var section = byId(id);
     if (!section) return;
@@ -2222,7 +2222,8 @@ function goPage(i){
   }
   if (page === 3 && !S.quitDate && !sheetRequired) firstRunSheet();
   if (page === 1) ensureWorkoutTicker();
-  if (page === 5 && reminderData) renderReminderPage();
+  if (page === 5) renderLedgerPage();
+  if (page === 6 && reminderData) renderReminderPage();
   if (page === 0) renderDashboard();
 }
 
@@ -5601,7 +5602,7 @@ function boot(){
       renderWorkoutHome();
     }
     if (todoData && page === 4) renderTodoPage();
-    if (reminderData && page === 5) renderReminderPage();
+    if (reminderData && page === 6) renderReminderPage();
     checkTodoReminder();
   }, 30000);
 }
