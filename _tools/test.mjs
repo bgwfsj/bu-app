@@ -448,6 +448,8 @@ async function run() {
         reminderCard: size('.reminder-copy b'),
         homeCardLabel: size('.home-card b'),
         pageTitle: size('.fit-title'),
+        waterQuick: size('.qbtn'),
+        waterInput: size('#w-input'),
         waterFont: getComputedStyle(document.querySelector('.qbtn')).fontFamily,
         commonFont: getComputedStyle(document.querySelector('.todo-add')).fontFamily
       };
@@ -460,6 +462,8 @@ async function run() {
     assert.equal(typography.reminderCard, '14px');
     assert.equal(typography.homeCardLabel, '16px');
     assert.equal(typography.pageTitle, '27px');
+    assert.equal(typography.waterQuick, '14px');
+    assert.equal(typography.waterInput, '14px');
     assert.equal(typography.waterFont, typography.commonFont);
 
     const snooze = await evaluate(cdp, `(function(){
