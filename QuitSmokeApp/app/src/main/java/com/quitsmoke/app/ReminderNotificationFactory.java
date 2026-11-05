@@ -2,6 +2,7 @@ package com.quitsmoke.app;
 
 import android.app.PendingIntent;
 import android.content.Context;
+import android.widget.RemoteViews;
 
 import androidx.core.app.NotificationCompat;
 
@@ -17,7 +18,7 @@ final class ReminderNotificationFactory {
             PendingIntent snoozeAction,
             PendingIntent confirmAction,
             int priority) {
-        return new NotificationCompat.Builder(context, channelId)
+        NotificationCompat.Builder publicBuilder = new NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.drawable.ic_notification)
             .setColor(context.getColor(R.color.mint))
             .setContentTitle(title)
@@ -30,5 +31,26 @@ final class ReminderNotificationFactory {
             .setPriority(priority)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setCategory(NotificationCompat.CATEGORY_REMINDER);
+
+        RemoteViews expanded = new RemoteViews(
+            context.getPackageName(), R.layout.notification_reminder);
+        expanded.setTextViewText(R.id.notification_title, title);
+        expanded.setTextViewText(R.id.notification_body, body);
+        expanded.setOnClickPendingIntent(R.id.notification_root, openAction);
+        expanded.setOnClickPendingIntent(R.id.notification_snooze, snoozeAction);
+        expanded.setOnClickPendingIntent(R.id.notification_confirm, confirmAction);
+
+        return new NotificationCompat.Builder(context, channelId)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setColor(context.getColor(R.color.mint))
+            .setContentTitle(title)
+            .setContentText(body)
+            .setContentIntent(openAction)
+            .setCustomBigContentView(expanded)
+            .setAutoCancel(true)
+            .setPriority(priority)
+            .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
+            .setCategory(NotificationCompat.CATEGORY_REMINDER)
+            .setPublicVersion(publicBuilder.build());
     }
 }

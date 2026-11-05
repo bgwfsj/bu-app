@@ -18,7 +18,7 @@ public final class ReminderScheduler {
     public static final String KEY_MINUTE = "minute";
     public static final String KEY_PENDING = "pending";
     public static final String KEY_DATE = "date";
-    public static final String CHANNEL_ID = "todo_daily_reminder_v3";
+    public static final String CHANNEL_ID = "todo_daily_reminder_v4";
     private static final int ALARM_REQUEST = 4101;
 
     private ReminderScheduler() {}
@@ -29,6 +29,7 @@ public final class ReminderScheduler {
         if (manager == null) return;
         manager.deleteNotificationChannel("todo_daily_reminder");
         manager.deleteNotificationChannel("todo_daily_reminder_v2");
+        manager.deleteNotificationChannel("todo_daily_reminder_v3");
         NotificationChannel channel = new NotificationChannel(
             CHANNEL_ID,
             "每日待办提醒",

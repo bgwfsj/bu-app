@@ -6,7 +6,7 @@
 
 - 应用名：补
 - 包名：`com.quitsmoke.app`
-- 当前版本：5.8.3
+- 当前版本：5.8.4
 - 最低 Android：API 24
 - Target SDK：34
 - 仓库：`bgwfsj/bu-app`（公开）
@@ -178,7 +178,7 @@ bu_pre_restore_v1    完整恢复前的安全副本
 - `SnoozeScheduler` / `SnoozeReceiver`：一次性稍后提醒。
 - `NotificationActionReceiver`：通知“确认”动作，收起通知。
 
-提醒通知由 `ReminderNotificationFactory` 使用系统原生 `BigTextStyle` 和带图标的标准 action 构建。小图标必须使用单色 `ic_notification`，不能使用自适应图标前景。独立提醒与待办提醒使用新的 `*_v3` 通知通道，旧通道会被清理。不要重新引入自定义 RemoteViews 卡片，小米会隐藏锁屏并产生多余留白。
+提醒通知由 `ReminderNotificationFactory` 构建。折叠状态保持系统原生标题和正文，仅用 `setCustomBigContentView` 提供展开后的双按钮；同时用原生 `publicVersion` 处理锁屏，主通知使用 `VISIBILITY_PRIVATE`。小图标必须使用单色 `ic_notification`，不能使用自适应图标前景。独立提醒与待办提醒使用新的 `*_v4` 通知通道，旧通道会被清理。不要把完整自定义布局同时设为普通 content view，否则小米锁屏可能不显示。
 
 通知点击：
 
