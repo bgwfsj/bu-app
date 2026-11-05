@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class AppUpdater {
     private static final String LATEST_RELEASE_API =
-        "https://api.github.com/repos/bgwfsj/bu-releases/releases/latest";
+        "https://api.github.com/repos/bgwfsj/bu-app/releases/latest";
     private static final String USER_AGENT = "Bu-Android-Updater";
     private static final AtomicBoolean checking = new AtomicBoolean(false);
     private static final AtomicBoolean downloading = new AtomicBoolean(false);
