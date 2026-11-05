@@ -35,7 +35,8 @@ public final class AppUpdater {
         toast(activity, "正在检查更新…");
         new Thread(() -> {
             try {
-                HttpURLConnection connection = openConnection(LATEST_RELEASE_API);
+                HttpURLConnection connection = openConnection(
+                    LATEST_RELEASE_API, "application/vnd.github+json");
                 int code = connection.getResponseCode();
                 if (code != 200) throw new Exception("GitHub 返回 " + code);
                 String json;
@@ -87,6 +88,7 @@ public final class AppUpdater {
             .setPositiveButton("下载并安装", (dialog, which) -> downloadAndInstall(
                 activity,
                 version,
+                asset.optString("url"),
                 asset.optString("browser_download_url"),
                 asset.optString("digest")
             ))
@@ -94,8 +96,12 @@ public final class AppUpdater {
     }
 
     private static void downloadAndInstall(
-            MainActivity activity, String version, String downloadUrl, String digest) {
-        if (downloadUrl.isEmpty()) {
+            MainActivity activity,
+            String version,
+            String apiDownloadUrl,
+            String browserDownloadUrl,
+            String digest) {
+        if (apiDownloadUrl.isEmpty() && browserDownloadUrl.isEmpty()) {
             toast(activity, "下载地址无效");
             return;
         }
@@ -116,23 +122,15 @@ public final class AppUpdater {
                 String expectedHash = digest.startsWith("sha256:")
                     ? digest.substring("sha256:".length()).toLowerCase(Locale.US)
                     : "";
-                MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
-                HttpURLConnection connection = openConnection(downloadUrl);
-                int code = connection.getResponseCode();
-                if (code != 200) throw new Exception("下载服务器返回 " + code);
-                try (InputStream input = connection.getInputStream();
-                     FileOutputStream output = new FileOutputStream(temp)) {
-                    byte[] buffer = new byte[16384];
-                    int count;
-                    while ((count = input.read(buffer)) > 0) {
-                        output.write(buffer, 0, count);
-                        sha256.update(buffer, 0, count);
+                try {
+                    downloadVerified(apiDownloadUrl, temp, expectedHash);
+                } catch (Exception apiError) {
+                    if (temp.exists()) temp.delete();
+                    if (!browserDownloadUrl.isEmpty()) {
+                        downloadVerified(browserDownloadUrl, temp, expectedHash);
+                    } else {
+                        throw apiError;
                     }
-                } finally {
-                    connection.disconnect();
-                }
-                if (!expectedHash.isEmpty() && !expectedHash.equals(hex(sha256.digest()))) {
-                    throw new Exception("安装包校验失败");
                 }
                 if (apk.exists() && !apk.delete()) throw new Exception("无法替换旧安装包");
                 if (!temp.renameTo(apk)) throw new Exception("无法保存安装包");
@@ -165,13 +163,36 @@ public final class AppUpdater {
         }, "bu-update-download").start();
     }
 
-    private static HttpURLConnection openConnection(String address) throws Exception {
+    private static void downloadVerified(
+            String address, File target, String expectedHash) throws Exception {
+        MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
+        HttpURLConnection connection = openConnection(address, "application/octet-stream");
+        int code = connection.getResponseCode();
+        if (code != 200) throw new Exception("下载服务器返回 " + code);
+        try (InputStream input = connection.getInputStream();
+             FileOutputStream output = new FileOutputStream(target)) {
+            byte[] buffer = new byte[16384];
+            int count;
+            while ((count = input.read(buffer)) > 0) {
+                output.write(buffer, 0, count);
+                sha256.update(buffer, 0, count);
+            }
+        } finally {
+            connection.disconnect();
+        }
+        if (!expectedHash.isEmpty() && !expectedHash.equals(hex(sha256.digest()))) {
+            throw new Exception("安装包校验失败");
+        }
+    }
+
+    private static HttpURLConnection openConnection(String address, String accept) throws Exception {
         HttpURLConnection connection = (HttpURLConnection) new URL(address).openConnection();
         connection.setConnectTimeout(20000);
         connection.setReadTimeout(60000);
         connection.setInstanceFollowRedirects(true);
         connection.setRequestProperty("User-Agent", USER_AGENT);
-        connection.setRequestProperty("Accept", "application/vnd.github+json, application/octet-stream");
+        connection.setRequestProperty("Accept", accept);
+        connection.setRequestProperty("X-GitHub-Api-Version", "2022-11-28");
         return connection;
     }
 
