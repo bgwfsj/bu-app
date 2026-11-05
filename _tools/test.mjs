@@ -268,11 +268,19 @@ async function run() {
     const settingsPage = await evaluate(cdp, `(function(){
       var originalNative = window.AppNative;
       var calls = 0;
-      window.AppNative = { checkForUpdates: function(){ calls++; } };
+      var cleanupCalls = 0;
+      window.AppNative = {
+        checkForUpdates: function(){ calls++; },
+        cleanupOldBackups: function(keep){ cleanupCalls++; return keep === 5 ? 2 : -1; }
+      };
       byId('btn-app-settings').click();
       var opened = byId('p-settings').classList.contains('on') &&
         document.body.dataset.page === 'settings';
       var dataActions = byId('p-settings').querySelectorAll('[data-action="exportAppBackup"], [data-action="chooseAppBackup"]').length;
+      var cleanupButton = byId('p-settings').querySelector('[data-action="requestCleanupOldBackups"]');
+      cleanupButton.click();
+      var cleanupConfirmOpened = byId('sheet').classList.contains('on');
+      document.querySelector('[data-action="resolveAppConfirm"][data-args="[true]"]').click();
       byId('p-settings').querySelector('[data-action="openAboutSheet"]').click();
       var aboutOpened = byId('sheet').classList.contains('on');
       var changelogCount = byId('sheet').querySelectorAll('.changelog-entry').length;
@@ -286,6 +294,9 @@ async function run() {
       return {
         opened: opened,
         dataActions: dataActions,
+        cleanupButton: !!cleanupButton,
+        cleanupConfirmOpened: cleanupConfirmOpened,
+        cleanupCalls: cleanupCalls,
         aboutOpened: aboutOpened,
         changelogCount: changelogCount,
         aboutVersion: aboutVersion,
@@ -298,9 +309,12 @@ async function run() {
     assert.deepEqual(settingsPage, {
       opened: true,
       dataActions: 2,
+      cleanupButton: true,
+      cleanupConfirmOpened: true,
+      cleanupCalls: 1,
       aboutOpened: true,
-      changelogCount: 36,
-      aboutVersion: '5.8.7',
+      changelogCount: 37,
+      aboutVersion: '5.8.8',
       updateBackupExposed: true,
       updateCalls: 1,
       handledBack: true,
@@ -495,6 +509,22 @@ async function run() {
       var manuallyArchived = reminderData.archived.some(function(item){ return item.id === edited.id; });
       restoreReminder(edited.id);
       var restored = reminderData.items.some(function(item){ return item.id === edited.id; });
+      var oldOnceDate = '2001-02-03';
+      var oldOnce = {
+        id: 'restore_old_once', title: '旧的一次提醒', mode: 'once', time: '09:00',
+        date: oldOnceDate, createdAt: new Date().toISOString(),
+        archivedAt: Date.now(), archiveReason: 'completed'
+      };
+      reminderData.archived.push(oldOnce);
+      restoreReminder(oldOnce.id);
+      var restoredOldOnce = reminderData.items.filter(function(item){
+        return item.id === oldOnce.id;
+      })[0];
+      var oldOnceDateUnchanged = !!restoredOldOnce && restoredOldOnce.date === oldOnceDate;
+      var oldOnceStaysActive = !!restoredOldOnce && restoredOldOnce.restoredPastOnce === true;
+      if (restoredOldOnce) {
+        reminderData.items = reminderData.items.filter(function(item){ return item.id !== oldOnce.id; });
+      }
       reminderData.archived.push({
         id: 'archive_temp', title: '临时归档', mode: 'daily', time: '09:00',
         createdAt: new Date().toISOString(), archivedAt: Date.now(), archiveReason: 'deleted'
@@ -552,6 +582,8 @@ async function run() {
         autoArchived: autoArchived,
         manuallyArchived: manuallyArchived,
         restored: restored,
+        oldOnceDateUnchanged: oldOnceDateUnchanged,
+        oldOnceStaysActive: oldOnceStaysActive,
         permanentlyRemoved: permanentlyRemoved,
         archiveCount: byId('reminder-archive-count').textContent,
         activeGroupLabels: activeGroupLabels,
@@ -580,6 +612,8 @@ async function run() {
     assert.equal(reminders.autoArchived, true);
     assert.equal(reminders.manuallyArchived, true);
     assert.equal(reminders.restored, true);
+    assert.equal(reminders.oldOnceDateUnchanged, true);
+    assert.equal(reminders.oldOnceStaysActive, true);
     assert.equal(reminders.permanentlyRemoved, true);
     assert.equal(reminders.archiveCount, '1 条');
     assert.deepEqual(reminders.activeGroupLabels, ['仅一次', '每天', '每周', '每月', '每年']);

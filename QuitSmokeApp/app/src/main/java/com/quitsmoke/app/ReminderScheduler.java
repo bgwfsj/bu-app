@@ -18,7 +18,7 @@ public final class ReminderScheduler {
     public static final String KEY_MINUTE = "minute";
     public static final String KEY_PENDING = "pending";
     public static final String KEY_DATE = "date";
-    public static final String CHANNEL_ID = "todo_daily_reminder_v6";
+    public static final String CHANNEL_ID = "todo_daily_reminder";
     private static final int ALARM_REQUEST = 4101;
 
     private ReminderScheduler() {}
@@ -30,7 +30,7 @@ public final class ReminderScheduler {
         NotificationChannel channel = new NotificationChannel(
             CHANNEL_ID,
             "每日待办提醒",
-            NotificationManager.IMPORTANCE_HIGH
+            NotificationManager.IMPORTANCE_DEFAULT
         );
         channel.setDescription("每天晚上提醒尚未完成的待办");
         manager.createNotificationChannel(channel);

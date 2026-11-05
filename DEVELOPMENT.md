@@ -6,7 +6,7 @@
 
 - 应用名：补
 - 包名：`com.quitsmoke.app`
-- 当前版本：5.8.7
+- 当前版本：5.8.8
 - 最低 Android：API 24
 - Target SDK：34
 - 仓库：`bgwfsj/bu-app`（公开）
@@ -152,10 +152,17 @@ bu_pre_restore_v1    完整恢复前的安全副本
 - 手动删除先进入归档。
 - 归档可移回或彻底删除。
 - 移回已过期的一次性提醒时，会安排最近的未来同名时间。
+- 从归档移回过期的仅一次提醒时保留原日期，并用 `restoredPastOnce` 阻止它被立即再次归档。
 - 提醒仅支持短距离横向滑动，不启用长按拖拽。
 - 普通状态和归档均按 once、daily、weekly、monthly、yearly 分组；折叠状态保存在 `reminderData.groupCollapsed`。
 - 通知“确认”只会对一次性提醒记录完成 ID；App 回到前台后 `applyConfirmedReminders()` 将对应提醒移入归档并标记 `archiveReason = completed`。
 - 待办与提醒可以一对一互相转换。转换后源项目进入归档并标记 `archiveReason = converted`。可一一对应的重复规则会直接保留；工作日、周末、自定义多日期待办转换为一条 `once` 提醒，日期取最近一次。
+
+## 备份清理
+
+- 每次手动导出或应用更新前自动备份后，调用 `AppNative.cleanupOldBackups(5)` 自动保留最近 5 份。
+- 设置页“清理旧备份”可手动执行同一规则。
+- Android 10 及以上查询 `Downloads` 中名称匹配 `补-%备份-%.json` 的文件；更早系统清理应用下载目录。
 
 ## 记账分析
 
@@ -178,9 +185,7 @@ bu_pre_restore_v1    完整恢复前的安全副本
 - `SnoozeScheduler` / `SnoozeReceiver`：一次性稍后提醒。
 - `NotificationActionReceiver`：通知“确认”动作，收起通知。
 
-提醒通知由 `ReminderNotificationFactory` 构建。小米不会稳定渲染 `setCustomBigContentView` 或标准 action，因此双按钮必须同时放在普通 `setCustomContentView`、big content 和 heads-up content 中。为兼顾锁屏，主通知使用 `VISIBILITY_PRIVATE`，并设置原生 `publicVersion`。状态栏必须使用 `drawable-xxhdpi/ic_stat_bu.png` 这类高密度单色位图，不要使用矢量图标；按钮使用轻量透明文字操作。独立提醒与待办提醒固定使用 `*_v6` 通知通道，后续版本不得再删除或更换通道。
-
-Android 14 / MIUI 的普通通知不能保证息屏时主动展示，因此通知同时设置 `fullScreenIntent`，由 `ReminderLockscreenActivity` 在锁屏上显示提醒卡片。提醒页“锁屏提醒”入口调用 `canUseLockscreenReminders()` 检查权限，并可跳转到系统的全屏通知设置。不要再删除或反复更换通知通道，否则会重置用户授权。
+提醒通知固定使用 5.7 的稳定实现：`StandaloneReminderReceiver`、`DailyReminderReceiver` 和 `SnoozeReceiver` 直接构造标准 `NotificationCompat`，使用 `ic_launcher_foreground`、标准 `addAction` 和原始通道 `standalone_reminders` / `todo_daily_reminder`。不要重新引入自定义 RemoteViews、全屏 Activity、额外通知图标或新通道 ID；这些改动已在小米设备上验证会造成按钮、锁屏或小图标回归。
 
 通知点击：
 

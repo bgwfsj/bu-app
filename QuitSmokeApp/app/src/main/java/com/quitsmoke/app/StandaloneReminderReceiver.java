@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 
+import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
@@ -28,8 +29,7 @@ public class StandaloneReminderReceiver extends BroadcastReceiver {
     public static void deliverScheduled(Context context, JSONObject item) {
         String id = item.optString("id", "reminder");
         String title = item.optString("title", "提醒时间到了");
-        showNotification(
-            context, id, title, "补 · 提醒时间到了", true, item.optString("mode"));
+        showNotification(context, id, title, "补 · 提醒时间到了", true, item.optString("mode"));
         StandaloneReminderScheduler.continueRecurring(context, item.toString());
     }
 
@@ -82,29 +82,20 @@ public class StandaloneReminderReceiver extends BroadcastReceiver {
             snoozeIntent,
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
-        PendingIntent fullScreenAction = ReminderNotificationFactory.fullScreenAction(
-            context,
-            notificationId,
-            title,
-            body,
-            "reminder",
-            "standalone",
-            id,
-            title,
-            id,
-            reminderMode
-        );
-        manager.notify(notificationId, ReminderNotificationFactory.create(
-            context,
-            StandaloneReminderScheduler.CHANNEL_ID,
-            title,
-            body,
-            contentIntent,
-            snoozeAction,
-            confirmAction,
-            fullScreenAction,
-            androidx.core.app.NotificationCompat.PRIORITY_HIGH
-        ).build());
+        NotificationCompat.Builder notification = new NotificationCompat.Builder(
+            context, StandaloneReminderScheduler.CHANNEL_ID
+        )
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setContentTitle(title)
+            .setContentText(body)
+            .setStyle(new NotificationCompat.BigTextStyle().bigText(body))
+            .setContentIntent(contentIntent)
+            .addAction(0, "确认", confirmAction)
+            .addAction(0, "稍后", snoozeAction)
+            .setAutoCancel(true)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_REMINDER);
+        manager.notify(notificationId, notification.build());
         return true;
     }
 }

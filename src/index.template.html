@@ -84,6 +84,9 @@
         <button class="settings-row" data-action="chooseAppBackup">
           <span><b>恢复完整备份</b><small>使用之前导出的 JSON 备份文件</small></span><em>选择文件 ›</em>
         </button>
+        <button class="settings-row" data-action="requestCleanupOldBackups">
+          <span><b>清理旧备份</b><small>自动和手动清理都只保留最近 5 份</small></span><em>清理 ›</em>
+        </button>
       </div>
       <div class="settings-group">
         <div class="settings-group-title">应用</div>
@@ -395,10 +398,6 @@
         <div class="reminder-setting-row">
           <span><b>首页通知</b><small>当天有提醒时，每次打开软件都在首页显示</small></span>
           <button id="btn-reminder-home-toggle" data-action="toggleReminderHomeNotice">已开启</button>
-        </div>
-        <div class="reminder-setting-row">
-          <span><b>锁屏提醒</b><small id="reminder-lockscreen-desc">需要允许全屏通知才能在锁屏显示</small></span>
-          <button id="btn-reminder-lockscreen">检查</button>
         </div>
       </div>
     </section>

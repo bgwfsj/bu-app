@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 
+import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
@@ -70,28 +71,17 @@ public class SnoozeReceiver extends BroadcastReceiver {
             snoozeIntent,
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
-        PendingIntent fullScreenAction = ReminderNotificationFactory.fullScreenAction(
-            context,
-            requestCode,
-            title,
-            "补 · 稍后提醒时间到了",
-            page,
-            type,
-            id,
-            title,
-            null,
-            null
-        );
-        manager.notify(requestCode, ReminderNotificationFactory.create(
-            context,
-            channelId,
-            title,
-            "补 · 稍后提醒时间到了",
-            contentIntent,
-            snoozeAction,
-            confirmAction,
-            fullScreenAction,
-            androidx.core.app.NotificationCompat.PRIORITY_HIGH
-        ).build());
+        NotificationCompat.Builder notification = new NotificationCompat.Builder(context, channelId)
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setContentTitle(title)
+            .setContentText("补 · 稍后提醒时间到了")
+            .setStyle(new NotificationCompat.BigTextStyle().bigText(title))
+            .setContentIntent(contentIntent)
+            .addAction(0, "确认", confirmAction)
+            .addAction(0, "稍后", snoozeAction)
+            .setAutoCancel(true)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_REMINDER);
+        manager.notify(requestCode, notification.build());
     }
 }

@@ -20,7 +20,7 @@ import java.util.Locale;
 public final class StandaloneReminderScheduler {
     public static final String PREFS = "standalone_reminders";
     public static final String KEY_ITEMS = "items";
-    public static final String CHANNEL_ID = "standalone_reminders_v6";
+    public static final String CHANNEL_ID = "standalone_reminders";
     private static final String ACTION_FIRE = "com.quitsmoke.app.STANDALONE_REMINDER";
 
     private StandaloneReminderScheduler() {}

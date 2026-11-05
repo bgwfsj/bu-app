@@ -2,9 +2,10 @@ package com.quitsmoke.app;
 
 import android.Manifest;
 import android.content.ContentValues;
+import android.content.ContentUris;
 import android.content.Intent;
+import android.database.Cursor;
 import android.content.pm.PackageManager;
-import android.app.NotificationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -12,7 +13,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
-import android.provider.Settings;
 import android.util.Base64;
 import android.view.View;
 import android.webkit.JavascriptInterface;
@@ -40,6 +40,9 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
@@ -215,34 +218,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @JavascriptInterface
-        public boolean canUseLockscreenReminders() {
-            if (!hasNotificationPermission()) return false;
-            if (Build.VERSION.SDK_INT < 34) return true;
-            NotificationManager manager = getSystemService(NotificationManager.class);
-            return manager != null && manager.canUseFullScreenIntent();
-        }
-
-        @JavascriptInterface
-        public void openLockscreenReminderSettings() {
-            runOnUiThread(() -> {
-                if (Build.VERSION.SDK_INT < 34) {
-                    toast(canUseLockscreenReminders() ? "锁屏提醒已允许" : "请先允许通知权限");
-                    return;
-                }
-                Intent settings = new Intent(Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT)
-                    .setData(Uri.parse("package:" + getPackageName()));
-                try {
-                    startActivity(settings);
-                } catch (Exception error) {
-                    startActivity(new Intent(
-                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                        Uri.parse("package:" + getPackageName())
-                    ));
-                }
-            });
-        }
-
-        @JavascriptInterface
         public boolean saveFile(String name, String base64, String mime) {
             try {
                 byte[] data = Base64.decode(base64, Base64.DEFAULT);
@@ -276,6 +251,55 @@ public class MainActivity extends AppCompatActivity {
                 toast("保存失败：" + e.getMessage());
                 return false;
             }
+        }
+
+        @JavascriptInterface
+        public int cleanupOldBackups(int keep) {
+            int safeKeep = Math.max(1, Math.min(20, keep));
+            int deleted = 0;
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    String[] projection = {
+                        MediaStore.MediaColumns._ID,
+                        MediaStore.MediaColumns.DATE_ADDED
+                    };
+                    List<Long> ids = new ArrayList<>();
+                    try (Cursor cursor = getContentResolver().query(
+                            MediaStore.Downloads.EXTERNAL_CONTENT_URI,
+                            projection,
+                            MediaStore.MediaColumns.DISPLAY_NAME + " LIKE ?",
+                            new String[]{"补-%备份-%.json"},
+                            MediaStore.MediaColumns.DATE_ADDED + " DESC, " +
+                                MediaStore.MediaColumns._ID + " DESC")) {
+                        if (cursor != null) {
+                            int idColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns._ID);
+                            while (cursor.moveToNext()) ids.add(cursor.getLong(idColumn));
+                        }
+                    }
+                    for (int i = safeKeep; i < ids.size(); i++) {
+                        Uri uri = ContentUris.withAppendedId(
+                            MediaStore.Downloads.EXTERNAL_CONTENT_URI, ids.get(i));
+                        deleted += getContentResolver().delete(uri, null, null);
+                    }
+                } else {
+                    File dir = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+                    if (dir == null || !dir.exists()) return 0;
+                    File[] files = dir.listFiles((folder, name) ->
+                        name.startsWith("补-") && name.contains("备份-") && name.endsWith(".json"));
+                    if (files == null) return 0;
+                    java.util.Arrays.sort(
+                        files,
+                        Comparator.comparingLong(File::lastModified).reversed()
+                    );
+                    for (int i = safeKeep; i < files.length; i++) {
+                        if (files[i].delete()) deleted++;
+                    }
+                }
+            } catch (Exception error) {
+                Log.e(TAG, "Failed to clean old backups", error);
+                return -1;
+            }
+            return deleted;
         }
 
         @JavascriptInterface

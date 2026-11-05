@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 
+import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
@@ -19,7 +20,8 @@ import java.util.Locale;
 public class DailyReminderReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        SharedPreferences prefs = context.getSharedPreferences(ReminderScheduler.PREFS, Context.MODE_PRIVATE);
+        SharedPreferences prefs = context.getSharedPreferences(
+            ReminderScheduler.PREFS, Context.MODE_PRIVATE);
         if (!prefs.getBoolean(ReminderScheduler.KEY_ENABLED, false)) return;
         if (Build.VERSION.SDK_INT >= 33 &&
                 ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
@@ -65,32 +67,21 @@ public class DailyReminderReceiver extends BroadcastReceiver {
             snoozeIntent,
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
-        PendingIntent fullScreenAction = ReminderNotificationFactory.fullScreenAction(
-            context,
-            4101,
-            "今晚的待办",
-            body,
-            "todo",
-            "todo",
-            "todo_daily",
-            "今晚的待办",
-            null,
-            null
-        );
 
-        NotificationManagerCompat.from(context).notify(4101, ReminderNotificationFactory.create(
-            context,
-            ReminderScheduler.CHANNEL_ID,
-            "补 · 今晚的待办",
-            body,
-            contentIntent,
-            snoozeAction,
-            confirmAction,
-            fullScreenAction,
-            androidx.core.app.NotificationCompat.PRIORITY_DEFAULT
-        ).build());
-        // This is a one-shot alarm. Schedule tomorrow's occurrence now that
-        // today's notification has been delivered.
+        NotificationCompat.Builder notification = new NotificationCompat.Builder(
+            context, ReminderScheduler.CHANNEL_ID
+        )
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setContentTitle("补 · 今晚的待办")
+            .setContentText(body)
+            .setStyle(new NotificationCompat.BigTextStyle().bigText(body))
+            .setContentIntent(contentIntent)
+            .addAction(0, "确认", confirmAction)
+            .addAction(0, "稍后", snoozeAction)
+            .setAutoCancel(true)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+
+        NotificationManagerCompat.from(context).notify(4101, notification.build());
         ReminderScheduler.schedule(context);
     }
 }

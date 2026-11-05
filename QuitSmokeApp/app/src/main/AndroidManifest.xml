@@ -6,7 +6,6 @@
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
-    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
 
     <application
         android:allowBackup="false"
@@ -27,14 +26,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity
-            android:name=".ReminderLockscreenActivity"
-            android:excludeFromRecents="true"
-            android:exported="false"
-            android:showWhenLocked="true"
-            android:theme="@style/Theme.QuitSmoke"
-            android:turnScreenOn="true" />
 
         <receiver
             android:name=".DailyReminderReceiver"

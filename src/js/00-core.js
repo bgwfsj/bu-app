@@ -81,6 +81,7 @@ var APP_ACTION_NAMES = {
   closeSheet: true,
   resolveAppConfirm: true,
   exportAppBackup: true,
+  requestCleanupOldBackups: true,
   chooseAppBackup: true,
   doBreak: true,
   saveSetDate: true,
@@ -337,14 +338,50 @@ function saveTextFile(filename, text, mime){
   return true;
 }
 
+var APP_BACKUP_KEEP = 5;
+
+function backupTimeSuffix(){
+  var now = new Date();
+  return pad2(now.getHours()) + pad2(now.getMinutes()) + pad2(now.getSeconds());
+}
+
+function cleanupOldBackups(showResult){
+  if (!window.AppNative || !window.AppNative.cleanupOldBackups) {
+    if (showResult) toast('仅安装版支持自动清理备份');
+    return 0;
+  }
+  var removed = 0;
+  try { removed = Number(window.AppNative.cleanupOldBackups(APP_BACKUP_KEEP)); }
+  catch (error) { removed = -1; }
+  if (showResult) {
+    if (removed < 0) toast('清理旧备份失败');
+    else if (removed) toast('已清理 ' + removed + ' 份旧备份');
+    else toast('没有需要清理的旧备份');
+  }
+  return removed;
+}
+
+function requestCleanupOldBackups(){
+  appConfirm(
+    '只保留最近 ' + APP_BACKUP_KEEP + ' 份完整备份，更早的备份文件会被删除。',
+    function(){ cleanupOldBackups(true); },
+    { title: '清理旧备份', confirmLabel: '清理' }
+  );
+}
+
 function exportAppBackup(){
   closeSheet();
   var text = JSON.stringify(appBackupPayload(), null, 2);
-  if (!saveTextFile('补-完整备份-' + wTodayStr() + '.json', text, 'application/json')) {
+  if (!saveTextFile(
+    '补-完整备份-' + wTodayStr() + '-' + backupTimeSuffix() + '.json',
+    text,
+    'application/json'
+  )) {
     toast('完整备份保存失败');
     return false;
   }
-  toast('完整数据已导出');
+  cleanupOldBackups(false);
+  toast('完整数据已导出，保留最近 ' + APP_BACKUP_KEEP + ' 份');
   return true;
 }
 
