@@ -246,13 +246,12 @@ function renderReminderPage(){
       '<div class="reminder-group-list">' + rows.map(function(row){
         var item = row.item;
         return '<div class="reminder-item" data-drag-kind="reminder" data-drag-state="active" data-drag-id="' +
-          escHtml(item.id) + '">' +
+          escHtml(item.id) + '"' + actionAttrs('editReminder', [item.id]) + '>' +
           '<span class="reminder-time-chip">' + escHtml(item.time) + '</span>' +
           '<span class="reminder-copy"><b>' + escHtml(item.title) + '</b>' +
           '<span>' + escHtml(reminderRuleText(item)) + '</span>' +
           '<small>' + escHtml(reminderNextText(item)) + '</small></span>' +
           '<button class="reminder-convert"' + actionAttrs('convertReminderToTodo', [item.id]) + ' aria-label="转为待办">转</button>' +
-          '<button class="reminder-edit"' + actionAttrs('editReminder', [item.id]) + '>改</button>' +
           '<button class="reminder-del"' + actionAttrs('deleteReminder', [item.id]) + ' aria-label="删除提醒">×</button>' +
           '</div>';
       }).join('') + '</div></section>';

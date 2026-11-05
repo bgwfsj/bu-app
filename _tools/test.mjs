@@ -229,6 +229,12 @@ async function run() {
       var pagerRect = byId('page-pager').getBoundingClientRect();
       var controlsSeparate = breakRect.bottom < pagerRect.top;
       var activeQuickLabel = byId('page-pager').querySelector('button.on').textContent.trim();
+      var dragTarget = document.createElement('span');
+      var dragRow = document.createElement('div');
+      dragRow.setAttribute('data-drag-kind', 'todo');
+      dragRow.setAttribute('data-drag-state', 'active');
+      dragRow.setAttribute('data-drag-id', 'gesture-test');
+      dragRow.appendChild(dragTarget);
       goPage(4);
       var handledBack = handleBackNavigation() && page === 0;
       return {
@@ -240,7 +246,9 @@ async function run() {
         handledBack: handledBack,
         pagerLabels: pagerLabels,
         controlsSeparate: controlsSeparate,
-        activeQuickLabel: activeQuickLabel
+        activeQuickLabel: activeQuickLabel,
+        dragOwnsHorizontalGesture: targetOwnsHorizontalGesture(dragTarget),
+        plainOwnsHorizontalGesture: targetOwnsHorizontalGesture(document.body)
       };
     })()`);
     assert.deepEqual(navigation, {
@@ -252,7 +260,9 @@ async function run() {
       handledBack: true,
       pagerLabels: ['练', '水', '戒', '记', '账', '醒'],
       controlsSeparate: true,
-      activeQuickLabel: '戒'
+      activeQuickLabel: '戒',
+      dragOwnsHorizontalGesture: true,
+      plainOwnsHorizontalGesture: false
     });
 
     const settingsPage = await evaluate(cdp, `(function(){
@@ -289,8 +299,8 @@ async function run() {
       opened: true,
       dataActions: 2,
       aboutOpened: true,
-      changelogCount: 31,
-      aboutVersion: '5.8.2',
+      changelogCount: 32,
+      aboutVersion: '5.8.3',
       updateBackupExposed: true,
       updateCalls: 1,
       handledBack: true,
@@ -395,7 +405,10 @@ async function run() {
     const todoEdit = await evaluate(cdp, `(function(){
       var today = wTodayStr();
       var beforeCount = todoData.items.length;
-      document.querySelector('.todo-edit[data-action="editTodo"]').click();
+      var editButtonsRemoved = byId('todo-list').querySelectorAll('.todo-edit').length === 0;
+      var clickableRows = byId('todo-list').querySelectorAll('.todo-item[data-action="editTodo"]').length;
+      var archiveEditable = byId('todo-archive-list').querySelectorAll('[data-action="editTodo"]').length > 0;
+      document.querySelector('.todo-item[data-action="editTodo"]').click();
       byId('todo-name').value = '每天一次（已编辑）';
       saveTodoItem();
       var edited = todoData.items.filter(function(item){ return item.id === 'daily'; })[0];
@@ -405,7 +418,10 @@ async function run() {
         title: edited && edited.title,
         completionPreserved: !!(edited && edited.doneDates && edited.doneDates[today]),
         sheetClosed: !byId('sheet').classList.contains('on'),
-        editingCleared: editingTodoId === null
+        editingCleared: editingTodoId === null,
+        editButtonsRemoved: editButtonsRemoved,
+        clickableRows: clickableRows,
+        archiveEditable: archiveEditable
       };
     })()`);
     assert.equal(todoEdit.count, todoEdit.beforeCount);
@@ -413,6 +429,9 @@ async function run() {
     assert.equal(todoEdit.completionPreserved, true);
     assert.equal(todoEdit.sheetClosed, true);
     assert.equal(todoEdit.editingCleared, true);
+    assert.equal(todoEdit.editButtonsRemoved, true);
+    assert.ok(todoEdit.clickableRows > 0);
+    assert.equal(todoEdit.archiveEditable, false);
 
     const reminders = await evaluate(cdp, `(function(){
       reminderData = reminderDefaultState();
@@ -441,7 +460,9 @@ async function run() {
       add('monthly');
       add('yearly');
       var weekly = reminderData.items.filter(function(item){ return item.mode === 'weekly'; })[0];
-      editReminder(weekly.id);
+      var reminderEditButtonsRemoved = byId('reminder-list').querySelectorAll('.reminder-edit').length === 0;
+      var weeklyRow = byId('reminder-list').querySelector('[data-drag-id="' + weekly.id + '"]');
+      weeklyRow.click();
       byId('reminder-title').value = '提醒-每周（已编辑）';
       saveReminder();
       var edited = reminderItemById(weekly.id);
@@ -537,7 +558,10 @@ async function run() {
         archiveGroupLabels: archiveGroupLabels,
         activeGroupCollapsed: activeGroupCollapsed,
         archiveGroupCollapsed: archiveGroupCollapsed,
-        confirmedArchived: confirmedArchived
+        confirmedArchived: confirmedArchived,
+        reminderEditButtonsRemoved: reminderEditButtonsRemoved,
+        reminderRowEditable: !!weeklyRow && weeklyRow.getAttribute('data-action') === 'editReminder',
+        reminderArchiveEditable: byId('reminder-archive-list').querySelectorAll('[data-action="editReminder"]').length > 0
       };
     })()`);
     assert.equal(reminders.count, 5);
@@ -563,6 +587,9 @@ async function run() {
     assert.equal(reminders.activeGroupCollapsed, true);
     assert.equal(reminders.archiveGroupCollapsed, true);
     assert.equal(reminders.confirmedArchived, true);
+    assert.equal(reminders.reminderEditButtonsRemoved, true);
+    assert.equal(reminders.reminderRowEditable, true);
+    assert.equal(reminders.reminderArchiveEditable, false);
 
     const dragActions = await evaluate(cdp, `(function(){
       todoData.items.push({

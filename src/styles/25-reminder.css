@@ -16,7 +16,7 @@
 .reminder-group-head small{font-size:var(--fs-caption);color:#9aa8ad;letter-spacing:0}
 .reminder-group.collapsed .reminder-group-list,.reminder-archive-group.collapsed .reminder-archive-item{display:none}
 .reminder-group-list{display:flex;flex-direction:column;gap:7px}
-.reminder-item{display:flex;align-items:center;gap:10px;padding:12px;border-radius:13px;background:#fff;border:1px solid var(--line2)}
+.reminder-item{display:flex;align-items:center;gap:10px;padding:12px;border-radius:13px;background:#fff;border:1px solid var(--line2);cursor:pointer}
 .reminder-item,.reminder-archive-item{position:relative;touch-action:pan-y;transition:transform .18s ease,background .18s,border-color .18s;will-change:transform}
 .reminder-item.dragging,.reminder-archive-item.dragging{transition:none}
 .reminder-item.drag-left,.reminder-archive-item.drag-left{border-color:rgba(229,72,77,.26);background:#fff5f5}
@@ -27,7 +27,7 @@
 .reminder-copy b{display:block;font-size:var(--fs-card);font-weight:500;color:#334b42;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .reminder-copy span{display:block;font-size:var(--fs-caption);color:#84959b;margin-top:4px}
 .reminder-copy small{display:block;font-size:10px;color:#a1adb1;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.reminder-convert,.reminder-edit{border:0;background:transparent;color:#16896a;font-size:var(--fs-meta);padding:4px 2px;cursor:pointer}
+.reminder-convert{border:0;background:transparent;color:#16896a;font-size:var(--fs-meta);padding:4px 2px;cursor:pointer}
 .reminder-convert{color:#5f8eaa}
 .reminder-del{border:0;background:transparent;color:#c5a2a2;font-size:15px;padding:3px 2px;cursor:pointer}
 .reminder-empty{text-align:center;padding:27px 10px;color:#98a6aa;font-size:12.5px;line-height:1.8;background:rgba(255,255,255,.55);border:1px dashed var(--line);border-radius:13px}

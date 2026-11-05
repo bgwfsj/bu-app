@@ -159,11 +159,11 @@ function renderTodoPage(){
     var isDone = todoIsDone(item, today);
     var overdue = item.repeat === 'once' && !isDone && item.date < today;
     return '<div class="todo-item' + (isDone ? ' done' : '') + (overdue ? ' overdue' : '') +
-      '" data-drag-kind="todo" data-drag-state="active" data-drag-id="' + escHtml(item.id) + '">' +
+      '" data-drag-kind="todo" data-drag-state="active" data-drag-id="' + escHtml(item.id) + '"' +
+      actionAttrs('editTodo', [item.id]) + '>' +
       '<button class="todo-check"' + actionAttrs('toggleTodo', [item.id]) + ' aria-label="切换完成">✓</button>' +
       '<span class="todo-copy"><b>' + escHtml(item.title) + '</b><span>' + todoRepeatText(item) + '</span></span>' +
       '<button class="todo-convert"' + actionAttrs('convertTodoToReminder', [item.id]) + ' aria-label="转为提醒">转</button>' +
-      '<button class="todo-edit"' + actionAttrs('editTodo', [item.id]) + ' aria-label="编辑待办">改</button>' +
       '<button class="todo-del"' + actionAttrs('deleteTodo', [item.id]) + ' aria-label="删除待办">×</button></div>';
   }).join('') : '<div class="todo-empty">今天还没有待办<br>添加一件需要每天完成的小事</div>';
 

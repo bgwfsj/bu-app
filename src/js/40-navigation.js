@@ -105,12 +105,20 @@ function moveByHorizontalSwipe(dx){
   else goPage(page === 1 ? 6 : page - 1);
 }
 
+function targetOwnsHorizontalGesture(target){
+  return !!(target && target.closest &&
+    target.closest('[data-drag-kind][data-drag-state][data-drag-id]'));
+}
+
 // 左右滑动切换（竖向滚动优先）
 (function(){
   var sx = 0, sy = 0, tracking = false;
   var el = byId('app');
   el.addEventListener('touchstart', function(e){
-    if (e.touches.length !== 1) { tracking = false; return; }
+    if (e.touches.length !== 1 || targetOwnsHorizontalGesture(e.target)) {
+      tracking = false;
+      return;
+    }
     sx = e.touches[0].clientX; sy = e.touches[0].clientY; tracking = true;
   }, { passive: true });
   el.addEventListener('touchend', function(e){

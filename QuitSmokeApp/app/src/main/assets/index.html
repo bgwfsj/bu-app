@@ -355,7 +355,7 @@ body[data-page="settings"] #page-pager{opacity:0;pointer-events:none}
 .todo-progress i::after{content:'';display:block;height:100%;width:var(--todo-progress,0%);background:linear-gradient(90deg,var(--acc),var(--acc2));border-radius:2px;transition:width .35s}
 .todo-add{width:100%;height:44px;border-radius:12px;border:1px solid rgba(10,168,122,.24);background:rgba(10,168,122,.06);color:var(--acc);font-size:12px;letter-spacing:.12em;cursor:pointer}
 .todo-list{display:flex;flex-direction:column;gap:7px;margin-top:13px}
-.todo-item{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:12px;background:#fff;border:1px solid var(--line2)}
+.todo-item{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:12px;background:#fff;border:1px solid var(--line2);cursor:pointer}
 .todo-item,.todo-archive-item{position:relative;touch-action:pan-y;transition:transform .18s ease,background .18s,border-color .18s;will-change:transform}
 .todo-item.dragging,.todo-archive-item.dragging{transition:none}
 .todo-item.drag-holding,.todo-archive-item.drag-holding{user-select:none;box-shadow:0 7px 20px -14px rgba(13,32,45,.45)}
@@ -370,7 +370,7 @@ body[data-page="settings"] #page-pager{opacity:0;pointer-events:none}
 .todo-item.overdue{background:#fffaf4;border-color:rgba(210,116,34,.18)}
 .todo-item.overdue .todo-copy span{color:#b57639}
 .todo-copy span{display:block;font-size:var(--fs-caption);color:#96a4a8;margin-top:4px}
-.todo-convert,.todo-edit{border:0;background:transparent;color:#16896a;font-size:var(--fs-meta);padding:4px 2px;cursor:pointer}
+.todo-convert{border:0;background:transparent;color:#16896a;font-size:var(--fs-meta);padding:4px 2px;cursor:pointer}
 .todo-convert{color:#5f8eaa}
 .todo-del{border:0;background:transparent;color:#c5a2a2;font-size:15px;padding:3px 2px;cursor:pointer}
 .todo-empty{text-align:center;padding:24px 10px;color:#98a6aa;font-size:12.5px;line-height:1.7}
@@ -429,7 +429,7 @@ body[data-page="settings"] #page-pager{opacity:0;pointer-events:none}
 .reminder-group-head small{font-size:var(--fs-caption);color:#9aa8ad;letter-spacing:0}
 .reminder-group.collapsed .reminder-group-list,.reminder-archive-group.collapsed .reminder-archive-item{display:none}
 .reminder-group-list{display:flex;flex-direction:column;gap:7px}
-.reminder-item{display:flex;align-items:center;gap:10px;padding:12px;border-radius:13px;background:#fff;border:1px solid var(--line2)}
+.reminder-item{display:flex;align-items:center;gap:10px;padding:12px;border-radius:13px;background:#fff;border:1px solid var(--line2);cursor:pointer}
 .reminder-item,.reminder-archive-item{position:relative;touch-action:pan-y;transition:transform .18s ease,background .18s,border-color .18s;will-change:transform}
 .reminder-item.dragging,.reminder-archive-item.dragging{transition:none}
 .reminder-item.drag-left,.reminder-archive-item.drag-left{border-color:rgba(229,72,77,.26);background:#fff5f5}
@@ -440,7 +440,7 @@ body[data-page="settings"] #page-pager{opacity:0;pointer-events:none}
 .reminder-copy b{display:block;font-size:var(--fs-card);font-weight:500;color:#334b42;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .reminder-copy span{display:block;font-size:var(--fs-caption);color:#84959b;margin-top:4px}
 .reminder-copy small{display:block;font-size:10px;color:#a1adb1;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.reminder-convert,.reminder-edit{border:0;background:transparent;color:#16896a;font-size:var(--fs-meta);padding:4px 2px;cursor:pointer}
+.reminder-convert{border:0;background:transparent;color:#16896a;font-size:var(--fs-meta);padding:4px 2px;cursor:pointer}
 .reminder-convert{color:#5f8eaa}
 .reminder-del{border:0;background:transparent;color:#c5a2a2;font-size:15px;padding:3px 2px;cursor:pointer}
 .reminder-empty{text-align:center;padding:27px 10px;color:#98a6aa;font-size:12.5px;line-height:1.8;background:rgba(255,255,255,.55);border:1px dashed var(--line);border-radius:13px}
@@ -1627,6 +1627,7 @@ var workoutLastPaint = 0;
 var page = 0;
 var settingsOpen = false;
 var ledgerSettingsOpen = false;
+var dragClickSuppressionUntil = 0;
 var sheetRequired = false;
 var lastStageIdx = -99;
 var lastDLen = -1;   // 天数位数，用于触发字号重算
@@ -1771,6 +1772,13 @@ function invokeAppAction(el, eventName){
 }
 
 document.addEventListener('click', function(e){
+  if (dragClickSuppressionUntil && Date.now() < dragClickSuppressionUntil &&
+      e.target.closest && e.target.closest('[data-drag-kind]')) {
+    dragClickSuppressionUntil = 0;
+    e.preventDefault();
+    e.stopPropagation();
+    return;
+  }
   var el = e.target && e.target.closest ? e.target.closest('[data-action]') : null;
   if (!el || el.disabled) return;
   invokeAppAction(el, 'click');
@@ -1967,6 +1975,7 @@ byId('mask').addEventListener('click', closeSheet);
    应用版本记录
    ============================================================ */
 var APP_CHANGELOG = [
+  { version: '5.8.3', date: '2026-11-05', changes: ['提醒和待办条目上的左右滑动只执行归档、移回或删除，不再切换大页面。', '去掉条目上的“改”按钮，点击正常状态的待办或提醒即可编辑；归档条目保持只读。', '通知恢复系统原生样式，增加清晰的小铃铛图标和带图标的“稍后”“确认”操作，并恢复锁屏显示。'] },
   { version: '5.8.2', date: '2026-11-05', changes: ['提醒通知改为自定义双按钮布局，正文内直接显示“稍后提醒”和“确认完成”。', '独立提醒和待办提醒使用新的通知通道，避免旧通道缓存影响按钮显示。'] },
   { version: '5.8.1', date: '2026-11-05', changes: ['提醒通知把“稍后”调整为首个操作，小米折叠通知也能直接看到。', '提醒、待办和补发通知都支持锁屏可见。'] },
   { version: '5.8', date: '2026-11-05', changes: ['记账支持修改事件名称、按日期/分类/备注/金额搜索和事件归档恢复。', '记账设置页集中管理事件、分类、CSV 导入导出，并可导出全部事件。', '提醒与待办支持一对一转换；一次性提醒点“确认”后归档为已完成。', '提醒分组记住展开或折叠状态，训练计划动作列表显示恢复。', '应用内更新会先自动导出完整备份，备份成功后才开始下载。', '安装包改用专用发布签名，后续更新固定使用同一签名。'] },
@@ -2574,12 +2583,20 @@ function moveByHorizontalSwipe(dx){
   else goPage(page === 1 ? 6 : page - 1);
 }
 
+function targetOwnsHorizontalGesture(target){
+  return !!(target && target.closest &&
+    target.closest('[data-drag-kind][data-drag-state][data-drag-id]'));
+}
+
 // 左右滑动切换（竖向滚动优先）
 (function(){
   var sx = 0, sy = 0, tracking = false;
   var el = byId('app');
   el.addEventListener('touchstart', function(e){
-    if (e.touches.length !== 1) { tracking = false; return; }
+    if (e.touches.length !== 1 || targetOwnsHorizontalGesture(e.target)) {
+      tracking = false;
+      return;
+    }
     sx = e.touches[0].clientX; sy = e.touches[0].clientY; tracking = true;
   }, { passive: true });
   el.addEventListener('touchend', function(e){
@@ -4312,11 +4329,11 @@ function renderTodoPage(){
     var isDone = todoIsDone(item, today);
     var overdue = item.repeat === 'once' && !isDone && item.date < today;
     return '<div class="todo-item' + (isDone ? ' done' : '') + (overdue ? ' overdue' : '') +
-      '" data-drag-kind="todo" data-drag-state="active" data-drag-id="' + escHtml(item.id) + '">' +
+      '" data-drag-kind="todo" data-drag-state="active" data-drag-id="' + escHtml(item.id) + '"' +
+      actionAttrs('editTodo', [item.id]) + '>' +
       '<button class="todo-check"' + actionAttrs('toggleTodo', [item.id]) + ' aria-label="切换完成">✓</button>' +
       '<span class="todo-copy"><b>' + escHtml(item.title) + '</b><span>' + todoRepeatText(item) + '</span></span>' +
       '<button class="todo-convert"' + actionAttrs('convertTodoToReminder', [item.id]) + ' aria-label="转为提醒">转</button>' +
-      '<button class="todo-edit"' + actionAttrs('editTodo', [item.id]) + ' aria-label="编辑待办">改</button>' +
       '<button class="todo-del"' + actionAttrs('deleteTodo', [item.id]) + ' aria-label="删除待办">×</button></div>';
   }).join('') : '<div class="todo-empty">今天还没有待办<br>添加一件需要每天完成的小事</div>';
 
@@ -5022,13 +5039,12 @@ function renderReminderPage(){
       '<div class="reminder-group-list">' + rows.map(function(row){
         var item = row.item;
         return '<div class="reminder-item" data-drag-kind="reminder" data-drag-state="active" data-drag-id="' +
-          escHtml(item.id) + '">' +
+          escHtml(item.id) + '"' + actionAttrs('editReminder', [item.id]) + '>' +
           '<span class="reminder-time-chip">' + escHtml(item.time) + '</span>' +
           '<span class="reminder-copy"><b>' + escHtml(item.title) + '</b>' +
           '<span>' + escHtml(reminderRuleText(item)) + '</span>' +
           '<small>' + escHtml(reminderNextText(item)) + '</small></span>' +
           '<button class="reminder-convert"' + actionAttrs('convertReminderToTodo', [item.id]) + ' aria-label="转为待办">转</button>' +
-          '<button class="reminder-edit"' + actionAttrs('editReminder', [item.id]) + '>改</button>' +
           '<button class="reminder-del"' + actionAttrs('deleteReminder', [item.id]) + ' aria-label="删除提醒">×</button>' +
           '</div>';
       }).join('') + '</div></section>';
@@ -6667,11 +6683,13 @@ function bindDragGestures(){
   function finish(e){
     if (!dragGesture || dragGesture.pointerId !== e.pointerId) return;
     var dx = e.clientX - dragGesture.startX;
+    var activated = dragGesture.activated;
     var kind = dragGesture.kind;
     var state = dragGesture.state;
     var id = dragGesture.id;
     var direction = dx <= -70 ? 'left' : (dx >= 70 ? 'right' : '');
     resetDragGesture(true);
+    if (activated) dragClickSuppressionUntil = Date.now() + 500;
     if (direction) applyDragGestureAction(kind, state, id, direction);
   }
 

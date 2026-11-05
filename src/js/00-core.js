@@ -51,6 +51,7 @@ var workoutLastPaint = 0;
 var page = 0;
 var settingsOpen = false;
 var ledgerSettingsOpen = false;
+var dragClickSuppressionUntil = 0;
 var sheetRequired = false;
 var lastStageIdx = -99;
 var lastDLen = -1;   // 天数位数，用于触发字号重算
@@ -195,6 +196,13 @@ function invokeAppAction(el, eventName){
 }
 
 document.addEventListener('click', function(e){
+  if (dragClickSuppressionUntil && Date.now() < dragClickSuppressionUntil &&
+      e.target.closest && e.target.closest('[data-drag-kind]')) {
+    dragClickSuppressionUntil = 0;
+    e.preventDefault();
+    e.stopPropagation();
+    return;
+  }
   var el = e.target && e.target.closest ? e.target.closest('[data-action]') : null;
   if (!el || el.disabled) return;
   invokeAppAction(el, 'click');

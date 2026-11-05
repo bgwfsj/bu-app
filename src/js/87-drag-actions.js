@@ -104,11 +104,13 @@ function bindDragGestures(){
   function finish(e){
     if (!dragGesture || dragGesture.pointerId !== e.pointerId) return;
     var dx = e.clientX - dragGesture.startX;
+    var activated = dragGesture.activated;
     var kind = dragGesture.kind;
     var state = dragGesture.state;
     var id = dragGesture.id;
     var direction = dx <= -70 ? 'left' : (dx >= 70 ? 'right' : '');
     resetDragGesture(true);
+    if (activated) dragClickSuppressionUntil = Date.now() + 500;
     if (direction) applyDragGestureAction(kind, state, id, direction);
   }
 

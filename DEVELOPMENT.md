@@ -6,7 +6,7 @@
 
 - 应用名：补
 - 包名：`com.quitsmoke.app`
-- 当前版本：5.8.2
+- 当前版本：5.8.3
 - 最低 Android：API 24
 - Target SDK：34
 - 仓库：`bgwfsj/bu-app`（公开）
@@ -141,6 +141,8 @@ bu_pre_restore_v1    完整恢复前的安全副本
 - 每日、工作日、周末任务不会整体过期。
 - 转换提醒时可无损使用 weekly、monthly、yearly 三类规则。
 - 支持手势：普通项左拖归档；归档项右拖移回、左拖彻底删除；长按后进入增强拖拽反馈，原按钮保留。
+- 待办和提醒条目自身拥有横向手势，因此从条目开始横向滑动时禁止切换大页面；拖拽结束后会短时抑制生成的点击事件，避免误开编辑页。
+- 正常状态的待办和提醒条目点击整行进入编辑；归档条目没有编辑 action，保持只读。
 
 ## 提醒规则
 
@@ -176,7 +178,7 @@ bu_pre_restore_v1    完整恢复前的安全副本
 - `SnoozeScheduler` / `SnoozeReceiver`：一次性稍后提醒。
 - `NotificationActionReceiver`：通知“确认”动作，收起通知。
 
-提醒通知使用 `ReminderNotificationFactory` 和 `res/layout/notification_reminder.xml` 构建自定义双按钮界面，避免小米等系统隐藏标准通知操作栏。独立提醒与待办提醒使用新的 `*_v2` 通知通道，旧通道会被清理。
+提醒通知由 `ReminderNotificationFactory` 使用系统原生 `BigTextStyle` 和带图标的标准 action 构建。小图标必须使用单色 `ic_notification`，不能使用自适应图标前景。独立提醒与待办提醒使用新的 `*_v3` 通知通道，旧通道会被清理。不要重新引入自定义 RemoteViews 卡片，小米会隐藏锁屏并产生多余留白。
 
 通知点击：
 
@@ -209,6 +211,8 @@ bu_pre_restore_v1    完整恢复前的安全副本
 用户确认更新后，`AppUpdater` 先调用 `MainActivity.backupBeforeUpdate()`，由 WebView 执行 `window.exportUpdateBackup()` 并保存完整 JSON。只有备份返回成功才进入下载；备份失败时停止更新。
 
 ## 发版流程
+
+用户已确认：以后每次执行“打包”都默认包含完整发版，即构建正式签名 APK、提交并推送源码、创建标签、上传 GitHub Release，无需再次询问是否上传。
 
 1. 修改 `QuitSmokeApp/app/build.gradle` 的 `versionCode` 和 `versionName`
 2. 在 `src/js/05-app-info.js` 增加当前版本更新记录
