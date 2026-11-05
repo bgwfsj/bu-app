@@ -246,8 +246,7 @@ function renderReminderPage(){
   byId('reminder-archive-list').innerHTML = archived.length ? archived.map(function(item){
     var state = item.archiveReason === 'completed' ? '已提醒' : '已删除';
     return '<div class="reminder-archive-item">' +
-      '<span class="reminder-archive-copy"><b>' + escHtml(item.title) + '</b>' +
-      '<span>' + escHtml(reminderRuleText(item)) + ' · ' + escHtml(item.time) + '</span></span>' +
+      '<span class="reminder-archive-copy"><b>' + escHtml(item.title) + '</b></span>' +
       '<span class="reminder-archive-actions"><span class="reminder-archive-state">' + state + '</span>' +
       '<button' + actionAttrs('restoreReminder', [item.id]) + '>移回</button>' +
       '<button class="danger"' + actionAttrs('permanentDeleteReminder', [item.id]) + ' aria-label="彻底删除">×</button></span></div>';

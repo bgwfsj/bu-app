@@ -287,8 +287,8 @@ async function run() {
       opened: true,
       dataActions: 2,
       aboutOpened: true,
-      changelogCount: 25,
-      aboutVersion: '5.5',
+      changelogCount: 26,
+      aboutVersion: '5.5.1',
       updateCalls: 1,
       handledBack: true,
       returnedHome: true

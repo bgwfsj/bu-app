@@ -171,14 +171,12 @@ function renderTodoPage(){
   var archived = todoArchivedItems();
   byId('todo-archive-count').textContent = archived.length + ' 项';
   byId('todo-archive-list').innerHTML = archived.length ? archived.map(function(item){
-    var archiveDate = todoArchiveDate(item);
     var state;
     if (item.archiveReason === 'deleted') state = '已删除';
     else if (item.repeat === 'once') state = item.done ? '已完成' : '未完成';
     else state = '已结束';
     return '<div class="todo-archive-item">' +
-      '<span class="todo-archive-copy"><b>' + escHtml(item.title) + '</b>' +
-      '<span>原定 ' + workoutDateLabel(archiveDate) + (item.repeat === 'custom' ? ' · 自定义日期' : '') + '</span></span>' +
+      '<span class="todo-archive-copy"><b>' + escHtml(item.title) + '</b></span>' +
       '<span class="todo-archive-actions"><span class="todo-archive-state">' + state + '</span>' +
       '<button' + actionAttrs('restoreTodo', [item.id]) + '>移回</button>' +
       '<button class="danger"' + actionAttrs('permanentDeleteTodo', [item.id]) + ' aria-label="彻底删除">×</button></span></div>';
