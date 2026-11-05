@@ -287,8 +287,8 @@ async function run() {
       opened: true,
       dataActions: 2,
       aboutOpened: true,
-      changelogCount: 26,
-      aboutVersion: '5.5.1',
+      changelogCount: 27,
+      aboutVersion: '5.6',
       updateCalls: 1,
       handledBack: true,
       returnedHome: true
@@ -505,6 +505,56 @@ async function run() {
     assert.equal(reminders.restored, true);
     assert.equal(reminders.permanentlyRemoved, true);
     assert.equal(reminders.archiveCount, '1 条');
+
+    const dragActions = await evaluate(cdp, `(function(){
+      todoData.items.push({
+        id: 'drag_todo', title: '拖拽待办', repeat: 'once', date: wTodayStr(),
+        createdDate: wTodayStr(), done: false, doneDates: {}
+      });
+      applyDragGestureAction('todo', 'active', 'drag_todo', 'left');
+      var todoArchived = todoData.archived.some(function(item){ return item.id === 'drag_todo'; });
+      applyDragGestureAction('todo', 'archive', 'drag_todo', 'right');
+      var todoRestored = todoData.items.some(function(item){ return item.id === 'drag_todo'; });
+      applyDragGestureAction('todo', 'active', 'drag_todo', 'left');
+      applyDragGestureAction('todo', 'archive', 'drag_todo', 'left');
+      document.querySelector('[data-action="resolveAppConfirm"][data-args="[true]"]').click();
+      var todoDeleted = !todoData.archived.some(function(item){ return item.id === 'drag_todo'; });
+
+      reminderData.items.push({
+        id: 'drag_reminder', title: '拖拽提醒', mode: 'daily', time: '09:00',
+        createdAt: new Date().toISOString()
+      });
+      applyDragGestureAction('reminder', 'active', 'drag_reminder', 'left');
+      var reminderArchived = reminderData.archived.some(function(item){ return item.id === 'drag_reminder'; });
+      applyDragGestureAction('reminder', 'archive', 'drag_reminder', 'right');
+      var reminderRestored = reminderData.items.some(function(item){ return item.id === 'drag_reminder'; });
+      applyDragGestureAction('reminder', 'active', 'drag_reminder', 'left');
+      applyDragGestureAction('reminder', 'archive', 'drag_reminder', 'left');
+      document.querySelector('[data-action="resolveAppConfirm"][data-args="[true]"]').click();
+      var reminderDeleted = !reminderData.archived.some(function(item){ return item.id === 'drag_reminder'; });
+      return {
+        todoArchived: todoArchived,
+        todoRestored: todoRestored,
+        todoDeleted: todoDeleted,
+        reminderArchived: reminderArchived,
+        reminderRestored: reminderRestored,
+        reminderDeleted: reminderDeleted,
+        activeHint: dragHintFor('todo', 'active', 'left'),
+        restoreHint: dragHintFor('reminder', 'archive', 'right'),
+        deleteHint: dragHintFor('reminder', 'archive', 'left')
+      };
+    })()`);
+    assert.deepEqual(dragActions, {
+      todoArchived: true,
+      todoRestored: true,
+      todoDeleted: true,
+      reminderArchived: true,
+      reminderRestored: true,
+      reminderDeleted: true,
+      activeHint: '松开归档',
+      restoreHint: '松开移回',
+      deleteHint: '松开彻底删除'
+    });
 
     const typography = await evaluate(cdp, `(function(){
       var size = function(selector){ return getComputedStyle(document.querySelector(selector)).fontSize; };

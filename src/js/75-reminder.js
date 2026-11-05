@@ -231,7 +231,8 @@ function renderReminderPage(){
   setTxt('reminder-next-summary', active.length ? '下一条 · ' + reminderShortDate(active[0].next) : '还没有安排');
   byId('reminder-list').innerHTML = ordered.length ? ordered.map(function(row){
     var item = row.item;
-    return '<div class="reminder-item">' +
+    return '<div class="reminder-item" data-drag-kind="reminder" data-drag-state="active" data-drag-id="' +
+      escHtml(item.id) + '">' +
       '<span class="reminder-time-chip">' + escHtml(item.time) + '</span>' +
       '<span class="reminder-copy"><b>' + escHtml(item.title) + '</b>' +
       '<span>' + escHtml(reminderRuleText(item)) + '</span>' +
@@ -245,7 +246,8 @@ function renderReminderPage(){
   byId('reminder-archive-count').textContent = archived.length + ' 条';
   byId('reminder-archive-list').innerHTML = archived.length ? archived.map(function(item){
     var state = item.archiveReason === 'completed' ? '已提醒' : '已删除';
-    return '<div class="reminder-archive-item">' +
+    return '<div class="reminder-archive-item" data-drag-kind="reminder" data-drag-state="archive" data-drag-id="' +
+      escHtml(item.id) + '">' +
       '<span class="reminder-archive-copy"><b>' + escHtml(item.title) + '</b></span>' +
       '<span class="reminder-archive-actions"><span class="reminder-archive-state">' + state + '</span>' +
       '<button' + actionAttrs('restoreReminder', [item.id]) + '>移回</button>' +
@@ -449,14 +451,20 @@ function deleteReminder(id){
   var item = reminderItemById(id);
   if (!item) return;
   appConfirm('将“' + item.title + '”移入归档？', function(){
-    reminderData.items = reminderData.items.filter(function(saved){ return saved.id !== id; });
-    item.archivedAt = Date.now();
-    item.archiveReason = 'deleted';
-    reminderData.archived.push(item);
-    saveReminderState(false);
-    renderReminderPage();
-    toast('提醒已移入归档');
+    archiveReminderNow(id);
   }, { title: '移入归档', confirmLabel: '移入归档' });
+}
+
+function archiveReminderNow(id){
+  var item = reminderItemById(id);
+  if (!item) return;
+  reminderData.items = reminderData.items.filter(function(saved){ return saved.id !== id; });
+  item.archivedAt = Date.now();
+  item.archiveReason = 'deleted';
+  reminderData.archived.push(item);
+  saveReminderState(false);
+  renderReminderPage();
+  toast('提醒已移入归档');
 }
 
 function restoreReminder(id){

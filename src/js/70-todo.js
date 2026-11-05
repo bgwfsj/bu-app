@@ -144,7 +144,8 @@ function renderTodoPage(){
   list.innerHTML = items.length ? items.map(function(item){
     var isDone = todoIsDone(item, today);
     var overdue = item.repeat === 'once' && !isDone && item.date < today;
-    return '<div class="todo-item' + (isDone ? ' done' : '') + (overdue ? ' overdue' : '') + '">' +
+    return '<div class="todo-item' + (isDone ? ' done' : '') + (overdue ? ' overdue' : '') +
+      '" data-drag-kind="todo" data-drag-state="active" data-drag-id="' + escHtml(item.id) + '">' +
       '<button class="todo-check"' + actionAttrs('toggleTodo', [item.id]) + ' aria-label="切换完成">✓</button>' +
       '<span class="todo-copy"><b>' + escHtml(item.title) + '</b><span>' + todoRepeatText(item) + '</span></span>' +
       '<button class="todo-edit"' + actionAttrs('editTodo', [item.id]) + ' aria-label="编辑待办">改</button>' +
@@ -175,7 +176,8 @@ function renderTodoPage(){
     if (item.archiveReason === 'deleted') state = '已删除';
     else if (item.repeat === 'once') state = item.done ? '已完成' : '未完成';
     else state = '已结束';
-    return '<div class="todo-archive-item">' +
+    return '<div class="todo-archive-item" data-drag-kind="todo" data-drag-state="archive" data-drag-id="' +
+      escHtml(item.id) + '">' +
       '<span class="todo-archive-copy"><b>' + escHtml(item.title) + '</b></span>' +
       '<span class="todo-archive-actions"><span class="todo-archive-state">' + state + '</span>' +
       '<button' + actionAttrs('restoreTodo', [item.id]) + '>移回</button>' +
@@ -333,15 +335,22 @@ function deleteTodo(id){
   each(todoData.items, function(saved){ if (saved.id === id) item = saved; });
   if (!item) return;
   appConfirm('将“' + item.title + '”移入归档？', function(){
-    todoData.items = todoData.items.filter(function(saved){ return saved.id !== id; });
-    item.archivedAt = Date.now();
-    item.archiveReason = 'deleted';
-    todoData.archived.push(item);
-    saveTodoState();
-    renderTodoPage();
-    syncTodoReminder();
-    toast('待办已移入归档');
+    archiveTodoNow(id);
   }, { title: '移入归档', confirmLabel: '移入归档' });
+}
+
+function archiveTodoNow(id){
+  var item = null;
+  each(todoData.items, function(saved){ if (saved.id === id) item = saved; });
+  if (!item) return;
+  todoData.items = todoData.items.filter(function(saved){ return saved.id !== id; });
+  item.archivedAt = Date.now();
+  item.archiveReason = 'deleted';
+  todoData.archived.push(item);
+  saveTodoState();
+  renderTodoPage();
+  syncTodoReminder();
+  toast('待办已移入归档');
 }
 
 function restoreTodo(id){

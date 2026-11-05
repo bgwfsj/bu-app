@@ -39,6 +39,7 @@ function boot(){
   initTodo();
   initReminder();
   initLedger();
+  bindDragGestures();
   renderDashboard();
 
   setInterval(function(){

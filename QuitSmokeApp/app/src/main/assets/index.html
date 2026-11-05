@@ -356,6 +356,12 @@ body[data-page="settings"] #page-pager{opacity:0;pointer-events:none}
 .todo-add{width:100%;height:44px;border-radius:12px;border:1px solid rgba(10,168,122,.24);background:rgba(10,168,122,.06);color:var(--acc);font-size:12px;letter-spacing:.12em;cursor:pointer}
 .todo-list{display:flex;flex-direction:column;gap:7px;margin-top:13px}
 .todo-item{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:12px;background:#fff;border:1px solid var(--line2)}
+.todo-item,.todo-archive-item{position:relative;touch-action:pan-y;transition:transform .18s ease,background .18s,border-color .18s;will-change:transform}
+.todo-item.dragging,.todo-archive-item.dragging{transition:none}
+.todo-item.drag-holding,.todo-archive-item.drag-holding{user-select:none;box-shadow:0 7px 20px -14px rgba(13,32,45,.45)}
+.todo-item.drag-left,.todo-archive-item.drag-left{border-color:rgba(229,72,77,.26);background:#fff5f5}
+.todo-item.drag-right,.todo-archive-item.drag-right{border-color:rgba(10,168,122,.24);background:#f3fbf8}
+[data-drag-hint]::after{content:attr(data-drag-hint);position:absolute;right:9px;top:50%;transform:translateY(-50%);padding:3px 6px;border-radius:6px;background:rgba(255,255,255,.92);font-size:10px;color:#657980;pointer-events:none}
 .todo-check{width:20px;height:20px;flex:0 0 20px;border-radius:50%;border:1.5px solid rgba(10,168,122,.35);background:#fff;color:transparent;font-size:11px;cursor:pointer;display:grid;place-items:center}
 .todo-item.done .todo-check{background:var(--acc);border-color:var(--acc);color:#fff}
 .todo-copy{flex:1;min-width:0}
@@ -416,6 +422,11 @@ body[data-page="settings"] #page-pager{opacity:0;pointer-events:none}
 .reminder-add{width:100%;height:44px;border-radius:12px;border:1px solid rgba(10,168,122,.24);background:rgba(10,168,122,.06);color:var(--acc);font-size:12px;letter-spacing:.12em;cursor:pointer}
 .reminder-list{display:flex;flex-direction:column;gap:8px;margin-top:13px}
 .reminder-item{display:flex;align-items:center;gap:10px;padding:12px;border-radius:13px;background:#fff;border:1px solid var(--line2)}
+.reminder-item,.reminder-archive-item{position:relative;touch-action:pan-y;transition:transform .18s ease,background .18s,border-color .18s;will-change:transform}
+.reminder-item.dragging,.reminder-archive-item.dragging{transition:none}
+.reminder-item.drag-holding,.reminder-archive-item.drag-holding{user-select:none;box-shadow:0 7px 20px -14px rgba(13,32,45,.45)}
+.reminder-item.drag-left,.reminder-archive-item.drag-left{border-color:rgba(229,72,77,.26);background:#fff5f5}
+.reminder-item.drag-right,.reminder-archive-item.drag-right{border-color:rgba(10,168,122,.24);background:#f3fbf8}
 .reminder-item.past{opacity:.58}
 .reminder-time-chip{flex:0 0 43px;height:43px;border-radius:12px;background:rgba(10,168,122,.07);color:#087d5c;display:grid;place-items:center;font:11px ui-monospace,"SF Mono",Menlo,Consolas,monospace;letter-spacing:-.02em}
 .reminder-copy{flex:1;min-width:0}
@@ -1808,6 +1819,7 @@ byId('mask').addEventListener('click', closeSheet);
    应用版本记录
    ============================================================ */
 var APP_CHANGELOG = [
+  { version: '5.6', date: '2026-11-05', changes: ['待办和提醒支持横向拖拽与长按拖拽。', '普通项左拖归档；归档项右拖移回、左拖彻底删除。', '保留原有按钮操作。'] },
   { version: '5.5.1', date: '2026-11-05', changes: ['待办和提醒归档列表改为单行，仅保留标题、状态和操作。'] },
   { version: '5.5', date: '2026-11-05', changes: ['待办和提醒新增归档、移回与彻底删除。', '一次性提醒完成后自动归档。', '喝水今日记录与快捷水量字号统一。', '记账事件和月度总览文字统一为 13px。', '整理项目目录并补充使用说明与 AI 开发说明。'] },
   { version: '5.4.1', date: '2026-11-05', changes: ['设置页新增“关于”和完整更新记录。'] },
@@ -4102,7 +4114,8 @@ function renderTodoPage(){
   list.innerHTML = items.length ? items.map(function(item){
     var isDone = todoIsDone(item, today);
     var overdue = item.repeat === 'once' && !isDone && item.date < today;
-    return '<div class="todo-item' + (isDone ? ' done' : '') + (overdue ? ' overdue' : '') + '">' +
+    return '<div class="todo-item' + (isDone ? ' done' : '') + (overdue ? ' overdue' : '') +
+      '" data-drag-kind="todo" data-drag-state="active" data-drag-id="' + escHtml(item.id) + '">' +
       '<button class="todo-check"' + actionAttrs('toggleTodo', [item.id]) + ' aria-label="切换完成">✓</button>' +
       '<span class="todo-copy"><b>' + escHtml(item.title) + '</b><span>' + todoRepeatText(item) + '</span></span>' +
       '<button class="todo-edit"' + actionAttrs('editTodo', [item.id]) + ' aria-label="编辑待办">改</button>' +
@@ -4133,7 +4146,8 @@ function renderTodoPage(){
     if (item.archiveReason === 'deleted') state = '已删除';
     else if (item.repeat === 'once') state = item.done ? '已完成' : '未完成';
     else state = '已结束';
-    return '<div class="todo-archive-item">' +
+    return '<div class="todo-archive-item" data-drag-kind="todo" data-drag-state="archive" data-drag-id="' +
+      escHtml(item.id) + '">' +
       '<span class="todo-archive-copy"><b>' + escHtml(item.title) + '</b></span>' +
       '<span class="todo-archive-actions"><span class="todo-archive-state">' + state + '</span>' +
       '<button' + actionAttrs('restoreTodo', [item.id]) + '>移回</button>' +
@@ -4291,15 +4305,22 @@ function deleteTodo(id){
   each(todoData.items, function(saved){ if (saved.id === id) item = saved; });
   if (!item) return;
   appConfirm('将“' + item.title + '”移入归档？', function(){
-    todoData.items = todoData.items.filter(function(saved){ return saved.id !== id; });
-    item.archivedAt = Date.now();
-    item.archiveReason = 'deleted';
-    todoData.archived.push(item);
-    saveTodoState();
-    renderTodoPage();
-    syncTodoReminder();
-    toast('待办已移入归档');
+    archiveTodoNow(id);
   }, { title: '移入归档', confirmLabel: '移入归档' });
+}
+
+function archiveTodoNow(id){
+  var item = null;
+  each(todoData.items, function(saved){ if (saved.id === id) item = saved; });
+  if (!item) return;
+  todoData.items = todoData.items.filter(function(saved){ return saved.id !== id; });
+  item.archivedAt = Date.now();
+  item.archiveReason = 'deleted';
+  todoData.archived.push(item);
+  saveTodoState();
+  renderTodoPage();
+  syncTodoReminder();
+  toast('待办已移入归档');
 }
 
 function restoreTodo(id){
@@ -4697,7 +4718,8 @@ function renderReminderPage(){
   setTxt('reminder-next-summary', active.length ? '下一条 · ' + reminderShortDate(active[0].next) : '还没有安排');
   byId('reminder-list').innerHTML = ordered.length ? ordered.map(function(row){
     var item = row.item;
-    return '<div class="reminder-item">' +
+    return '<div class="reminder-item" data-drag-kind="reminder" data-drag-state="active" data-drag-id="' +
+      escHtml(item.id) + '">' +
       '<span class="reminder-time-chip">' + escHtml(item.time) + '</span>' +
       '<span class="reminder-copy"><b>' + escHtml(item.title) + '</b>' +
       '<span>' + escHtml(reminderRuleText(item)) + '</span>' +
@@ -4711,7 +4733,8 @@ function renderReminderPage(){
   byId('reminder-archive-count').textContent = archived.length + ' 条';
   byId('reminder-archive-list').innerHTML = archived.length ? archived.map(function(item){
     var state = item.archiveReason === 'completed' ? '已提醒' : '已删除';
-    return '<div class="reminder-archive-item">' +
+    return '<div class="reminder-archive-item" data-drag-kind="reminder" data-drag-state="archive" data-drag-id="' +
+      escHtml(item.id) + '">' +
       '<span class="reminder-archive-copy"><b>' + escHtml(item.title) + '</b></span>' +
       '<span class="reminder-archive-actions"><span class="reminder-archive-state">' + state + '</span>' +
       '<button' + actionAttrs('restoreReminder', [item.id]) + '>移回</button>' +
@@ -4915,14 +4938,20 @@ function deleteReminder(id){
   var item = reminderItemById(id);
   if (!item) return;
   appConfirm('将“' + item.title + '”移入归档？', function(){
-    reminderData.items = reminderData.items.filter(function(saved){ return saved.id !== id; });
-    item.archivedAt = Date.now();
-    item.archiveReason = 'deleted';
-    reminderData.archived.push(item);
-    saveReminderState(false);
-    renderReminderPage();
-    toast('提醒已移入归档');
+    archiveReminderNow(id);
   }, { title: '移入归档', confirmLabel: '移入归档' });
+}
+
+function archiveReminderNow(id){
+  var item = reminderItemById(id);
+  if (!item) return;
+  reminderData.items = reminderData.items.filter(function(saved){ return saved.id !== id; });
+  item.archivedAt = Date.now();
+  item.archiveReason = 'deleted';
+  reminderData.archived.push(item);
+  saveReminderState(false);
+  renderReminderPage();
+  toast('提醒已移入归档');
 }
 
 function restoreReminder(id){
@@ -5811,6 +5840,124 @@ function saveSnooze(){
   snoozeDraft = null;
 }
 
+/* 87-drag-actions.js */
+/* ============================================================
+   8.9 待办与提醒拖拽
+   ============================================================ */
+var dragGesture = null;
+
+function resetDragGesture(clearTransform){
+  if (!dragGesture) return;
+  clearTimeout(dragGesture.timer);
+  var row = dragGesture.row;
+  if (row) {
+    row.classList.remove('dragging', 'drag-holding', 'drag-left', 'drag-right');
+    row.removeAttribute('data-drag-hint');
+    if (clearTransform) row.style.transform = '';
+  }
+  dragGesture = null;
+}
+
+function dragHintFor(kind, state, direction){
+  if (state === 'active') {
+    return direction === 'left' ? '松开归档' : '';
+  }
+  if (direction === 'left') return '松开彻底删除';
+  if (direction === 'right') return '松开移回';
+  return '';
+}
+
+function applyDragGestureAction(kind, state, id, direction){
+  if (!direction) return;
+  if (kind === 'todo') {
+    if (state === 'active' && direction === 'left') archiveTodoNow(id);
+    if (state === 'archive' && direction === 'right') restoreTodo(id);
+    if (state === 'archive' && direction === 'left') permanentDeleteTodo(id);
+    return;
+  }
+  if (kind === 'reminder') {
+    if (state === 'active' && direction === 'left') archiveReminderNow(id);
+    if (state === 'archive' && direction === 'right') restoreReminder(id);
+    if (state === 'archive' && direction === 'left') permanentDeleteReminder(id);
+  }
+}
+
+function bindDragGestures(){
+  var app = byId('app');
+  if (!app || app._dragBound) return;
+  app._dragBound = true;
+
+  app.addEventListener('pointerdown', function(e){
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    if (e.target.closest('button,input,select,textarea,a')) return;
+    var row = e.target.closest('[data-drag-kind][data-drag-state][data-drag-id]');
+    if (!row) return;
+    resetDragGesture(true);
+    dragGesture = {
+      row: row,
+      kind: row.getAttribute('data-drag-kind'),
+      state: row.getAttribute('data-drag-state'),
+      id: row.getAttribute('data-drag-id'),
+      pointerId: e.pointerId,
+      startX: e.clientX,
+      startY: e.clientY,
+      activated: false,
+      holding: false,
+      timer: setTimeout(function(){
+        if (!dragGesture || dragGesture.row !== row) return;
+        dragGesture.holding = true;
+        dragGesture.activated = true;
+        row.classList.add('drag-holding');
+        try { row.setPointerCapture(dragGesture.pointerId); } catch (error) {}
+        if (navigator.vibrate) navigator.vibrate(10);
+      }, 320)
+    };
+  });
+
+  app.addEventListener('pointermove', function(e){
+    if (!dragGesture || dragGesture.pointerId !== e.pointerId) return;
+    var dx = e.clientX - dragGesture.startX;
+    var dy = e.clientY - dragGesture.startY;
+    if (!dragGesture.activated) {
+      if (Math.abs(dy) > 10 && Math.abs(dy) > Math.abs(dx)) {
+        resetDragGesture(true);
+        return;
+      }
+      if (Math.abs(dx) < 7) return;
+      dragGesture.activated = true;
+      clearTimeout(dragGesture.timer);
+      try { dragGesture.row.setPointerCapture(e.pointerId); } catch (error) {}
+    }
+    e.preventDefault();
+    var limit = Math.max(76, window.innerWidth * 0.28);
+    var shifted = Math.max(-limit, Math.min(limit, dx));
+    var direction = shifted < -24 ? 'left' : (shifted > 24 ? 'right' : '');
+    dragGesture.row.classList.add('dragging');
+    dragGesture.row.classList.toggle('drag-left', direction === 'left');
+    dragGesture.row.classList.toggle('drag-right', direction === 'right');
+    dragGesture.row.style.transform = 'translateX(' + shifted + 'px)';
+    var hint = dragHintFor(dragGesture.kind, dragGesture.state, direction);
+    if (hint) dragGesture.row.setAttribute('data-drag-hint', hint);
+    else dragGesture.row.removeAttribute('data-drag-hint');
+  });
+
+  function finish(e){
+    if (!dragGesture || dragGesture.pointerId !== e.pointerId) return;
+    var dx = e.clientX - dragGesture.startX;
+    var kind = dragGesture.kind;
+    var state = dragGesture.state;
+    var id = dragGesture.id;
+    var direction = dx <= -70 ? 'left' : (dx >= 70 ? 'right' : '');
+    resetDragGesture(true);
+    if (direction) applyDragGestureAction(kind, state, id, direction);
+  }
+
+  app.addEventListener('pointerup', finish);
+  app.addEventListener('pointercancel', function(e){
+    if (dragGesture && dragGesture.pointerId === e.pointerId) resetDragGesture(true);
+  });
+}
+
 /* 90-boot.js */
 /* ============================================================
    9. 启动
@@ -5853,6 +6000,7 @@ function boot(){
   initTodo();
   initReminder();
   initLedger();
+  bindDragGestures();
   renderDashboard();
 
   setInterval(function(){

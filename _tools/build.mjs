@@ -29,6 +29,7 @@ const scriptNames = [
   '75-reminder.js',
   '80-ledger.js',
   '85-snooze.js',
+  '87-drag-actions.js',
   '90-boot.js'
 ];
 
