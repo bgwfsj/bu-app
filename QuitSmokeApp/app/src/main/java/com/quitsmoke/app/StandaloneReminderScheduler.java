@@ -20,7 +20,7 @@ import java.util.Locale;
 public final class StandaloneReminderScheduler {
     public static final String PREFS = "standalone_reminders";
     public static final String KEY_ITEMS = "items";
-    public static final String CHANNEL_ID = "standalone_reminders_v5";
+    public static final String CHANNEL_ID = "standalone_reminders_v6";
     private static final String ACTION_FIRE = "com.quitsmoke.app.STANDALONE_REMINDER";
 
     private StandaloneReminderScheduler() {}
@@ -29,10 +29,6 @@ public final class StandaloneReminderScheduler {
         if (Build.VERSION.SDK_INT < 26) return;
         NotificationManager manager = context.getSystemService(NotificationManager.class);
         if (manager == null) return;
-        manager.deleteNotificationChannel("standalone_reminders");
-        manager.deleteNotificationChannel("standalone_reminders_v2");
-        manager.deleteNotificationChannel("standalone_reminders_v3");
-        manager.deleteNotificationChannel("standalone_reminders_v4");
         NotificationChannel channel = new NotificationChannel(
             CHANNEL_ID,
             "独立提醒",

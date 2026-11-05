@@ -213,6 +213,34 @@ function updateReminderSettings(){
     toggle.textContent = enabled ? '已开启' : '已关闭';
     toggle.classList.toggle('off', !enabled);
   }
+  updateLockscreenReminderSetting();
+}
+
+function updateLockscreenReminderSetting(){
+  var button = byId('btn-reminder-lockscreen');
+  var description = byId('reminder-lockscreen-desc');
+  if (!button || !description) return;
+  if (!window.AppNative || !window.AppNative.canUseLockscreenReminders) {
+    button.textContent = '仅安装版';
+    description.textContent = '安装到手机后可检查锁屏提醒权限';
+    return;
+  }
+  var allowed = false;
+  try { allowed = !!window.AppNative.canUseLockscreenReminders(); } catch (error) {}
+  button.textContent = allowed ? '已开启' : '去开启';
+  button.classList.toggle('off', !allowed);
+  description.textContent = allowed ?
+    '已允许，锁屏时会显示提醒' :
+    '需要在系统设置中允许“全屏通知”';
+}
+
+function openLockscreenReminderSetting(){
+  if (!window.AppNative || !window.AppNative.openLockscreenReminderSettings) {
+    toast('安装到手机后可设置锁屏提醒');
+    return;
+  }
+  window.AppNative.openLockscreenReminderSettings();
+  setTimeout(updateLockscreenReminderSetting, 600);
 }
 
 function reminderSortedItems(){
@@ -630,5 +658,6 @@ function initReminder(){
   applyConfirmedReminders();
   byId('btn-reminder-add').addEventListener('click', function(){ openReminderForm(); });
   byId('btn-reminder-add-top').addEventListener('click', function(){ openReminderForm(); });
+  byId('btn-reminder-lockscreen').addEventListener('click', openLockscreenReminderSetting);
   renderReminderPage();
 }

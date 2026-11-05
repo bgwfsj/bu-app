@@ -70,6 +70,18 @@ public class SnoozeReceiver extends BroadcastReceiver {
             snoozeIntent,
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
+        PendingIntent fullScreenAction = ReminderNotificationFactory.fullScreenAction(
+            context,
+            requestCode,
+            title,
+            "补 · 稍后提醒时间到了",
+            page,
+            type,
+            id,
+            title,
+            null,
+            null
+        );
         manager.notify(requestCode, ReminderNotificationFactory.create(
             context,
             channelId,
@@ -78,6 +90,7 @@ public class SnoozeReceiver extends BroadcastReceiver {
             contentIntent,
             snoozeAction,
             confirmAction,
+            fullScreenAction,
             androidx.core.app.NotificationCompat.PRIORITY_HIGH
         ).build());
     }

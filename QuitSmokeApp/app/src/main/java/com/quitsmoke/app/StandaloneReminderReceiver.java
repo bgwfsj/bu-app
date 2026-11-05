@@ -82,6 +82,18 @@ public class StandaloneReminderReceiver extends BroadcastReceiver {
             snoozeIntent,
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
+        PendingIntent fullScreenAction = ReminderNotificationFactory.fullScreenAction(
+            context,
+            notificationId,
+            title,
+            body,
+            "reminder",
+            "standalone",
+            id,
+            title,
+            id,
+            reminderMode
+        );
         manager.notify(notificationId, ReminderNotificationFactory.create(
             context,
             StandaloneReminderScheduler.CHANNEL_ID,
@@ -90,6 +102,7 @@ public class StandaloneReminderReceiver extends BroadcastReceiver {
             contentIntent,
             snoozeAction,
             confirmAction,
+            fullScreenAction,
             androidx.core.app.NotificationCompat.PRIORITY_HIGH
         ).build());
         return true;

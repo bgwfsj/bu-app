@@ -6,7 +6,7 @@
 
 - 应用名：补
 - 包名：`com.quitsmoke.app`
-- 当前版本：5.8.5
+- 当前版本：5.8.7
 - 最低 Android：API 24
 - Target SDK：34
 - 仓库：`bgwfsj/bu-app`（公开）
@@ -178,7 +178,9 @@ bu_pre_restore_v1    完整恢复前的安全副本
 - `SnoozeScheduler` / `SnoozeReceiver`：一次性稍后提醒。
 - `NotificationActionReceiver`：通知“确认”动作，收起通知。
 
-提醒通知由 `ReminderNotificationFactory` 构建。小米不会稳定渲染 `setCustomBigContentView` 或标准 action，因此双按钮必须同时放在普通 `setCustomContentView`、big content 和 heads-up content 中。为兼顾锁屏，主通知使用 `VISIBILITY_PRIVATE`，并设置原生 `publicVersion`。小图标必须使用单色 `ic_notification`。独立提醒与待办提醒使用新的 `*_v5` 通知通道，旧通道会被清理。
+提醒通知由 `ReminderNotificationFactory` 构建。小米不会稳定渲染 `setCustomBigContentView` 或标准 action，因此双按钮必须同时放在普通 `setCustomContentView`、big content 和 heads-up content 中。为兼顾锁屏，主通知使用 `VISIBILITY_PRIVATE`，并设置原生 `publicVersion`。状态栏必须使用 `drawable-xxhdpi/ic_stat_bu.png` 这类高密度单色位图，不要使用矢量图标；按钮使用轻量透明文字操作。独立提醒与待办提醒固定使用 `*_v6` 通知通道，后续版本不得再删除或更换通道。
+
+Android 14 / MIUI 的普通通知不能保证息屏时主动展示，因此通知同时设置 `fullScreenIntent`，由 `ReminderLockscreenActivity` 在锁屏上显示提醒卡片。提醒页“锁屏提醒”入口调用 `canUseLockscreenReminders()` 检查权限，并可跳转到系统的全屏通知设置。不要再删除或反复更换通知通道，否则会重置用户授权。
 
 通知点击：
 

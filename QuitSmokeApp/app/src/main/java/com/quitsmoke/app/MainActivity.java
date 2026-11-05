@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.app.NotificationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -11,6 +12,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.util.Base64;
 import android.view.View;
 import android.webkit.JavascriptInterface;
@@ -210,6 +212,34 @@ public class MainActivity extends AppCompatActivity {
         @JavascriptInterface
         public void checkForUpdates() {
             AppUpdater.check(MainActivity.this);
+        }
+
+        @JavascriptInterface
+        public boolean canUseLockscreenReminders() {
+            if (!hasNotificationPermission()) return false;
+            if (Build.VERSION.SDK_INT < 34) return true;
+            NotificationManager manager = getSystemService(NotificationManager.class);
+            return manager != null && manager.canUseFullScreenIntent();
+        }
+
+        @JavascriptInterface
+        public void openLockscreenReminderSettings() {
+            runOnUiThread(() -> {
+                if (Build.VERSION.SDK_INT < 34) {
+                    toast(canUseLockscreenReminders() ? "锁屏提醒已允许" : "请先允许通知权限");
+                    return;
+                }
+                Intent settings = new Intent(Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT)
+                    .setData(Uri.parse("package:" + getPackageName()));
+                try {
+                    startActivity(settings);
+                } catch (Exception error) {
+                    startActivity(new Intent(
+                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                        Uri.parse("package:" + getPackageName())
+                    ));
+                }
+            });
         }
 
         @JavascriptInterface

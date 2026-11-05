@@ -18,7 +18,7 @@ public final class ReminderScheduler {
     public static final String KEY_MINUTE = "minute";
     public static final String KEY_PENDING = "pending";
     public static final String KEY_DATE = "date";
-    public static final String CHANNEL_ID = "todo_daily_reminder_v5";
+    public static final String CHANNEL_ID = "todo_daily_reminder_v6";
     private static final int ALARM_REQUEST = 4101;
 
     private ReminderScheduler() {}
@@ -27,10 +27,6 @@ public final class ReminderScheduler {
         if (Build.VERSION.SDK_INT < 26) return;
         NotificationManager manager = context.getSystemService(NotificationManager.class);
         if (manager == null) return;
-        manager.deleteNotificationChannel("todo_daily_reminder");
-        manager.deleteNotificationChannel("todo_daily_reminder_v2");
-        manager.deleteNotificationChannel("todo_daily_reminder_v3");
-        manager.deleteNotificationChannel("todo_daily_reminder_v4");
         NotificationChannel channel = new NotificationChannel(
             CHANNEL_ID,
             "每日待办提醒",

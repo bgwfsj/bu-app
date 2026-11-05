@@ -1445,6 +1445,10 @@ body[data-page="fitness"]::before{
           <span><b>首页通知</b><small>当天有提醒时，每次打开软件都在首页显示</small></span>
           <button id="btn-reminder-home-toggle" data-action="toggleReminderHomeNotice">已开启</button>
         </div>
+        <div class="reminder-setting-row">
+          <span><b>锁屏提醒</b><small id="reminder-lockscreen-desc">需要允许全屏通知才能在锁屏显示</small></span>
+          <button id="btn-reminder-lockscreen">检查</button>
+        </div>
       </div>
     </section>
 
@@ -1975,6 +1979,8 @@ byId('mask').addEventListener('click', closeSheet);
    应用版本记录
    ============================================================ */
 var APP_CHANGELOG = [
+  { version: '5.8.7', date: '2026-11-05', changes: ['新增锁屏全屏提醒界面，屏幕关闭时也能看到提醒内容和“稍后”“确认”。', '提醒页新增锁屏提醒权限检查，可直接打开系统的全屏通知授权页面。', '停止删除和重建通知通道，避免每次升级重置通知权限。'] },
+  { version: '5.8.6', date: '2026-11-05', changes: ['通知小图标改为高密度位图铃铛，修复小米状态栏不显示图标。', '通知按钮改为轻量文字操作，去掉大面积色块，视觉更接近系统原生通知。', '更换新通知通道确保图标和样式立即生效。'] },
   { version: '5.8.5', date: '2026-11-05', changes: ['修复小米不渲染展开区导致通知没有按钮的问题，“稍后”和“确认”直接放入通知主内容。', '保留紧凑无嵌套卡片的通知外观和锁屏原生公开版本。'] },
   { version: '5.8.4', date: '2026-11-05', changes: ['通知折叠时保持系统原生样式，展开后显示清晰的“稍后”和“确认”按钮。', '锁屏使用单独的系统原生通知版本，修复小米锁屏不显示提醒。', '继续使用铃铛小图标，并更换新通知通道清除旧设置。'] },
   { version: '5.8.3', date: '2026-11-05', changes: ['提醒和待办条目上的左右滑动只执行归档、移回或删除，不再切换大页面。', '去掉条目上的“改”按钮，点击正常状态的待办或提醒即可编辑；归档条目保持只读。', '通知恢复系统原生样式，增加清晰的小铃铛图标和带图标的“稍后”“确认”操作，并恢复锁屏显示。'] },
@@ -5008,6 +5014,34 @@ function updateReminderSettings(){
     toggle.textContent = enabled ? '已开启' : '已关闭';
     toggle.classList.toggle('off', !enabled);
   }
+  updateLockscreenReminderSetting();
+}
+
+function updateLockscreenReminderSetting(){
+  var button = byId('btn-reminder-lockscreen');
+  var description = byId('reminder-lockscreen-desc');
+  if (!button || !description) return;
+  if (!window.AppNative || !window.AppNative.canUseLockscreenReminders) {
+    button.textContent = '仅安装版';
+    description.textContent = '安装到手机后可检查锁屏提醒权限';
+    return;
+  }
+  var allowed = false;
+  try { allowed = !!window.AppNative.canUseLockscreenReminders(); } catch (error) {}
+  button.textContent = allowed ? '已开启' : '去开启';
+  button.classList.toggle('off', !allowed);
+  description.textContent = allowed ?
+    '已允许，锁屏时会显示提醒' :
+    '需要在系统设置中允许“全屏通知”';
+}
+
+function openLockscreenReminderSetting(){
+  if (!window.AppNative || !window.AppNative.openLockscreenReminderSettings) {
+    toast('安装到手机后可设置锁屏提醒');
+    return;
+  }
+  window.AppNative.openLockscreenReminderSettings();
+  setTimeout(updateLockscreenReminderSetting, 600);
 }
 
 function reminderSortedItems(){
@@ -5425,6 +5459,7 @@ function initReminder(){
   applyConfirmedReminders();
   byId('btn-reminder-add').addEventListener('click', function(){ openReminderForm(); });
   byId('btn-reminder-add-top').addEventListener('click', function(){ openReminderForm(); });
+  byId('btn-reminder-lockscreen').addEventListener('click', openLockscreenReminderSetting);
   renderReminderPage();
 }
 

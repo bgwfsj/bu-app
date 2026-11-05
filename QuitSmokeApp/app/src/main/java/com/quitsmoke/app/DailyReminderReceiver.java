@@ -65,6 +65,18 @@ public class DailyReminderReceiver extends BroadcastReceiver {
             snoozeIntent,
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
+        PendingIntent fullScreenAction = ReminderNotificationFactory.fullScreenAction(
+            context,
+            4101,
+            "今晚的待办",
+            body,
+            "todo",
+            "todo",
+            "todo_daily",
+            "今晚的待办",
+            null,
+            null
+        );
 
         NotificationManagerCompat.from(context).notify(4101, ReminderNotificationFactory.create(
             context,
@@ -74,6 +86,7 @@ public class DailyReminderReceiver extends BroadcastReceiver {
             contentIntent,
             snoozeAction,
             confirmAction,
+            fullScreenAction,
             androidx.core.app.NotificationCompat.PRIORITY_DEFAULT
         ).build());
         // This is a one-shot alarm. Schedule tomorrow's occurrence now that
