@@ -12,7 +12,7 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
 
 _SRC_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-SRC = os.path.join(_SRC_DIR, '水墨晕染风格图片生成.png')
+SRC = os.path.join(_SRC_DIR, 'assets', 'source-art', '水墨晕染风格图片生成.png')
 _HERE = os.path.dirname(os.path.abspath(__file__))
 RES = os.path.join(os.path.dirname(_HERE), 'app', 'src', 'main', 'res')
 

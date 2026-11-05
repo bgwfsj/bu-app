@@ -7,8 +7,8 @@
 # Machine-specific Android configuration
 /QuitSmokeApp/local.properties
 
-# Personal import data
-/导出数据.csv
+# Personal import data and local-only test fixtures
+/_local-data/
 
 # Historical binaries, private signing files and old reference project
 /历史版本/

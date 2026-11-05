@@ -7,7 +7,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const appPath = path.join(root, 'quit-app.html');
-const csvPath = path.join(root, '导出数据.csv');
+const csvPath = path.join(root, '_local-data', '导出数据.csv');
 const browserPath = 'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe';
 const profileDir = fs.mkdtempSync(path.join(os.tmpdir(), 'bu-app-test-'));
 
@@ -287,8 +287,8 @@ async function run() {
       opened: true,
       dataActions: 2,
       aboutOpened: true,
-      changelogCount: 24,
-      aboutVersion: '5.4.1',
+      changelogCount: 25,
+      aboutVersion: '5.5',
       updateCalls: 1,
       handledBack: true,
       returnedHome: true
@@ -345,11 +345,22 @@ async function run() {
         return item.id === 'daily' && todoIsDone(item, today);
       });
       renderTodoPage();
+      var initialArchived = todoArchivedItems().map(function(item){ return item.id; }).sort();
+      restoreTodo('overdue');
+      var restored = todoData.items.some(function(item){ return item.id === 'overdue' && item.date === today; });
+      permanentDeleteTodo('pastDone');
+      document.querySelector('[data-action="resolveAppConfirm"][data-args="[true]"]').click();
+      var permanentRemoved = !todoData.archived.some(function(item){ return item.id === 'pastDone'; });
+      deleteTodo('overdue');
+      document.querySelector('[data-action="resolveAppConfirm"][data-args="[true]"]').click();
       return {
         before: before,
         after: after,
         completedToday: completedToday,
-        archived: todoArchivedItems().map(function(item){ return item.id; }).sort(),
+        archived: initialArchived,
+        restored: restored,
+        permanentRemoved: permanentRemoved,
+        finalArchived: todoArchivedItems().map(function(item){ return item.id; }).sort(),
         archiveCollapsed: byId('todo-archive-box').open === false,
         archiveCount: byId('todo-archive-count').textContent
       };
@@ -358,8 +369,11 @@ async function run() {
     assert.deepEqual(todo.after, ['daily']);
     assert.equal(todo.completedToday, true);
     assert.deepEqual(todo.archived, ['expiredCustom', 'overdue', 'pastDone']);
+    assert.equal(todo.restored, true);
+    assert.equal(todo.permanentRemoved, true);
+    assert.deepEqual(todo.finalArchived, ['expiredCustom', 'overdue']);
     assert.equal(todo.archiveCollapsed, true);
-    assert.equal(todo.archiveCount, '3 项');
+    assert.equal(todo.archiveCount, '2 项');
 
     const todoEdit = await evaluate(cdp, `(function(){
       var today = wTodayStr();
@@ -427,6 +441,29 @@ async function run() {
       var homeNoticeHidden = byId('home-notice').hidden;
       var savedOff = JSON.parse(localStorage.getItem(RKEY)).homeNoticeEnabled === false;
       toggleReminderHomeNotice();
+      var yesterday = new Date(Date.now() - 86400000);
+      reminderData.items.push({
+        id: 'completed_once',
+        title: '已经结束',
+        mode: 'once',
+        time: '08:00',
+        date: yesterday.getFullYear() + '-' + pad2(yesterday.getMonth() + 1) + '-' + pad2(yesterday.getDate()),
+        createdAt: new Date().toISOString()
+      });
+      renderReminderPage();
+      var autoArchived = reminderData.archived.some(function(item){ return item.id === 'completed_once'; });
+      deleteReminder(edited.id);
+      document.querySelector('[data-action="resolveAppConfirm"][data-args="[true]"]').click();
+      var manuallyArchived = reminderData.archived.some(function(item){ return item.id === edited.id; });
+      restoreReminder(edited.id);
+      var restored = reminderData.items.some(function(item){ return item.id === edited.id; });
+      reminderData.archived.push({
+        id: 'archive_temp', title: '临时归档', mode: 'daily', time: '09:00',
+        createdAt: new Date().toISOString(), archivedAt: Date.now(), archiveReason: 'deleted'
+      });
+      permanentDeleteReminder('archive_temp');
+      document.querySelector('[data-action="resolveAppConfirm"][data-args="[true]"]').click();
+      var permanentlyRemoved = !reminderData.archived.some(function(item){ return item.id === 'archive_temp'; });
       return {
         count: reminderData.items.length,
         modes: reminderData.items.map(function(item){ return item.mode; }).sort(),
@@ -442,7 +479,12 @@ async function run() {
         returnedNextCycle: returnedNextCycle,
         homeNoticeHidden: homeNoticeHidden,
         savedOff: savedOff,
-        compactCards: document.querySelectorAll('.home-grid .home-card.compact').length
+        compactCards: document.querySelectorAll('.home-grid .home-card.compact').length,
+        autoArchived: autoArchived,
+        manuallyArchived: manuallyArchived,
+        restored: restored,
+        permanentlyRemoved: permanentlyRemoved,
+        archiveCount: byId('reminder-archive-count').textContent
       };
     })()`);
     assert.equal(reminders.count, 5);
@@ -458,9 +500,20 @@ async function run() {
     assert.equal(reminders.homeNoticeHidden, true);
     assert.equal(reminders.savedOff, true);
     assert.equal(reminders.compactCards, 2);
+    assert.equal(reminders.autoArchived, true);
+    assert.equal(reminders.manuallyArchived, true);
+    assert.equal(reminders.restored, true);
+    assert.equal(reminders.permanentlyRemoved, true);
+    assert.equal(reminders.archiveCount, '1 条');
 
     const typography = await evaluate(cdp, `(function(){
       var size = function(selector){ return getComputedStyle(document.querySelector(selector)).fontSize; };
+      var savedRecords = wd.todayRecords;
+      wd.todayRecords = [{ time: '08:00', amount: 200 }];
+      renderWater();
+      var waterRecord = size('.ramt');
+      wd.todayRecords = savedRecords;
+      renderWater();
       return {
         waterBody: size('#water-hero-sub'),
         fitBody: size('.fit-desc'),
@@ -472,6 +525,7 @@ async function run() {
         pageTitle: size('.fit-title'),
         waterQuick: size('.qbtn'),
         waterInput: size('#w-input'),
+        waterRecord: waterRecord,
         waterFont: getComputedStyle(document.querySelector('.qbtn')).fontFamily,
         commonFont: getComputedStyle(document.querySelector('.todo-add')).fontFamily
       };
@@ -486,6 +540,7 @@ async function run() {
     assert.equal(typography.pageTitle, '27px');
     assert.equal(typography.waterQuick, '13px');
     assert.equal(typography.waterInput, '14px');
+    assert.equal(typography.waterRecord, '13px');
     assert.equal(typography.waterFont, typography.commonFont);
 
     const snooze = await evaluate(cdp, `(function(){
@@ -528,6 +583,8 @@ async function run() {
       }).map(function(book){ return book.id; });
       var rootCount = ledgerData.books.filter(function(book){ return !book.parentId; }).length;
       var visibleRows = byId('ledger-tree').querySelectorAll('.ledger-tree-row').length;
+      var eventFont = getComputedStyle(byId('ledger-tree').querySelector('.ledger-tree-select')).fontSize;
+      var monthFont = getComputedStyle(byId('ledger-month-list').querySelector('.ledger-month-row b')).fontSize;
       return {
         first: first,
         second: second,
@@ -536,7 +593,9 @@ async function run() {
         childCount: childCount,
         allCollapsed: parentIds.every(function(id){ return ledgerCollapsed[id] === true; }),
         visibleRows: visibleRows,
-        rootCount: rootCount
+        rootCount: rootCount,
+        eventFont: eventFont,
+        monthFont: monthFont
       };
     })()`);
     assert.equal(ledger.first.imported, 118);
@@ -548,6 +607,8 @@ async function run() {
     assert.equal(ledger.childCount, 10);
     assert.equal(ledger.allCollapsed, true);
     assert.equal(ledger.visibleRows, ledger.rootCount);
+    assert.equal(ledger.eventFont, '13px');
+    assert.equal(ledger.monthFont, '13px');
 
     await evaluate(cdp, `(function(){
       S.quitDate = Date.now() - 86400000;
@@ -579,21 +640,29 @@ async function run() {
         waterGoal: water.dailyGoal,
         fitnessSessions: fitness.sessions.length,
         todoItems: todo.items.length,
+        todoArchived: todo.archived.length,
         reminderItems: reminders.items.length,
+        reminderArchived: reminders.archived.length,
         ledgerRecords: ledger.books.reduce(function(sum, book){ return sum + book.records.length; }, 0),
         quitDate: quit.quitDate,
         previousGoal: previous.data.water.dailyGoal,
-        previousReminders: previous.data.reminders.items.length
+        previousReminders: previous.data.reminders.items.length,
+        previousReminderArchived: previous.data.reminders.archived.length,
+        previousTodoArchived: previous.data.todo.archived.length
       };
     })()`);
     assert.equal(restored.waterGoal, 2600);
     assert.equal(restored.fitnessSessions, 1);
-    assert.equal(restored.todoItems, 5);
+    assert.equal(restored.todoItems, 2);
+    assert.equal(restored.todoArchived, 2);
     assert.equal(restored.reminderItems, 5);
+    assert.equal(restored.reminderArchived, 1);
     assert.equal(restored.ledgerRecords, 118);
     assert.ok(restored.quitDate > 0);
     assert.equal(restored.previousGoal, 2345);
     assert.equal(restored.previousReminders, 5);
+    assert.equal(restored.previousReminderArchived, 1);
+    assert.equal(restored.previousTodoArchived, 2);
 
     const legacyQuit = Date.now() - 48 * 3600000;
     await evaluate(cdp, `(function(){

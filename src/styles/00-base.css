@@ -200,7 +200,7 @@ body[data-page="water"] .section-kicker{color:var(--acc2)}
 .rlist{display:flex;flex-direction:column;gap:4px}
 .ritem{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:11px;background:#fff;border:1px solid var(--line2)}
 .rtime{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:13px;color:var(--dim2);flex:0 0 50px}
-.ramt{flex:1;font-size:14.5px;color:#3d5468}
+.ramt{flex:1;font-size:var(--fs-body);color:#3d5468}
 .rdel{background:none;border:0;color:var(--dim2);font-size:13px;cursor:pointer;padding:2px 4px;line-height:1}
 .rdel:active{color:var(--danger)}
 .rempty{font-size:13px;color:var(--dim2);text-align:center;padding:22px 0;letter-spacing:.08em}

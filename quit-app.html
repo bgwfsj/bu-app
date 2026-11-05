@@ -211,7 +211,7 @@ body[data-page="water"] .section-kicker{color:var(--acc2)}
 .rlist{display:flex;flex-direction:column;gap:4px}
 .ritem{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:11px;background:#fff;border:1px solid var(--line2)}
 .rtime{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:13px;color:var(--dim2);flex:0 0 50px}
-.ramt{flex:1;font-size:14.5px;color:#3d5468}
+.ramt{flex:1;font-size:var(--fs-body);color:#3d5468}
 .rdel{background:none;border:0;color:var(--dim2);font-size:13px;cursor:pointer;padding:2px 4px;line-height:1}
 .rdel:active{color:var(--danger)}
 .rempty{font-size:13px;color:var(--dim2);text-align:center;padding:22px 0;letter-spacing:.08em}
@@ -384,7 +384,10 @@ body[data-page="settings"] #page-pager{opacity:0;pointer-events:none}
 .todo-archive-copy{flex:1;min-width:0}
 .todo-archive-copy b{display:block;font-size:12.5px;font-weight:500;color:#74858b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .todo-archive-copy span{display:block;font-size:var(--fs-caption);color:#a0acb0;margin-top:3px}
-.todo-archive-state{font-size:10px;color:#9aa8ad;white-space:nowrap}
+.todo-archive-actions{display:flex;align-items:center;gap:7px;white-space:nowrap}
+.todo-archive-state{font-size:10px;color:#9aa8ad}
+.todo-archive-actions button{border:0;background:transparent;color:#5f8f82;font-size:var(--fs-caption);padding:3px 1px;cursor:pointer}
+.todo-archive-actions button.danger{color:#bb8585;font-size:14px;padding:1px 2px}
 .todo-archive-empty{text-align:center;padding:12px 8px;color:#9aa8ad;font-size:11.5px}
 .todo-reminder{margin-top:22px;padding:14px;border-radius:14px;background:#fff;border:1px solid var(--line2);display:flex;align-items:center;gap:11px}
 .todo-reminder div{flex:1}
@@ -422,6 +425,23 @@ body[data-page="settings"] #page-pager{opacity:0;pointer-events:none}
 .reminder-edit{border:0;background:transparent;color:#16896a;font-size:var(--fs-meta);padding:4px 2px;cursor:pointer}
 .reminder-del{border:0;background:transparent;color:#c5a2a2;font-size:15px;padding:3px 2px;cursor:pointer}
 .reminder-empty{text-align:center;padding:27px 10px;color:#98a6aa;font-size:12.5px;line-height:1.8;background:rgba(255,255,255,.55);border:1px dashed var(--line);border-radius:13px}
+.reminder-archive-box{margin-top:18px;border-top:1px solid var(--line2);padding-top:10px}
+.reminder-archive-box>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;cursor:pointer;color:#6d8089;font-size:var(--fs-meta);letter-spacing:.08em}
+.reminder-archive-box>summary::-webkit-details-marker{display:none}
+.reminder-archive-box>summary::marker{content:''}
+.reminder-archive-box>summary small{display:flex;align-items:center;gap:7px;font-size:var(--fs-caption);color:#9aa8ad}
+.reminder-archive-box>summary em{font-style:normal;transition:transform .2s;color:#a4b0b5}
+.reminder-archive-box[open]>summary em{transform:rotate(180deg)}
+.reminder-archive-list{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.reminder-archive-item{display:flex;align-items:center;gap:9px;padding:10px 11px;border-radius:10px;background:rgba(255,255,255,.6);border:1px solid var(--line2)}
+.reminder-archive-copy{flex:1;min-width:0}
+.reminder-archive-copy b{display:block;font-size:12.5px;font-weight:500;color:#74858b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.reminder-archive-copy span{display:block;font-size:var(--fs-caption);color:#9ba8ac;margin-top:3px}
+.reminder-archive-actions{display:flex;align-items:center;gap:7px;white-space:nowrap}
+.reminder-archive-state{font-size:10px;color:#9aa8ad}
+.reminder-archive-actions button{border:0;background:transparent;color:#5f8f82;font-size:var(--fs-caption);padding:3px 1px;cursor:pointer}
+.reminder-archive-actions button.danger{color:#bb8585;font-size:14px;padding:1px 2px}
+.reminder-archive-empty{text-align:center;padding:12px 8px;color:#9aa8ad;font-size:11.5px}
 .reminder-hint{text-align:center;font-size:var(--fs-caption);line-height:1.6;color:#93a2a7;margin:16px 12px 4px}
 .reminder-settings{margin-top:18px;background:#fff;border:1px solid var(--line2);border-radius:14px;overflow:hidden}
 .reminder-setting-row{display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid var(--line2)}
@@ -446,13 +466,13 @@ body[data-page="settings"] #page-pager{opacity:0;pointer-events:none}
 /* 30-ledger.css */
 /* ---------- 记账 ---------- */
 .ledger-hero{flex:0 0 auto;margin:24px 0 16px}
-.ledger-kicker{font-size:10px;letter-spacing:.2em;color:#8f7b65;margin-bottom:6px}
+.ledger-kicker{font-size:11px;letter-spacing:.18em;color:#8f7b65;margin-bottom:6px}
 .ledger-total{
   font-family:ui-serif,Georgia,"Songti SC",serif;font-size:39px;font-weight:400;
   letter-spacing:-.045em;color:#29241f;line-height:1.05
 }
 .ledger-total small{font-family:inherit;font-size:15px;letter-spacing:0;margin-right:4px;color:#8b7461}
-.ledger-sub{font-size:10.5px;color:#94877d;margin-top:8px;letter-spacing:.03em}
+.ledger-sub{font-size:12px;color:#94877d;margin-top:8px;letter-spacing:.03em}
 .ledger-tree-box{
   flex:0 0 auto;
   margin:2px 0 10px;background:rgba(255,255,255,.78);border:1px solid var(--line2);
@@ -460,11 +480,11 @@ body[data-page="settings"] #page-pager{opacity:0;pointer-events:none}
 }
 .ledger-tree-head{
   display:flex;align-items:center;gap:8px;list-style:none;cursor:pointer;padding:10px 12px;
-  color:#6c7e7e;font-size:10.5px;letter-spacing:.08em
+  color:#6c7e7e;font-size:13px;letter-spacing:.05em
 }
 .ledger-tree-head span{font-weight:600;color:#526861}
-.ledger-tree-head b{flex:1;font-size:10px;color:#8a785f;font-weight:500;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ledger-tree-head small{font-size:9px;color:#9eaaa7}
+.ledger-tree-head b{flex:1;font-size:12px;color:#8a785f;font-weight:500;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ledger-tree-head small{font-size:11px;color:#9eaaa7}
 .ledger-tree{max-height:255px;overflow-y:auto;padding:1px 7px 8px;border-top:1px solid var(--line2)}
 .ledger-tree-row{
   display:flex;align-items:center;min-height:32px;padding-left:calc(var(--depth,0) * 16px);
@@ -478,11 +498,11 @@ body[data-page="settings"] #page-pager{opacity:0;pointer-events:none}
 }
 .ledger-tree-select{
   flex:1;min-width:0;height:30px;padding:0 3px;border:0;background:transparent;text-align:left;
-  color:inherit;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:6px
+  color:inherit;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px
 }
 .ledger-tree-select .name{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ledger-tree-select .kind{font-size:8px;color:#a1968d;letter-spacing:.06em}
-.ledger-tree-select .amount{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:9px;color:#8d9c96}
+.ledger-tree-select .kind{font-size:10px;color:#a1968d;letter-spacing:.05em}
+.ledger-tree-select .amount{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:13px;color:#8d9c96}
 .ledger-tree-row.current .amount{color:#3d7561}
 .ledger-tree-guide{color:#c6d0cc;font-size:10px;margin-right:2px}
 .ledger-months-box{
@@ -492,11 +512,11 @@ body[data-page="settings"] #page-pager{opacity:0;pointer-events:none}
 }
 .ledger-months-box>summary{
   display:flex;align-items:center;justify-content:space-between;list-style:none;
-  padding:10px 12px;cursor:pointer;font-size:10.5px;letter-spacing:.1em;color:#687c7e
+  padding:10px 12px;cursor:pointer;font-size:13px;letter-spacing:.06em;color:#687c7e
 }
 .ledger-months-box>summary::-webkit-details-marker{display:none}
 .ledger-months-box>summary::marker{content:''}
-.ledger-months-box>summary b{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;color:#9a897a;font-size:9.5px;font-weight:500}
+.ledger-months-box>summary b{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;color:#9a897a;font-size:13px;font-weight:500}
 .ledger-month-list{display:flex;flex-direction:column;gap:4px;padding:0 7px 8px;border-top:1px solid var(--line2);max-height:220px;overflow-y:auto}
 .ledger-month-row{
   display:flex;align-items:center;gap:10px;padding:8px 9px;border:0;border-radius:8px;
@@ -504,24 +524,24 @@ body[data-page="settings"] #page-pager{opacity:0;pointer-events:none}
 }
 .ledger-month-row:active,.ledger-month-row.current{background:#edf5f1}
 .ledger-month-row span{flex:1;min-width:0}
-.ledger-month-row b{display:block;font-size:10.5px;font-weight:500;color:#3f574e}
-.ledger-month-row small{display:block;font-size:8.5px;color:#9ba7a4;margin-top:2px}
-.ledger-month-row strong{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:11px;color:#8c6c51;font-weight:500}
+.ledger-month-row b{display:block;font-size:13px;font-weight:500;color:#3f574e}
+.ledger-month-row small{display:block;font-size:11px;color:#9ba7a4;margin-top:2px}
+.ledger-month-row strong{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:13px;color:#8c6c51;font-weight:500}
 .ledger-report-total{
   margin:2px 0 15px;padding:13px;border-radius:12px;background:#f7f4f0;
   display:flex;align-items:center;justify-content:space-between
 }
-.ledger-report-total span{font-size:10px;color:#948477}
+.ledger-report-total span{font-size:13px;color:#948477}
 .ledger-report-total b{font-family:ui-serif,Georgia,"Songti SC",serif;font-size:25px;font-weight:400;color:#56483c}
-.ledger-report-check{display:flex;justify-content:space-between;gap:8px;padding:8px 2px;border-bottom:1px solid var(--line2);font-size:10.5px;color:#536a62}
+.ledger-report-check{display:flex;justify-content:space-between;gap:8px;padding:8px 2px;border-bottom:1px solid var(--line2);font-size:13px;color:#536a62}
 .ledger-report-check span:last-child{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;color:#8f7259}
 .ledger-report-records{display:flex;flex-direction:column;gap:5px;margin-top:12px}
 .ledger-report-record{display:flex;gap:8px;align-items:center;padding:8px 9px;border-radius:9px;background:#f8faf9}
-.ledger-report-record .path{flex:1;min-width:0;font-size:10px;color:#576c65;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ledger-report-record .date{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:9px;color:#9ba5a3}
-.ledger-report-record .money{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:10px;color:#7d6551}
+.ledger-report-record .path{flex:1;min-width:0;font-size:13px;color:#576c65;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ledger-report-record .date{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:11px;color:#9ba5a3}
+.ledger-report-record .money{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:13px;color:#7d6551}
 .ledger-branch-actions{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;margin:-4px 0 13px;gap:8px}
-.ledger-branch-path{font-size:9px;color:#9a8c81;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ledger-branch-path{font-size:12px;color:#9a8c81;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ledger-add-child{height:28px;flex:0 0 auto;padding:0 9px;border-radius:8px;border:1px solid rgba(92,75,61,.18);background:rgba(92,75,61,.05);color:#79614e;font-size:9.5px;cursor:pointer}
 .ledger-actions{flex:0 0 auto;display:flex;gap:8px;margin:2px 0 17px}
 .ledger-entry-btn{
@@ -530,12 +550,12 @@ body[data-page="settings"] #page-pager{opacity:0;pointer-events:none}
 }
 .ledger-stats{flex:0 0 auto;display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:15px}
 .ledger-stat{padding:11px 12px;border-radius:12px;background:rgba(255,255,255,.78);border:1px solid var(--line2)}
-.ledger-stat span{display:block;font-size:9px;letter-spacing:.14em;color:#9a8d83;margin-bottom:4px}
-.ledger-stat b{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:14px;font-weight:500;color:#4e4035}
+.ledger-stat span{display:block;font-size:11px;letter-spacing:.1em;color:#9a8d83;margin-bottom:4px}
+.ledger-stat b{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:13px;font-weight:500;color:#4e4035}
 .ledger-record-box{flex:0 0 auto;margin-top:4px}
 .ledger-record-box>summary{
   display:flex;align-items:center;justify-content:space-between;list-style:none;cursor:pointer;
-  font-size:10.5px;letter-spacing:.19em;color:#61777f;font-weight:500;margin-bottom:9px
+  font-size:13px;letter-spacing:.1em;color:#61777f;font-weight:500;margin-bottom:9px
 }
 .ledger-record-box>summary::-webkit-details-marker{display:none}
 .ledger-record-box>summary::marker{content:''}
@@ -550,8 +570,8 @@ body[data-page="settings"] #page-pager{opacity:0;pointer-events:none}
   color:#8b6748;font-size:10px;white-space:nowrap;overflow:hidden
 }
 .ledger-main{min-width:0}
-.ledger-main b{display:block;font-size:12px;color:#3b3d39;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ledger-main span{display:block;font-size:9px;color:#9ca5a3;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ledger-main b{display:block;font-size:13px;color:#3b3d39;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ledger-main span{display:block;font-size:11px;color:#9ca5a3;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ledger-amount{text-align:right}
 .ledger-amount b{display:block;font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:13px;font-weight:600;color:#52463c}
 .ledger-amount span{display:flex;justify-content:flex-end;gap:5px;margin-top:4px}
@@ -1348,6 +1368,10 @@ body[data-page="fitness"]::before{
       </div>
       <button class="reminder-add" id="btn-reminder-add">＋ 添加提醒</button>
       <div class="reminder-list" id="reminder-list"></div>
+      <details class="reminder-archive-box">
+        <summary><span>归档</span><small><i id="reminder-archive-count">0 条</i><em>&#9662;</em></small></summary>
+        <div class="reminder-archive-list" id="reminder-archive-list"></div>
+      </details>
       <p class="reminder-hint" id="reminder-hint">提醒只保存在这台设备上。</p>
       <div class="reminder-settings">
         <div class="reminder-setting-row">
@@ -1527,6 +1551,8 @@ var APP_ACTION_NAMES = {
   toggleTodo: true,
   editTodo: true,
   deleteTodo: true,
+  restoreTodo: true,
+  permanentDeleteTodo: true,
   removeTodoDraftDate: true,
   setTodoRepeat: true,
   addTodoDraftDate: true,
@@ -1540,6 +1566,8 @@ var APP_ACTION_NAMES = {
   saveReminder: true,
   editReminder: true,
   deleteReminder: true,
+  restoreReminder: true,
+  permanentDeleteReminder: true,
   toggleReminderHomeNotice: true,
   dismissHomeNoticeToday: true,
   saveSnooze: true,
@@ -1780,6 +1808,7 @@ byId('mask').addEventListener('click', closeSheet);
    应用版本记录
    ============================================================ */
 var APP_CHANGELOG = [
+  { version: '5.5', date: '2026-11-05', changes: ['待办和提醒新增归档、移回与彻底删除。', '一次性提醒完成后自动归档。', '喝水今日记录与快捷水量字号统一。', '记账事件和月度总览文字统一为 13px。', '整理项目目录并补充使用说明与 AI 开发说明。'] },
   { version: '5.4.1', date: '2026-11-05', changes: ['设置页新增“关于”和完整更新记录。'] },
   { version: '5.4', date: '2026-11-05', changes: ['功能页顺序统一为待办、记账、提醒。', '快捷导航与左右滑动顺序保持一致。', '喝水快捷水量调整为 13px 常规字重。'] },
   { version: '5.3.3', date: '2026-11-05', changes: ['喝水快捷水量和输入数字调整为 14px。'] },
@@ -3932,6 +3961,7 @@ function initFitness(){
 function todoDefaultState(){
   return {
     items: [],
+    archived: [],
     reminder: { enabled: false, hour: 20, minute: 0, lastNotified: '' }
   };
 }
@@ -3940,21 +3970,33 @@ function loadTodoState(){
   var d = storeGet(TKEY, null);
   if (!d || typeof d !== 'object') d = todoDefaultState();
   if (!Array.isArray(d.items)) d.items = [];
+  if (!Array.isArray(d.archived)) d.archived = [];
   if (!d.reminder || typeof d.reminder !== 'object') d.reminder = todoDefaultState().reminder;
   if (d.reminder.hour === undefined) d.reminder.hour = 20;
   if (d.reminder.minute === undefined) d.reminder.minute = 0;
   d.reminder.enabled = !!d.reminder.enabled;
-  d.items = d.items.filter(function(item){
+  function normalizeItem(item){
     return item && typeof item.id === 'string' && typeof item.title === 'string' &&
       ['once','daily','weekdays','weekends','custom'].indexOf(item.repeat) >= 0;
-  });
+  }
+  d.items = d.items.filter(normalizeItem);
+  d.archived = d.archived.filter(normalizeItem);
   each(d.items, function(item){
     if (!item.createdDate) item.createdDate = wTodayStr();
     if (!item.doneDates || typeof item.doneDates !== 'object') item.doneDates = {};
     if (item.repeat === 'custom' && !Array.isArray(item.dates)) item.dates = [];
     item.done = !!item.done;
   });
+  each(d.archived, function(item){
+    if (!item.createdDate) item.createdDate = wTodayStr();
+    if (!item.doneDates || typeof item.doneDates !== 'object') item.doneDates = {};
+    if (item.repeat === 'custom' && !Array.isArray(item.dates)) item.dates = [];
+    item.done = !!item.done;
+    if (!item.archivedAt) item.archivedAt = Date.now();
+    if (!item.archiveReason) item.archiveReason = 'expired';
+  });
   todoData = d;
+  archiveExpiredTodos();
   saveTodoState();
 }
 
@@ -3995,10 +4037,27 @@ function todoIsArchived(item, today){
 }
 
 function todoArchivedItems(){
-  return todoData.items.filter(function(item){ return todoIsArchived(item); })
+  return todoData.archived.slice()
     .sort(function(a, b){
-      return todoArchiveDate(b).localeCompare(todoArchiveDate(a));
+      return (b.archivedAt || 0) - (a.archivedAt || 0);
     });
+}
+
+function archiveExpiredTodos(){
+  if (!todoData) return false;
+  var keep = [], moved = false, today = wTodayStr();
+  each(todoData.items, function(item){
+    if (!todoIsArchived(item, today)) {
+      keep.push(item);
+      return;
+    }
+    item.archivedAt = Date.now();
+    item.archiveReason = 'expired';
+    todoData.archived.push(item);
+    moved = true;
+  });
+  if (moved) todoData.items = keep;
+  return moved;
 }
 
 function todoIsDone(item, date){
@@ -4027,6 +4086,7 @@ function todoRepeatText(item){
 
 function renderTodoPage(){
   if (!todoData) return;
+  if (archiveExpiredTodos()) saveTodoState();
   var today = wTodayStr();
   var items = todosForDate(today);
   var done = items.filter(function(item){ return todoIsDone(item, today); }).length;
@@ -4070,12 +4130,15 @@ function renderTodoPage(){
   byId('todo-archive-list').innerHTML = archived.length ? archived.map(function(item){
     var archiveDate = todoArchiveDate(item);
     var state;
-    if (item.repeat === 'once') state = item.done ? '已完成' : '未完成';
+    if (item.archiveReason === 'deleted') state = '已删除';
+    else if (item.repeat === 'once') state = item.done ? '已完成' : '未完成';
     else state = '已结束';
     return '<div class="todo-archive-item">' +
       '<span class="todo-archive-copy"><b>' + escHtml(item.title) + '</b>' +
       '<span>原定 ' + workoutDateLabel(archiveDate) + (item.repeat === 'custom' ? ' · 自定义日期' : '') + '</span></span>' +
-      '<span class="todo-archive-state">' + state + '</span></div>';
+      '<span class="todo-archive-actions"><span class="todo-archive-state">' + state + '</span>' +
+      '<button' + actionAttrs('restoreTodo', [item.id]) + '>移回</button>' +
+      '<button class="danger"' + actionAttrs('permanentDeleteTodo', [item.id]) + ' aria-label="彻底删除">×</button></span></div>';
   }).join('') : '<div class="todo-archive-empty">还没有失效的待办</div>';
 
   var r = todoData.reminder;
@@ -4225,13 +4288,54 @@ function toggleTodo(id){
 }
 
 function deleteTodo(id){
-  appConfirm('删除这条待办？', function(){
-    todoData.items = todoData.items.filter(function(item){ return item.id !== id; });
+  var item = null;
+  each(todoData.items, function(saved){ if (saved.id === id) item = saved; });
+  if (!item) return;
+  appConfirm('将“' + item.title + '”移入归档？', function(){
+    todoData.items = todoData.items.filter(function(saved){ return saved.id !== id; });
+    item.archivedAt = Date.now();
+    item.archiveReason = 'deleted';
+    todoData.archived.push(item);
     saveTodoState();
     renderTodoPage();
     syncTodoReminder();
-    toast('待办已删除');
-  }, { title: '删除待办' });
+    toast('待办已移入归档');
+  }, { title: '移入归档', confirmLabel: '移入归档' });
+}
+
+function restoreTodo(id){
+  var item = null;
+  each(todoData.archived, function(saved){ if (saved.id === id) item = saved; });
+  if (!item) return;
+  todoData.archived = todoData.archived.filter(function(saved){ return saved.id !== id; });
+  delete item.archivedAt;
+  delete item.archiveReason;
+  if (item.repeat === 'once' && item.date < wTodayStr()) {
+    item.date = wTodayStr();
+    item.done = false;
+  }
+  if (item.repeat === 'custom') {
+    item.dates = (item.dates || []).filter(function(date){ return date >= wTodayStr(); });
+    if (!item.dates.length) item.dates = [wTodayStr()];
+    item.doneDates = {};
+  }
+  todoData.items.push(item);
+  saveTodoState();
+  renderTodoPage();
+  syncTodoReminder();
+  toast('待办已移回');
+}
+
+function permanentDeleteTodo(id){
+  var item = null;
+  each(todoData.archived, function(saved){ if (saved.id === id) item = saved; });
+  if (!item) return;
+  appConfirm('彻底删除“' + item.title + '”？删除后不能恢复。', function(){
+    todoData.archived = todoData.archived.filter(function(saved){ return saved.id !== id; });
+    saveTodoState();
+    renderTodoPage();
+    toast('待办已彻底删除');
+  }, { title: '彻底删除待办' });
 }
 
 function openReminderSettings(){
@@ -4374,6 +4478,7 @@ function reminderDefaultState(){
   return {
     schemaVersion: 1,
     items: [],
+    archived: [],
     homeNoticeEnabled: true,
     homeNoticeDismissedDate: ''
   };
@@ -4427,11 +4532,20 @@ function loadReminderState(){
   var d = storeGet(RKEY, null);
   if (!d || typeof d !== 'object') d = reminderDefaultState();
   if (!Array.isArray(d.items)) d.items = [];
+  if (!Array.isArray(d.archived)) d.archived = [];
   if (typeof d.homeNoticeEnabled !== 'boolean') d.homeNoticeEnabled = true;
   if (typeof d.homeNoticeDismissedDate !== 'string') d.homeNoticeDismissedDate = '';
   delete d.backgroundGuardEnabled;
   d.items = d.items.map(normalizeReminderItem).filter(Boolean);
+  d.archived = d.archived.map(function(item){
+    var normalized = normalizeReminderItem(item);
+    if (!normalized) return null;
+    normalized.archivedAt = item.archivedAt || Date.now();
+    normalized.archiveReason = item.archiveReason || 'deleted';
+    return normalized;
+  }).filter(Boolean);
   reminderData = d;
+  archiveCompletedReminders();
   saveReminderState(false);
 }
 
@@ -4577,14 +4691,14 @@ function reminderSortedItems(){
 
 function renderReminderPage(){
   if (!reminderData) return;
+  if (archiveCompletedReminders()) saveReminderState(false);
   var ordered = reminderSortedItems();
   setTxt('reminder-count', String(reminderData.items.length));
   var active = ordered.filter(function(row){ return row.next && row.ts !== Infinity; });
   setTxt('reminder-next-summary', active.length ? '下一条 · ' + reminderShortDate(active[0].next) : '还没有安排');
   byId('reminder-list').innerHTML = ordered.length ? ordered.map(function(row){
     var item = row.item;
-    var past = item.mode === 'once' && row.ts === Infinity;
-    return '<div class="reminder-item' + (past ? ' past' : '') + '">' +
+    return '<div class="reminder-item">' +
       '<span class="reminder-time-chip">' + escHtml(item.time) + '</span>' +
       '<span class="reminder-copy"><b>' + escHtml(item.title) + '</b>' +
       '<span>' + escHtml(reminderRuleText(item)) + '</span>' +
@@ -4593,6 +4707,18 @@ function renderReminderPage(){
       '<button class="reminder-del"' + actionAttrs('deleteReminder', [item.id]) + ' aria-label="删除提醒">×</button>' +
       '</div>';
   }).join('') : '<div class="reminder-empty">还没有独立提醒<br>设置一次时间，让手机替你记住</div>';
+
+  var archived = reminderArchivedItems();
+  byId('reminder-archive-count').textContent = archived.length + ' 条';
+  byId('reminder-archive-list').innerHTML = archived.length ? archived.map(function(item){
+    var state = item.archiveReason === 'completed' ? '已提醒' : '已删除';
+    return '<div class="reminder-archive-item">' +
+      '<span class="reminder-archive-copy"><b>' + escHtml(item.title) + '</b>' +
+      '<span>' + escHtml(reminderRuleText(item)) + ' · ' + escHtml(item.time) + '</span></span>' +
+      '<span class="reminder-archive-actions"><span class="reminder-archive-state">' + state + '</span>' +
+      '<button' + actionAttrs('restoreReminder', [item.id]) + '>移回</button>' +
+      '<button class="danger"' + actionAttrs('permanentDeleteReminder', [item.id]) + ' aria-label="彻底删除">×</button></span></div>';
+  }).join('') : '<div class="reminder-archive-empty">还没有归档提醒</div>';
   updateReminderSettings();
   renderHomeNotice();
   renderDashboard();
@@ -4622,6 +4748,34 @@ function reminderItemById(id){
     if (reminderData.items[i].id === id) return reminderData.items[i];
   }
   return null;
+}
+
+function reminderArchivedItems(){
+  return reminderData.archived.slice().sort(function(a, b){
+    return (b.archivedAt || 0) - (a.archivedAt || 0);
+  });
+}
+
+function archiveCompletedReminders(){
+  if (!reminderData) return false;
+  var now = Date.now(), keep = [], moved = false;
+  each(reminderData.items, function(item){
+    if (item.mode !== 'once') {
+      keep.push(item);
+      return;
+    }
+    var deadline = new Date(item.date + 'T' + item.time + ':00').getTime();
+    if (isNaN(deadline) || deadline > now) {
+      keep.push(item);
+      return;
+    }
+    item.archivedAt = now;
+    item.archiveReason = 'completed';
+    reminderData.archived.push(item);
+    moved = true;
+  });
+  if (moved) reminderData.items = keep;
+  return moved;
 }
 
 function openReminderForm(id){
@@ -4762,12 +4916,48 @@ function editReminder(id){
 function deleteReminder(id){
   var item = reminderItemById(id);
   if (!item) return;
-  appConfirm('删除“' + item.title + '”？', function(){
+  appConfirm('将“' + item.title + '”移入归档？', function(){
     reminderData.items = reminderData.items.filter(function(saved){ return saved.id !== id; });
+    item.archivedAt = Date.now();
+    item.archiveReason = 'deleted';
+    reminderData.archived.push(item);
     saveReminderState(false);
     renderReminderPage();
-    toast('提醒已删除');
-  }, { title: '删除提醒' });
+    toast('提醒已移入归档');
+  }, { title: '移入归档', confirmLabel: '移入归档' });
+}
+
+function restoreReminder(id){
+  var item = null;
+  each(reminderData.archived, function(saved){ if (saved.id === id) item = saved; });
+  if (!item) return;
+  reminderData.archived = reminderData.archived.filter(function(saved){ return saved.id !== id; });
+  delete item.archivedAt;
+  delete item.archiveReason;
+  if (item.mode === 'once') {
+    var candidate = new Date(item.date + 'T' + item.time + ':00');
+    if (isNaN(candidate.getTime()) || candidate.getTime() <= Date.now()) {
+      candidate = reminderAtTime(new Date(), item.time);
+      if (candidate.getTime() <= Date.now()) candidate.setDate(candidate.getDate() + 1);
+      item.date = candidate.getFullYear() + '-' + pad2(candidate.getMonth() + 1) + '-' + pad2(candidate.getDate());
+    }
+  }
+  reminderData.items.push(item);
+  saveReminderState(true);
+  renderReminderPage();
+  toast('提醒已移回');
+}
+
+function permanentDeleteReminder(id){
+  var item = null;
+  each(reminderData.archived, function(saved){ if (saved.id === id) item = saved; });
+  if (!item) return;
+  appConfirm('彻底删除“' + item.title + '”？删除后不能恢复。', function(){
+    reminderData.archived = reminderData.archived.filter(function(saved){ return saved.id !== id; });
+    saveReminderState(false);
+    renderReminderPage();
+    toast('提醒已彻底删除');
+  }, { title: '彻底删除提醒' });
 }
 
 function toggleReminderHomeNotice(){

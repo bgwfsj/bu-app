@@ -19,6 +19,23 @@
 .reminder-edit{border:0;background:transparent;color:#16896a;font-size:var(--fs-meta);padding:4px 2px;cursor:pointer}
 .reminder-del{border:0;background:transparent;color:#c5a2a2;font-size:15px;padding:3px 2px;cursor:pointer}
 .reminder-empty{text-align:center;padding:27px 10px;color:#98a6aa;font-size:12.5px;line-height:1.8;background:rgba(255,255,255,.55);border:1px dashed var(--line);border-radius:13px}
+.reminder-archive-box{margin-top:18px;border-top:1px solid var(--line2);padding-top:10px}
+.reminder-archive-box>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;cursor:pointer;color:#6d8089;font-size:var(--fs-meta);letter-spacing:.08em}
+.reminder-archive-box>summary::-webkit-details-marker{display:none}
+.reminder-archive-box>summary::marker{content:''}
+.reminder-archive-box>summary small{display:flex;align-items:center;gap:7px;font-size:var(--fs-caption);color:#9aa8ad}
+.reminder-archive-box>summary em{font-style:normal;transition:transform .2s;color:#a4b0b5}
+.reminder-archive-box[open]>summary em{transform:rotate(180deg)}
+.reminder-archive-list{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.reminder-archive-item{display:flex;align-items:center;gap:9px;padding:10px 11px;border-radius:10px;background:rgba(255,255,255,.6);border:1px solid var(--line2)}
+.reminder-archive-copy{flex:1;min-width:0}
+.reminder-archive-copy b{display:block;font-size:12.5px;font-weight:500;color:#74858b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.reminder-archive-copy span{display:block;font-size:var(--fs-caption);color:#9ba8ac;margin-top:3px}
+.reminder-archive-actions{display:flex;align-items:center;gap:7px;white-space:nowrap}
+.reminder-archive-state{font-size:10px;color:#9aa8ad}
+.reminder-archive-actions button{border:0;background:transparent;color:#5f8f82;font-size:var(--fs-caption);padding:3px 1px;cursor:pointer}
+.reminder-archive-actions button.danger{color:#bb8585;font-size:14px;padding:1px 2px}
+.reminder-archive-empty{text-align:center;padding:12px 8px;color:#9aa8ad;font-size:11.5px}
 .reminder-hint{text-align:center;font-size:var(--fs-caption);line-height:1.6;color:#93a2a7;margin:16px 12px 4px}
 .reminder-settings{margin-top:18px;background:#fff;border:1px solid var(--line2);border-radius:14px;overflow:hidden}
 .reminder-setting-row{display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid var(--line2)}

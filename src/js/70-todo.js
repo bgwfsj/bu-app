@@ -4,6 +4,7 @@
 function todoDefaultState(){
   return {
     items: [],
+    archived: [],
     reminder: { enabled: false, hour: 20, minute: 0, lastNotified: '' }
   };
 }
@@ -12,21 +13,33 @@ function loadTodoState(){
   var d = storeGet(TKEY, null);
   if (!d || typeof d !== 'object') d = todoDefaultState();
   if (!Array.isArray(d.items)) d.items = [];
+  if (!Array.isArray(d.archived)) d.archived = [];
   if (!d.reminder || typeof d.reminder !== 'object') d.reminder = todoDefaultState().reminder;
   if (d.reminder.hour === undefined) d.reminder.hour = 20;
   if (d.reminder.minute === undefined) d.reminder.minute = 0;
   d.reminder.enabled = !!d.reminder.enabled;
-  d.items = d.items.filter(function(item){
+  function normalizeItem(item){
     return item && typeof item.id === 'string' && typeof item.title === 'string' &&
       ['once','daily','weekdays','weekends','custom'].indexOf(item.repeat) >= 0;
-  });
+  }
+  d.items = d.items.filter(normalizeItem);
+  d.archived = d.archived.filter(normalizeItem);
   each(d.items, function(item){
     if (!item.createdDate) item.createdDate = wTodayStr();
     if (!item.doneDates || typeof item.doneDates !== 'object') item.doneDates = {};
     if (item.repeat === 'custom' && !Array.isArray(item.dates)) item.dates = [];
     item.done = !!item.done;
   });
+  each(d.archived, function(item){
+    if (!item.createdDate) item.createdDate = wTodayStr();
+    if (!item.doneDates || typeof item.doneDates !== 'object') item.doneDates = {};
+    if (item.repeat === 'custom' && !Array.isArray(item.dates)) item.dates = [];
+    item.done = !!item.done;
+    if (!item.archivedAt) item.archivedAt = Date.now();
+    if (!item.archiveReason) item.archiveReason = 'expired';
+  });
   todoData = d;
+  archiveExpiredTodos();
   saveTodoState();
 }
 
@@ -67,10 +80,27 @@ function todoIsArchived(item, today){
 }
 
 function todoArchivedItems(){
-  return todoData.items.filter(function(item){ return todoIsArchived(item); })
+  return todoData.archived.slice()
     .sort(function(a, b){
-      return todoArchiveDate(b).localeCompare(todoArchiveDate(a));
+      return (b.archivedAt || 0) - (a.archivedAt || 0);
     });
+}
+
+function archiveExpiredTodos(){
+  if (!todoData) return false;
+  var keep = [], moved = false, today = wTodayStr();
+  each(todoData.items, function(item){
+    if (!todoIsArchived(item, today)) {
+      keep.push(item);
+      return;
+    }
+    item.archivedAt = Date.now();
+    item.archiveReason = 'expired';
+    todoData.archived.push(item);
+    moved = true;
+  });
+  if (moved) todoData.items = keep;
+  return moved;
 }
 
 function todoIsDone(item, date){
@@ -99,6 +129,7 @@ function todoRepeatText(item){
 
 function renderTodoPage(){
   if (!todoData) return;
+  if (archiveExpiredTodos()) saveTodoState();
   var today = wTodayStr();
   var items = todosForDate(today);
   var done = items.filter(function(item){ return todoIsDone(item, today); }).length;
@@ -142,12 +173,15 @@ function renderTodoPage(){
   byId('todo-archive-list').innerHTML = archived.length ? archived.map(function(item){
     var archiveDate = todoArchiveDate(item);
     var state;
-    if (item.repeat === 'once') state = item.done ? '已完成' : '未完成';
+    if (item.archiveReason === 'deleted') state = '已删除';
+    else if (item.repeat === 'once') state = item.done ? '已完成' : '未完成';
     else state = '已结束';
     return '<div class="todo-archive-item">' +
       '<span class="todo-archive-copy"><b>' + escHtml(item.title) + '</b>' +
       '<span>原定 ' + workoutDateLabel(archiveDate) + (item.repeat === 'custom' ? ' · 自定义日期' : '') + '</span></span>' +
-      '<span class="todo-archive-state">' + state + '</span></div>';
+      '<span class="todo-archive-actions"><span class="todo-archive-state">' + state + '</span>' +
+      '<button' + actionAttrs('restoreTodo', [item.id]) + '>移回</button>' +
+      '<button class="danger"' + actionAttrs('permanentDeleteTodo', [item.id]) + ' aria-label="彻底删除">×</button></span></div>';
   }).join('') : '<div class="todo-archive-empty">还没有失效的待办</div>';
 
   var r = todoData.reminder;
@@ -297,13 +331,54 @@ function toggleTodo(id){
 }
 
 function deleteTodo(id){
-  appConfirm('删除这条待办？', function(){
-    todoData.items = todoData.items.filter(function(item){ return item.id !== id; });
+  var item = null;
+  each(todoData.items, function(saved){ if (saved.id === id) item = saved; });
+  if (!item) return;
+  appConfirm('将“' + item.title + '”移入归档？', function(){
+    todoData.items = todoData.items.filter(function(saved){ return saved.id !== id; });
+    item.archivedAt = Date.now();
+    item.archiveReason = 'deleted';
+    todoData.archived.push(item);
     saveTodoState();
     renderTodoPage();
     syncTodoReminder();
-    toast('待办已删除');
-  }, { title: '删除待办' });
+    toast('待办已移入归档');
+  }, { title: '移入归档', confirmLabel: '移入归档' });
+}
+
+function restoreTodo(id){
+  var item = null;
+  each(todoData.archived, function(saved){ if (saved.id === id) item = saved; });
+  if (!item) return;
+  todoData.archived = todoData.archived.filter(function(saved){ return saved.id !== id; });
+  delete item.archivedAt;
+  delete item.archiveReason;
+  if (item.repeat === 'once' && item.date < wTodayStr()) {
+    item.date = wTodayStr();
+    item.done = false;
+  }
+  if (item.repeat === 'custom') {
+    item.dates = (item.dates || []).filter(function(date){ return date >= wTodayStr(); });
+    if (!item.dates.length) item.dates = [wTodayStr()];
+    item.doneDates = {};
+  }
+  todoData.items.push(item);
+  saveTodoState();
+  renderTodoPage();
+  syncTodoReminder();
+  toast('待办已移回');
+}
+
+function permanentDeleteTodo(id){
+  var item = null;
+  each(todoData.archived, function(saved){ if (saved.id === id) item = saved; });
+  if (!item) return;
+  appConfirm('彻底删除“' + item.title + '”？删除后不能恢复。', function(){
+    todoData.archived = todoData.archived.filter(function(saved){ return saved.id !== id; });
+    saveTodoState();
+    renderTodoPage();
+    toast('待办已彻底删除');
+  }, { title: '彻底删除待办' });
 }
 
 function openReminderSettings(){

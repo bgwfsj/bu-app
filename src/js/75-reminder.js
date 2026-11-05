@@ -11,6 +11,7 @@ function reminderDefaultState(){
   return {
     schemaVersion: 1,
     items: [],
+    archived: [],
     homeNoticeEnabled: true,
     homeNoticeDismissedDate: ''
   };
@@ -64,11 +65,20 @@ function loadReminderState(){
   var d = storeGet(RKEY, null);
   if (!d || typeof d !== 'object') d = reminderDefaultState();
   if (!Array.isArray(d.items)) d.items = [];
+  if (!Array.isArray(d.archived)) d.archived = [];
   if (typeof d.homeNoticeEnabled !== 'boolean') d.homeNoticeEnabled = true;
   if (typeof d.homeNoticeDismissedDate !== 'string') d.homeNoticeDismissedDate = '';
   delete d.backgroundGuardEnabled;
   d.items = d.items.map(normalizeReminderItem).filter(Boolean);
+  d.archived = d.archived.map(function(item){
+    var normalized = normalizeReminderItem(item);
+    if (!normalized) return null;
+    normalized.archivedAt = item.archivedAt || Date.now();
+    normalized.archiveReason = item.archiveReason || 'deleted';
+    return normalized;
+  }).filter(Boolean);
   reminderData = d;
+  archiveCompletedReminders();
   saveReminderState(false);
 }
 
@@ -214,14 +224,14 @@ function reminderSortedItems(){
 
 function renderReminderPage(){
   if (!reminderData) return;
+  if (archiveCompletedReminders()) saveReminderState(false);
   var ordered = reminderSortedItems();
   setTxt('reminder-count', String(reminderData.items.length));
   var active = ordered.filter(function(row){ return row.next && row.ts !== Infinity; });
   setTxt('reminder-next-summary', active.length ? '下一条 · ' + reminderShortDate(active[0].next) : '还没有安排');
   byId('reminder-list').innerHTML = ordered.length ? ordered.map(function(row){
     var item = row.item;
-    var past = item.mode === 'once' && row.ts === Infinity;
-    return '<div class="reminder-item' + (past ? ' past' : '') + '">' +
+    return '<div class="reminder-item">' +
       '<span class="reminder-time-chip">' + escHtml(item.time) + '</span>' +
       '<span class="reminder-copy"><b>' + escHtml(item.title) + '</b>' +
       '<span>' + escHtml(reminderRuleText(item)) + '</span>' +
@@ -230,6 +240,18 @@ function renderReminderPage(){
       '<button class="reminder-del"' + actionAttrs('deleteReminder', [item.id]) + ' aria-label="删除提醒">×</button>' +
       '</div>';
   }).join('') : '<div class="reminder-empty">还没有独立提醒<br>设置一次时间，让手机替你记住</div>';
+
+  var archived = reminderArchivedItems();
+  byId('reminder-archive-count').textContent = archived.length + ' 条';
+  byId('reminder-archive-list').innerHTML = archived.length ? archived.map(function(item){
+    var state = item.archiveReason === 'completed' ? '已提醒' : '已删除';
+    return '<div class="reminder-archive-item">' +
+      '<span class="reminder-archive-copy"><b>' + escHtml(item.title) + '</b>' +
+      '<span>' + escHtml(reminderRuleText(item)) + ' · ' + escHtml(item.time) + '</span></span>' +
+      '<span class="reminder-archive-actions"><span class="reminder-archive-state">' + state + '</span>' +
+      '<button' + actionAttrs('restoreReminder', [item.id]) + '>移回</button>' +
+      '<button class="danger"' + actionAttrs('permanentDeleteReminder', [item.id]) + ' aria-label="彻底删除">×</button></span></div>';
+  }).join('') : '<div class="reminder-archive-empty">还没有归档提醒</div>';
   updateReminderSettings();
   renderHomeNotice();
   renderDashboard();
@@ -259,6 +281,34 @@ function reminderItemById(id){
     if (reminderData.items[i].id === id) return reminderData.items[i];
   }
   return null;
+}
+
+function reminderArchivedItems(){
+  return reminderData.archived.slice().sort(function(a, b){
+    return (b.archivedAt || 0) - (a.archivedAt || 0);
+  });
+}
+
+function archiveCompletedReminders(){
+  if (!reminderData) return false;
+  var now = Date.now(), keep = [], moved = false;
+  each(reminderData.items, function(item){
+    if (item.mode !== 'once') {
+      keep.push(item);
+      return;
+    }
+    var deadline = new Date(item.date + 'T' + item.time + ':00').getTime();
+    if (isNaN(deadline) || deadline > now) {
+      keep.push(item);
+      return;
+    }
+    item.archivedAt = now;
+    item.archiveReason = 'completed';
+    reminderData.archived.push(item);
+    moved = true;
+  });
+  if (moved) reminderData.items = keep;
+  return moved;
 }
 
 function openReminderForm(id){
@@ -399,12 +449,48 @@ function editReminder(id){
 function deleteReminder(id){
   var item = reminderItemById(id);
   if (!item) return;
-  appConfirm('删除“' + item.title + '”？', function(){
+  appConfirm('将“' + item.title + '”移入归档？', function(){
     reminderData.items = reminderData.items.filter(function(saved){ return saved.id !== id; });
+    item.archivedAt = Date.now();
+    item.archiveReason = 'deleted';
+    reminderData.archived.push(item);
     saveReminderState(false);
     renderReminderPage();
-    toast('提醒已删除');
-  }, { title: '删除提醒' });
+    toast('提醒已移入归档');
+  }, { title: '移入归档', confirmLabel: '移入归档' });
+}
+
+function restoreReminder(id){
+  var item = null;
+  each(reminderData.archived, function(saved){ if (saved.id === id) item = saved; });
+  if (!item) return;
+  reminderData.archived = reminderData.archived.filter(function(saved){ return saved.id !== id; });
+  delete item.archivedAt;
+  delete item.archiveReason;
+  if (item.mode === 'once') {
+    var candidate = new Date(item.date + 'T' + item.time + ':00');
+    if (isNaN(candidate.getTime()) || candidate.getTime() <= Date.now()) {
+      candidate = reminderAtTime(new Date(), item.time);
+      if (candidate.getTime() <= Date.now()) candidate.setDate(candidate.getDate() + 1);
+      item.date = candidate.getFullYear() + '-' + pad2(candidate.getMonth() + 1) + '-' + pad2(candidate.getDate());
+    }
+  }
+  reminderData.items.push(item);
+  saveReminderState(true);
+  renderReminderPage();
+  toast('提醒已移回');
+}
+
+function permanentDeleteReminder(id){
+  var item = null;
+  each(reminderData.archived, function(saved){ if (saved.id === id) item = saved; });
+  if (!item) return;
+  appConfirm('彻底删除“' + item.title + '”？删除后不能恢复。', function(){
+    reminderData.archived = reminderData.archived.filter(function(saved){ return saved.id !== id; });
+    saveReminderState(false);
+    renderReminderPage();
+    toast('提醒已彻底删除');
+  }, { title: '彻底删除提醒' });
 }
 
 function toggleReminderHomeNotice(){
