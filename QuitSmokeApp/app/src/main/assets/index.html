@@ -2016,6 +2016,7 @@ byId('mask').addEventListener('click', closeSheet);
    应用版本记录
    ============================================================ */
 var APP_CHANGELOG = [
+  { version: '5.9.3', date: '2026-11-06', changes: ['修复小米忽略通知展开区导致下滑后没有内容的问题，改为直接注册通知主内容布局。', '仅一次的独立提醒选择稍后后移入归档，并显示“已稍后”状态；补发的稍后通知仍会正常触发。'] },
   { version: '5.9.2', date: '2026-11-06', changes: ['通知下滑展开后的内容区增加“稍后”和“确认”按钮。', '仅增加自定义展开内容，保留原通知小图标、通道、悬浮通知和锁屏逻辑。'] },
   { version: '5.9.1', date: '2026-11-06', changes: ['删除首页“点击进入，功能页之间可以滑动切换”的辅助文字。', '通知栏点“稍后”改为进入 App 的时间输入框，不再使用固定 10 分钟。'] },
   { version: '5.9.0', date: '2026-11-06', changes: ['首页提醒只在到点且本次未处理时显示，未来提醒和已确认、已稍后的提醒不再显示。', '点击通知正文进入页面后自动弹出“确认/稍后”处理框。', '通知栏上的“确认”“稍后”继续在后台直接处理，不打开 App。'] },
@@ -5138,7 +5139,8 @@ function renderReminderPage(){
       REMINDER_MODE_NAMES[mode] + '</span><small>' + rows.length + ' 条</small></button>' +
       rows.map(function(item){
         var state = item.archiveReason === 'completed' ? '已提醒' :
-          (item.archiveReason === 'converted' ? '已转待办' : '已删除');
+          (item.archiveReason === 'snoozed' ? '已稍后' :
+            (item.archiveReason === 'converted' ? '已转待办' : '已删除'));
         return '<div class="reminder-archive-item" data-drag-kind="reminder" data-drag-state="archive" data-drag-id="' +
           escHtml(item.id) + '">' +
           '<span class="reminder-archive-copy"><b>' + escHtml(item.title) + '</b></span>' +
@@ -6715,9 +6717,27 @@ function saveSnooze(){
     toast('安排稍后提醒失败，请检查通知权限');
     return;
   }
+  if (snoozeDraft.type === 'standalone') {
+    var item = reminderItemById(snoozeDraft.id);
+    if (item && item.mode === 'once' && reminderData.items.indexOf(item) >= 0) {
+      reminderData.items = reminderData.items.filter(function(saved){ return saved.id !== snoozeDraft.id; });
+      item.archivedAt = Date.now();
+      item.archiveReason = 'snoozed';
+      reminderData.archived.push(item);
+    } else {
+      each(reminderData.archived, function(saved){
+        if (saved.id === snoozeDraft.id && saved.mode === 'once') {
+          saved.archiveReason = 'snoozed';
+        }
+      });
+    }
+  }
   if (snoozeDraft.type === 'standalone' && snoozeDraft.occurrenceKey) {
     reminderData.handledOccurrences[snoozeDraft.occurrenceKey] = true;
+  }
+  if (snoozeDraft.type === 'standalone') {
     saveReminderState(false);
+    renderReminderPage();
     renderHomeNotice();
   }
   closeSheet();

@@ -104,9 +104,27 @@ function saveSnooze(){
     toast('安排稍后提醒失败，请检查通知权限');
     return;
   }
+  if (snoozeDraft.type === 'standalone') {
+    var item = reminderItemById(snoozeDraft.id);
+    if (item && item.mode === 'once' && reminderData.items.indexOf(item) >= 0) {
+      reminderData.items = reminderData.items.filter(function(saved){ return saved.id !== snoozeDraft.id; });
+      item.archivedAt = Date.now();
+      item.archiveReason = 'snoozed';
+      reminderData.archived.push(item);
+    } else {
+      each(reminderData.archived, function(saved){
+        if (saved.id === snoozeDraft.id && saved.mode === 'once') {
+          saved.archiveReason = 'snoozed';
+        }
+      });
+    }
+  }
   if (snoozeDraft.type === 'standalone' && snoozeDraft.occurrenceKey) {
     reminderData.handledOccurrences[snoozeDraft.occurrenceKey] = true;
+  }
+  if (snoozeDraft.type === 'standalone') {
     saveReminderState(false);
+    renderReminderPage();
     renderHomeNotice();
   }
   closeSheet();

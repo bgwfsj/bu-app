@@ -316,8 +316,8 @@ async function run() {
       cleanupConfirmOpened: true,
       cleanupCalls: 1,
       aboutOpened: true,
-      changelogCount: 41,
-      aboutVersion: '5.9.2',
+      changelogCount: 42,
+      aboutVersion: '5.9.3',
       updateBackupExposed: true,
       updateCalls: 1,
       handledBack: true,
@@ -866,23 +866,37 @@ async function run() {
       openSnoozeDialog('todo', 'todo_daily', '今晚的待办');
       byId('snooze-minutes').value = '17';
       saveSnooze();
-      var occurrenceKey = 'reminder_1|2026-11-06|09:00';
-      openSnoozeDialog('standalone', 'reminder_1', '测试提醒', occurrenceKey);
+      reminderData.items.push({
+        id: 'snooze_once', title: '测试提醒', mode: 'once', time: '09:00',
+        date: '2099-01-01', createdAt: new Date().toISOString()
+      });
+      var occurrenceKey = 'snooze_once|2099-01-01|09:00';
+      openSnoozeDialog('standalone', 'snooze_once', '测试提醒', occurrenceKey);
       byId('snooze-minutes').value = '30';
       saveSnooze();
+      var snoozedArchived = reminderData.archived.some(function(item){
+        return item.id === 'snooze_once' && item.archiveReason === 'snoozed';
+      });
+      reminderData.archived = reminderData.archived.filter(function(item){
+        return item.id !== 'snooze_once';
+      });
+      saveReminderState(false);
+      renderReminderPage();
       window.AppNative = originalNative;
       return {
         calls: calls,
         sheetClosed: !byId('sheet').classList.contains('on'),
-        occurrenceHandled: reminderData.handledOccurrences[occurrenceKey] === true
+        occurrenceHandled: reminderData.handledOccurrences[occurrenceKey] === true,
+        snoozedArchived: snoozedArchived
       };
     })()`);
     assert.deepEqual(snooze.calls, [
       { type: 'todo', id: 'todo_daily', title: '今晚的待办', minutes: 17 },
-      { type: 'standalone', id: 'reminder_1', title: '测试提醒', minutes: 30 }
+      { type: 'standalone', id: 'snooze_once', title: '测试提醒', minutes: 30 }
     ]);
     assert.equal(snooze.sheetClosed, true);
     assert.equal(snooze.occurrenceHandled, true);
+    assert.equal(snooze.snoozedArchived, true);
 
     const csv = fs.readFileSync(csvPath, 'utf8');
     const ledger = await evaluate(cdp, `(function(){

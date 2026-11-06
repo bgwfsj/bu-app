@@ -24,6 +24,8 @@ final class ReminderExpandedNotificationView {
         content.setOnClickPendingIntent(R.id.notification_expanded_root, openAction);
         content.setOnClickPendingIntent(R.id.notification_expanded_snooze, snoozeAction);
         content.setOnClickPendingIntent(R.id.notification_expanded_confirm, confirmAction);
-        builder.setCustomBigContentView(content);
+        builder.setCustomContentView(content)
+            .setCustomBigContentView(content)
+            .setCustomHeadsUpContentView(content);
     }
 }

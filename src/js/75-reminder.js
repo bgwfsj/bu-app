@@ -295,7 +295,8 @@ function renderReminderPage(){
       REMINDER_MODE_NAMES[mode] + '</span><small>' + rows.length + ' 条</small></button>' +
       rows.map(function(item){
         var state = item.archiveReason === 'completed' ? '已提醒' :
-          (item.archiveReason === 'converted' ? '已转待办' : '已删除');
+          (item.archiveReason === 'snoozed' ? '已稍后' :
+            (item.archiveReason === 'converted' ? '已转待办' : '已删除'));
         return '<div class="reminder-archive-item" data-drag-kind="reminder" data-drag-state="archive" data-drag-id="' +
           escHtml(item.id) + '">' +
           '<span class="reminder-archive-copy"><b>' + escHtml(item.title) + '</b></span>' +
