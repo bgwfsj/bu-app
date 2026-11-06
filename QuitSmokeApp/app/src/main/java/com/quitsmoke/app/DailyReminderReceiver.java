@@ -86,9 +86,6 @@ public class DailyReminderReceiver extends BroadcastReceiver {
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
-        ReminderExpandedNotificationView.apply(
-            notification, context, "补 · 今晚的待办", body,
-            contentIntent, snoozeAction, confirmAction);
         NotificationManagerCompat.from(context).notify(4101, notification.build());
         ReminderScheduler.schedule(context);
     }

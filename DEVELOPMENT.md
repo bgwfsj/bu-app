@@ -6,7 +6,7 @@
 
 - 应用名：补
 - 包名：`com.quitsmoke.app`
-- 当前版本：5.9.3
+- 当前版本：5.9.4
 - 最低 Android：API 24
 - Target SDK：34
 - 仓库：`bgwfsj/bu-app`（公开）
@@ -186,11 +186,7 @@ bu_pre_restore_v1    完整恢复前的安全副本
 - `SnoozeScheduler` / `SnoozeReceiver`：一次性稍后提醒。
 - `NotificationActionReceiver`：通知“确认”动作直接收起并记录完成；仍兼容旧通知里的后台“稍后”广播，但新通知不再使用该入口。
 
-提醒通知以 5.7 的稳定实现为基础：`StandaloneReminderReceiver`、`DailyReminderReceiver` 和 `SnoozeReceiver` 直接构造标准 `NotificationCompat`，使用 `ic_launcher_foreground`、标准 `addAction` 和原始通道 `standalone_reminders` / `todo_daily_reminder`。`ReminderExpandedNotificationView` 将同一套布局注册为 content view、big content 和 heads-up content，因为 MIUI 会忽略只设置 big content 的通知。通知图标、通道、visibility 和锁屏配置保持不变。
-
-标准 action 和自定义 content view 同时保留，保证悬浮横幅和下滑展开都有按钮。其他通知层保持稳定。
-
-`notification_reminder_expanded` 必须使用明确的不透明背景 `notification_reminder_expanded_bg`，否则小米深色通知栏中会出现“展开后什么都没有”。
+提醒通知固定使用 5.7 的原生实现：`StandaloneReminderReceiver`、`DailyReminderReceiver` 和 `SnoozeReceiver` 直接构造标准 `NotificationCompat`，使用 `ic_launcher_foreground`、标准 `addAction` 和原始通道 `standalone_reminders` / `todo_daily_reminder`。不要再引入自定义 content view、big content 或 heads-up view；小米会因此丢失悬浮通知。
 
 待办、提醒及归档标题使用自动换行，不再使用 `nowrap + ellipsis`。
 
