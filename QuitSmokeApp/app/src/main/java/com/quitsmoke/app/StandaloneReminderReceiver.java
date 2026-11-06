@@ -14,6 +14,10 @@ import androidx.core.content.ContextCompat;
 
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 public class StandaloneReminderReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -29,7 +33,12 @@ public class StandaloneReminderReceiver extends BroadcastReceiver {
     public static void deliverScheduled(Context context, JSONObject item) {
         String id = item.optString("id", "reminder");
         String title = item.optString("title", "提醒时间到了");
-        showNotification(context, id, title, "补 · 提醒时间到了", true, item.optString("mode"));
+        String mode = item.optString("mode");
+        String eventDate = "once".equals(mode) ? item.optString("date") :
+            new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA).format(new Date());
+        showNotification(
+            context, id, title, "补 · 提醒时间到了", true, mode, eventDate,
+            item.optString("time"));
         StandaloneReminderScheduler.continueRecurring(context, item.toString());
     }
 
@@ -39,7 +48,9 @@ public class StandaloneReminderReceiver extends BroadcastReceiver {
             String title,
             String body,
             boolean openReminderPage,
-            String reminderMode) {
+            String reminderMode,
+            String reminderDate,
+            String reminderTime) {
         if (Build.VERSION.SDK_INT >= 33 &&
                 ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -49,10 +60,19 @@ public class StandaloneReminderReceiver extends BroadcastReceiver {
         if (!manager.areNotificationsEnabled()) return false;
         StandaloneReminderScheduler.ensureChannel(context);
         int notificationId = StandaloneReminderScheduler.requestCode(id);
+        String occurrenceKey = id + "|" + reminderDate + "|" + reminderTime;
 
         Intent openIntent = new Intent(context, MainActivity.class)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        if (openReminderPage) openIntent.putExtra("open_page", "reminder");
+        if (openReminderPage) {
+            openIntent.putExtra("open_page", "reminder")
+                .putExtra("open_notification_action_dialog", true)
+                .putExtra("notification_action_type", "standalone")
+                .putExtra("notification_action_id", id)
+                .putExtra("notification_action_title", title)
+                .putExtra("notification_event_key", occurrenceKey)
+                .putExtra("notification_id", notificationId);
+        }
         PendingIntent contentIntent = PendingIntent.getActivity(
             context,
             notificationId,
@@ -62,7 +82,8 @@ public class StandaloneReminderReceiver extends BroadcastReceiver {
         Intent confirmIntent = new Intent(context, NotificationActionReceiver.class)
             .putExtra("notification_id", notificationId)
             .putExtra("reminder_confirm_id", id)
-            .putExtra("reminder_confirm_mode", reminderMode);
+            .putExtra("reminder_confirm_mode", reminderMode)
+            .putExtra("reminder_event_key", occurrenceKey);
         PendingIntent confirmAction = PendingIntent.getBroadcast(
             context,
             notificationId ^ 0x434F,
@@ -75,6 +96,7 @@ public class StandaloneReminderReceiver extends BroadcastReceiver {
             .putExtra("snooze_type", "standalone")
             .putExtra("snooze_id", id)
             .putExtra("snooze_title", title)
+            .putExtra("reminder_event_key", occurrenceKey)
             .putExtra("snooze_minutes", 10);
         PendingIntent snoozeAction = PendingIntent.getBroadcast(
             context,

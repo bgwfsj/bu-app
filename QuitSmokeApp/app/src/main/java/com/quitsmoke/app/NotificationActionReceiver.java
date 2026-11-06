@@ -18,6 +18,15 @@ public class NotificationActionReceiver extends BroadcastReceiver {
         if (notificationId >= 0) {
             NotificationManagerCompat.from(context).cancel(notificationId);
         }
+        String eventKey = intent.getStringExtra("reminder_event_key");
+        if (eventKey != null && !eventKey.isEmpty()) {
+            SharedPreferences prefs = context.getSharedPreferences(
+                "notification_confirmations", Context.MODE_PRIVATE);
+            Set<String> keys = new HashSet<>(
+                prefs.getStringSet("handled_keys", new HashSet<>()));
+            keys.add(eventKey);
+            prefs.edit().putStringSet("handled_keys", keys).commit();
+        }
         if ("snooze".equals(intent.getStringExtra("notification_action"))) {
             String type = intent.getStringExtra("snooze_type");
             String id = intent.getStringExtra("snooze_id");

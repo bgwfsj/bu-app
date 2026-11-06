@@ -43,6 +43,11 @@ public class SnoozeReceiver extends BroadcastReceiver {
         int requestCode = SnoozeScheduler.requestCode(type, id);
         Intent openIntent = new Intent(context, MainActivity.class)
             .putExtra("open_page", page)
+            .putExtra("open_notification_action_dialog", true)
+            .putExtra("notification_action_type", type)
+            .putExtra("notification_action_id", id)
+            .putExtra("notification_action_title", title)
+            .putExtra("notification_id", requestCode)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent contentIntent = PendingIntent.getActivity(
             context,

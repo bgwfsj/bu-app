@@ -6,7 +6,7 @@
 
 - 应用名：补
 - 包名：`com.quitsmoke.app`
-- 当前版本：5.8.9
+- 当前版本：5.9.0
 - 最低 Android：API 24
 - Target SDK：34
 - 仓库：`bgwfsj/bu-app`（公开）
@@ -155,6 +155,7 @@ bu_pre_restore_v1    完整恢复前的安全副本
 - 从归档移回过期的仅一次提醒时保留原日期，并用 `restoredPastOnce` 阻止它被立即再次归档。
 - 提醒仅支持短距离横向滑动，不启用长按拖拽。
 - 普通状态和归档均按 once、daily、weekly、monthly、yearly 分组；折叠状态保存在 `reminderData.groupCollapsed`。
+- 首页提醒只显示当天已经到点、且 `handledOccurrences` 中没有对应事件键的提醒。事件键格式为 `id|yyyy-MM-dd|HH:mm`，通知后台确认或稍后时写入原生 SharedPreferences，App 恢复时由 `applyConfirmedReminders()` 同步。
 - 通知“确认”只会对一次性提醒记录完成 ID；App 回到前台后 `applyConfirmedReminders()` 将对应提醒移入归档并标记 `archiveReason = completed`。
 - 待办与提醒可以一对一互相转换。转换后源项目进入归档并标记 `archiveReason = converted`。可一一对应的重复规则会直接保留；工作日、周末、自定义多日期待办转换为一条 `once` 提醒，日期取最近一次。
 
@@ -193,10 +194,10 @@ bu_pre_restore_v1    完整恢复前的安全副本
 
 通知点击：
 
-- 通知主体：打开对应页面，不弹输入框。
+- 通知主体：打开对应页面并调用 `openNotificationActionDialog`，弹框提供“确认”和“稍后”。
 - 点通知“稍后”：后台广播直接安排 10 分钟后补发通知，不打开 App。
 - 点通知“确认”：直接收起通知；一次性提醒记录完成标记，App 下次恢复时归档。
-- 在 App 内使用稍后入口时，仍通过 `openSnoozeDialog` 输入 1–1440 分钟。
+- 在弹框内使用稍后入口时，仍通过 `openSnoozeDialog` 输入 1–1440 分钟。
 
 系统权限：
 

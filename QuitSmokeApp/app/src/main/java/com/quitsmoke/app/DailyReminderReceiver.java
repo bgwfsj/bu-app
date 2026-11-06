@@ -39,6 +39,11 @@ public class DailyReminderReceiver extends BroadcastReceiver {
 
         Intent openIntent = new Intent(context, MainActivity.class)
             .putExtra("open_page", "todo")
+            .putExtra("open_notification_action_dialog", true)
+            .putExtra("notification_action_type", "todo")
+            .putExtra("notification_action_id", "todo_daily")
+            .putExtra("notification_action_title", "今晚的待办")
+            .putExtra("notification_id", 4101)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent contentIntent = PendingIntent.getActivity(
             context,

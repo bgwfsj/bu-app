@@ -323,6 +323,16 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @JavascriptInterface
+        public String consumeHandledReminderKeys() {
+            android.content.SharedPreferences prefs = getSharedPreferences(
+                "notification_confirmations", MODE_PRIVATE);
+            Set<String> keys = new HashSet<>(prefs.getStringSet(
+                "handled_keys", new HashSet<>()));
+            prefs.edit().remove("handled_keys").apply();
+            return new org.json.JSONArray(keys).toString();
+        }
+
+        @JavascriptInterface
         public void pickCsvFile() {
             runOnUiThread(() -> {
                 filePickerPurpose = "csv";
@@ -385,9 +395,14 @@ public class MainActivity extends AppCompatActivity {
         String snoozeType = intent.getStringExtra("snooze_type");
         String snoozeId = intent.getStringExtra("snooze_id");
         String snoozeTitle = intent.getStringExtra("snooze_title");
+        boolean openActionDialog = intent.getBooleanExtra("open_notification_action_dialog", false);
+        String actionType = intent.getStringExtra("notification_action_type");
+        String actionId = intent.getStringExtra("notification_action_id");
+        String actionTitle = intent.getStringExtra("notification_action_title");
+        String actionEventKey = intent.getStringExtra("notification_event_key");
         int notificationId = intent.getIntExtra("notification_id", -1);
         if (!"reminder".equals(page) && !"todo".equals(page) &&
-                snoozeType == null) return;
+                snoozeType == null && !openActionDialog) return;
         if (notificationId >= 0) {
             NotificationManagerCompat.from(this).cancel(notificationId);
         }
@@ -403,6 +418,14 @@ public class MainActivity extends AppCompatActivity {
                 .append(JSONObject.quote(snoozeId)).append(',')
                 .append(JSONObject.quote(snoozeTitle)).append(");");
         }
+        if (openActionDialog && actionType != null && actionId != null && actionTitle != null) {
+            script.append("window.openNotificationActionDialog&&window.openNotificationActionDialog(")
+                .append(JSONObject.quote(actionType)).append(',')
+                .append(JSONObject.quote(actionId)).append(',')
+                .append(JSONObject.quote(actionTitle)).append(',')
+                .append(notificationId).append(',')
+                .append(JSONObject.quote(actionEventKey == null ? "" : actionEventKey)).append(");");
+        }
         intent.removeExtra("open_page");
         view.evaluateJavascript(
             "(function(){" + script + "}()),true",
@@ -411,6 +434,11 @@ public class MainActivity extends AppCompatActivity {
         intent.removeExtra("snooze_type");
         intent.removeExtra("snooze_id");
         intent.removeExtra("snooze_title");
+        intent.removeExtra("open_notification_action_dialog");
+        intent.removeExtra("notification_action_type");
+        intent.removeExtra("notification_action_id");
+        intent.removeExtra("notification_action_title");
+        intent.removeExtra("notification_event_key");
         intent.removeExtra("notification_id");
     }
 

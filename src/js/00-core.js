@@ -139,6 +139,8 @@ var APP_ACTION_NAMES = {
   toggleReminderHomeNotice: true,
   dismissHomeNoticeToday: true,
   saveSnooze: true,
+  openSnoozeDialog: true,
+  confirmNotificationAction: true,
   checkAppUpdate: true,
   openSettingsPage: true,
   closeSettingsPage: true,

@@ -1719,6 +1719,8 @@ var APP_ACTION_NAMES = {
   toggleReminderHomeNotice: true,
   dismissHomeNoticeToday: true,
   saveSnooze: true,
+  openSnoozeDialog: true,
+  confirmNotificationAction: true,
   checkAppUpdate: true,
   openSettingsPage: true,
   closeSettingsPage: true,
@@ -2016,6 +2018,7 @@ byId('mask').addEventListener('click', closeSheet);
    应用版本记录
    ============================================================ */
 var APP_CHANGELOG = [
+  { version: '5.9.0', date: '2026-11-06', changes: ['首页提醒只在到点且本次未处理时显示，未来提醒和已确认、已稍后的提醒不再显示。', '点击通知正文进入页面后自动弹出“确认/稍后”处理框。', '通知栏上的“确认”“稍后”继续在后台直接处理，不打开 App。'] },
   { version: '5.8.9', date: '2026-11-06', changes: ['待办和提醒的长内容改为自动换行，正常和归档列表都完整显示。', '通知栏的“确认”“稍后”改为后台直接处理，不再打开 App；通知栏“稍后”默认延后 10 分钟。', '点击通知正文仍会进入对应页面，可在页面中手动选择确认或自定义稍后时间。'] },
   { version: '5.8.8', date: '2026-11-05', changes: ['提醒通知完整恢复为 5.7 的稳定实现，保留“确认”“稍后”和原通知通道。', '移回已结束的仅一次提醒时保持原日期，不再自动改到后一天。', '完整备份自动只保留最近 5 份，设置页新增手动清理旧备份。'] },
   { version: '5.8.7', date: '2026-11-05', changes: ['新增锁屏全屏提醒界面，屏幕关闭时也能看到提醒内容和“稍后”“确认”。', '提醒页新增锁屏提醒权限检查，可直接打开系统的全屏通知授权页面。', '停止删除和重建通知通道，避免每次升级重置通知权限。'] },
@@ -4852,6 +4855,7 @@ function reminderDefaultState(){
     schemaVersion: 1,
     items: [],
     archived: [],
+    handledOccurrences: {},
     homeNoticeEnabled: true,
     homeNoticeDismissedDate: '',
     groupCollapsed: { active: {}, archived: {} }
@@ -4908,6 +4912,10 @@ function loadReminderState(){
   if (!d || typeof d !== 'object') d = reminderDefaultState();
   if (!Array.isArray(d.items)) d.items = [];
   if (!Array.isArray(d.archived)) d.archived = [];
+  if (!d.handledOccurrences || typeof d.handledOccurrences !== 'object') {
+    d.handledOccurrences = {};
+  }
+  pruneHandledReminderOccurrences(d.handledOccurrences);
   if (typeof d.homeNoticeEnabled !== 'boolean') d.homeNoticeEnabled = true;
   if (typeof d.homeNoticeDismissedDate !== 'string') d.homeNoticeDismissedDate = '';
   if (!d.groupCollapsed || typeof d.groupCollapsed !== 'object') {
@@ -5016,6 +5024,23 @@ function reminderOccursOnDate(item, date){
   return false;
 }
 
+function reminderOccurrenceKey(item, date){
+  var value = date || new Date();
+  var occurrenceDate = item.mode === 'once' ? item.date :
+    value.getFullYear() + '-' + pad2(value.getMonth() + 1) + '-' + pad2(value.getDate());
+  return item.id + '|' + occurrenceDate + '|' + item.time;
+}
+
+function pruneHandledReminderOccurrences(handled){
+  var cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 2);
+  var cutoffText = cutoff.getFullYear() + '-' + pad2(cutoff.getMonth() + 1) + '-' + pad2(cutoff.getDate());
+  Object.keys(handled).forEach(function(key){
+    var parts = key.split('|');
+    if (!parts[1] || parts[1] < cutoffText) delete handled[key];
+  });
+}
+
 function renderHomeNotice(){
   var box = byId('home-notice');
   if (!box || !reminderData) return;
@@ -5030,13 +5055,16 @@ function renderHomeNotice(){
   var todayItems = reminderData.items.filter(function(item){
     return reminderOccursOnDate(item, now);
   }).sort(function(a, b){ return a.time.localeCompare(b.time); });
-  var dueItems = todayItems.filter(function(item){ return item.time <= currentTime; });
+  var dueItems = todayItems.filter(function(item){
+    return item.time <= currentTime &&
+      !reminderData.handledOccurrences[reminderOccurrenceKey(item, now)];
+  });
   var title = '';
   var copy = '';
-  if (todayItems.length) {
-    var first = (dueItems.length ? dueItems[0] : todayItems[0]);
-    title = dueItems.length ? '今天有提醒到时间了' : '今天安排了提醒';
-    copy = first.title + ' · ' + first.time + (todayItems.length > 1 ? '，另有 ' + (todayItems.length - 1) + ' 条' : '');
+  if (dueItems.length) {
+    var first = dueItems[0];
+    title = '今天有提醒到时间了';
+    copy = first.title + ' · ' + first.time + (dueItems.length > 1 ? '，另有 ' + (dueItems.length - 1) + ' 条' : '');
   } else {
     box.hidden = true;
     return;
@@ -5132,11 +5160,19 @@ function toggleReminderGroup(scope, mode){
 }
 
 function applyConfirmedReminders(){
-  if (!reminderData || !window.AppNative || !window.AppNative.consumeConfirmedReminderIds) return;
+  if (!reminderData || !window.AppNative) return;
   var ids = [];
-  try { ids = JSON.parse(window.AppNative.consumeConfirmedReminderIds() || '[]'); }
-  catch (error) { return; }
-  if (!Array.isArray(ids) || !ids.length) return;
+  var handledKeys = [];
+  try {
+    if (window.AppNative.consumeConfirmedReminderIds) {
+      ids = JSON.parse(window.AppNative.consumeConfirmedReminderIds() || '[]');
+    }
+    if (window.AppNative.consumeHandledReminderKeys) {
+      handledKeys = JSON.parse(window.AppNative.consumeHandledReminderKeys() || '[]');
+    }
+  } catch (error) {}
+  if (!Array.isArray(ids)) ids = [];
+  if (!Array.isArray(handledKeys)) handledKeys = [];
   var keep = [], changed = false;
   each(reminderData.items, function(item){
     if (item.mode === 'once' && ids.indexOf(item.id) >= 0) {
@@ -5148,11 +5184,19 @@ function applyConfirmedReminders(){
       keep.push(item);
     }
   });
+  each(handledKeys, function(key){
+    if (typeof key === 'string' && key) {
+      reminderData.handledOccurrences[key] = true;
+      changed = true;
+    }
+  });
   if (!changed) return;
   reminderData.items = keep;
+  pruneHandledReminderOccurrences(reminderData.handledOccurrences);
   saveReminderState(false);
   renderReminderPage();
-  toast('提醒已确认完成并归档');
+  renderHomeNotice();
+  if (ids.length) toast('提醒已确认完成并归档');
 }
 
 function reminderOptions(start, end, selected){
@@ -6569,6 +6613,55 @@ function initLedger(){
    8.8 稍后提醒
    ============================================================ */
 var snoozeDraft = null;
+
+function openNotificationActionDialog(type, id, title, notificationId, occurrenceKey){
+  if ((type !== 'todo' && type !== 'standalone') || !id || !title) return;
+  openSheet(
+    '<h3>处理提醒</h3>' +
+    '<p>选择完成本次提醒，或稍后再次提醒。</p>' +
+    '<div class="snooze-title">' + escHtml(String(title)) + '</div>' +
+    '<div class="row"><button class="ghost"' +
+      actionAttrs('openSnoozeDialog', [type, String(id), String(title)]) + '>稍后</button>' +
+    '<button class="primary"' +
+      actionAttrs('confirmNotificationAction', [type, String(id), Number(notificationId) || -1, String(occurrenceKey || '')]) +
+      '>确认</button></div>'
+  );
+}
+
+function confirmNotificationAction(type, id, notificationId, occurrenceKey){
+  var item = reminderItemById(id);
+  if (!item) {
+    each(reminderData.archived, function(saved){
+      if (saved.id === id) item = saved;
+    });
+  }
+  var changed = false;
+  if (type === 'standalone' && occurrenceKey) {
+    reminderData.handledOccurrences[occurrenceKey] = true;
+    changed = true;
+  }
+  if (type === 'standalone' && item && item.mode === 'once') {
+    if (reminderData.items.indexOf(item) >= 0) {
+      reminderData.items = reminderData.items.filter(function(saved){ return saved.id !== id; });
+      item.archivedAt = Date.now();
+      item.archiveReason = 'completed';
+      reminderData.archived.push(item);
+      changed = true;
+    }
+  }
+  if (changed) {
+    saveReminderState(false);
+    renderReminderPage();
+    renderHomeNotice();
+  }
+  if (type === 'standalone' && item && item.mode === 'once') {
+    closeSheet();
+    toast('提醒已确认并归档');
+    return;
+  }
+  closeSheet();
+  toast(type === 'todo' ? '本次待办提醒已确认' : '本次提醒已确认');
+}
 
 function openSnoozeDialog(type, id, title){
   if ((type !== 'todo' && type !== 'standalone') || !id || !title) return;

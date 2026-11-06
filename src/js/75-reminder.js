@@ -12,6 +12,7 @@ function reminderDefaultState(){
     schemaVersion: 1,
     items: [],
     archived: [],
+    handledOccurrences: {},
     homeNoticeEnabled: true,
     homeNoticeDismissedDate: '',
     groupCollapsed: { active: {}, archived: {} }
@@ -68,6 +69,10 @@ function loadReminderState(){
   if (!d || typeof d !== 'object') d = reminderDefaultState();
   if (!Array.isArray(d.items)) d.items = [];
   if (!Array.isArray(d.archived)) d.archived = [];
+  if (!d.handledOccurrences || typeof d.handledOccurrences !== 'object') {
+    d.handledOccurrences = {};
+  }
+  pruneHandledReminderOccurrences(d.handledOccurrences);
   if (typeof d.homeNoticeEnabled !== 'boolean') d.homeNoticeEnabled = true;
   if (typeof d.homeNoticeDismissedDate !== 'string') d.homeNoticeDismissedDate = '';
   if (!d.groupCollapsed || typeof d.groupCollapsed !== 'object') {
@@ -176,6 +181,23 @@ function reminderOccursOnDate(item, date){
   return false;
 }
 
+function reminderOccurrenceKey(item, date){
+  var value = date || new Date();
+  var occurrenceDate = item.mode === 'once' ? item.date :
+    value.getFullYear() + '-' + pad2(value.getMonth() + 1) + '-' + pad2(value.getDate());
+  return item.id + '|' + occurrenceDate + '|' + item.time;
+}
+
+function pruneHandledReminderOccurrences(handled){
+  var cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 2);
+  var cutoffText = cutoff.getFullYear() + '-' + pad2(cutoff.getMonth() + 1) + '-' + pad2(cutoff.getDate());
+  Object.keys(handled).forEach(function(key){
+    var parts = key.split('|');
+    if (!parts[1] || parts[1] < cutoffText) delete handled[key];
+  });
+}
+
 function renderHomeNotice(){
   var box = byId('home-notice');
   if (!box || !reminderData) return;
@@ -190,13 +212,16 @@ function renderHomeNotice(){
   var todayItems = reminderData.items.filter(function(item){
     return reminderOccursOnDate(item, now);
   }).sort(function(a, b){ return a.time.localeCompare(b.time); });
-  var dueItems = todayItems.filter(function(item){ return item.time <= currentTime; });
+  var dueItems = todayItems.filter(function(item){
+    return item.time <= currentTime &&
+      !reminderData.handledOccurrences[reminderOccurrenceKey(item, now)];
+  });
   var title = '';
   var copy = '';
-  if (todayItems.length) {
-    var first = (dueItems.length ? dueItems[0] : todayItems[0]);
-    title = dueItems.length ? '今天有提醒到时间了' : '今天安排了提醒';
-    copy = first.title + ' · ' + first.time + (todayItems.length > 1 ? '，另有 ' + (todayItems.length - 1) + ' 条' : '');
+  if (dueItems.length) {
+    var first = dueItems[0];
+    title = '今天有提醒到时间了';
+    copy = first.title + ' · ' + first.time + (dueItems.length > 1 ? '，另有 ' + (dueItems.length - 1) + ' 条' : '');
   } else {
     box.hidden = true;
     return;
@@ -292,11 +317,19 @@ function toggleReminderGroup(scope, mode){
 }
 
 function applyConfirmedReminders(){
-  if (!reminderData || !window.AppNative || !window.AppNative.consumeConfirmedReminderIds) return;
+  if (!reminderData || !window.AppNative) return;
   var ids = [];
-  try { ids = JSON.parse(window.AppNative.consumeConfirmedReminderIds() || '[]'); }
-  catch (error) { return; }
-  if (!Array.isArray(ids) || !ids.length) return;
+  var handledKeys = [];
+  try {
+    if (window.AppNative.consumeConfirmedReminderIds) {
+      ids = JSON.parse(window.AppNative.consumeConfirmedReminderIds() || '[]');
+    }
+    if (window.AppNative.consumeHandledReminderKeys) {
+      handledKeys = JSON.parse(window.AppNative.consumeHandledReminderKeys() || '[]');
+    }
+  } catch (error) {}
+  if (!Array.isArray(ids)) ids = [];
+  if (!Array.isArray(handledKeys)) handledKeys = [];
   var keep = [], changed = false;
   each(reminderData.items, function(item){
     if (item.mode === 'once' && ids.indexOf(item.id) >= 0) {
@@ -308,11 +341,19 @@ function applyConfirmedReminders(){
       keep.push(item);
     }
   });
+  each(handledKeys, function(key){
+    if (typeof key === 'string' && key) {
+      reminderData.handledOccurrences[key] = true;
+      changed = true;
+    }
+  });
   if (!changed) return;
   reminderData.items = keep;
+  pruneHandledReminderOccurrences(reminderData.handledOccurrences);
   saveReminderState(false);
   renderReminderPage();
-  toast('提醒已确认完成并归档');
+  renderHomeNotice();
+  if (ids.length) toast('提醒已确认完成并归档');
 }
 
 function reminderOptions(start, end, selected){

@@ -3,6 +3,55 @@
    ============================================================ */
 var snoozeDraft = null;
 
+function openNotificationActionDialog(type, id, title, notificationId, occurrenceKey){
+  if ((type !== 'todo' && type !== 'standalone') || !id || !title) return;
+  openSheet(
+    '<h3>处理提醒</h3>' +
+    '<p>选择完成本次提醒，或稍后再次提醒。</p>' +
+    '<div class="snooze-title">' + escHtml(String(title)) + '</div>' +
+    '<div class="row"><button class="ghost"' +
+      actionAttrs('openSnoozeDialog', [type, String(id), String(title)]) + '>稍后</button>' +
+    '<button class="primary"' +
+      actionAttrs('confirmNotificationAction', [type, String(id), Number(notificationId) || -1, String(occurrenceKey || '')]) +
+      '>确认</button></div>'
+  );
+}
+
+function confirmNotificationAction(type, id, notificationId, occurrenceKey){
+  var item = reminderItemById(id);
+  if (!item) {
+    each(reminderData.archived, function(saved){
+      if (saved.id === id) item = saved;
+    });
+  }
+  var changed = false;
+  if (type === 'standalone' && occurrenceKey) {
+    reminderData.handledOccurrences[occurrenceKey] = true;
+    changed = true;
+  }
+  if (type === 'standalone' && item && item.mode === 'once') {
+    if (reminderData.items.indexOf(item) >= 0) {
+      reminderData.items = reminderData.items.filter(function(saved){ return saved.id !== id; });
+      item.archivedAt = Date.now();
+      item.archiveReason = 'completed';
+      reminderData.archived.push(item);
+      changed = true;
+    }
+  }
+  if (changed) {
+    saveReminderState(false);
+    renderReminderPage();
+    renderHomeNotice();
+  }
+  if (type === 'standalone' && item && item.mode === 'once') {
+    closeSheet();
+    toast('提醒已确认并归档');
+    return;
+  }
+  closeSheet();
+  toast(type === 'todo' ? '本次待办提醒已确认' : '本次提醒已确认');
+}
+
 function openSnoozeDialog(type, id, title){
   if ((type !== 'todo' && type !== 'standalone') || !id || !title) return;
   snoozeDraft = { type: type, id: String(id), title: String(title) };

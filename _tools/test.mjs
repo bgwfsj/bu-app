@@ -313,8 +313,8 @@ async function run() {
       cleanupConfirmOpened: true,
       cleanupCalls: 1,
       aboutOpened: true,
-      changelogCount: 38,
-      aboutVersion: '5.8.9',
+      changelogCount: 39,
+      aboutVersion: '5.9.0',
       updateBackupExposed: true,
       updateCalls: 1,
       handledBack: true,
@@ -482,7 +482,28 @@ async function run() {
       var edited = reminderItemById(weekly.id);
       var dailyItem = reminderData.items.filter(function(item){ return item.mode === 'daily'; })[0];
       var rows = reminderSortedItems();
+      var savedNoticeItems = reminderData.items.slice();
+      var tomorrow = new Date(Date.now() + 86400000);
+      var tomorrowText = tomorrow.getFullYear() + '-' + pad2(tomorrow.getMonth() + 1) + '-' + pad2(tomorrow.getDate());
+      reminderData.homeNoticeDismissedDate = '';
+      reminderData.items = [{
+        id: 'future_notice', title: '明天提醒', mode: 'once', time: '09:00',
+        date: tomorrowText, createdAt: new Date().toISOString()
+      }];
+      renderHomeNotice();
+      var futureNoticeHidden = byId('home-notice').hidden;
+      reminderData.items = [{
+        id: 'due_notice', title: '已到点提醒', mode: 'daily', time: '00:00',
+        createdAt: new Date().toISOString()
+      }];
+      renderHomeNotice();
       var homeNoticeVisible = !byId('home-notice').hidden;
+      var dueKey = reminderOccurrenceKey(reminderData.items[0], new Date());
+      reminderData.handledOccurrences[dueKey] = true;
+      renderHomeNotice();
+      var handledNoticeHidden = byId('home-notice').hidden;
+      delete reminderData.handledOccurrences[dueKey];
+      renderHomeNotice();
       document.querySelector('.home-notice-close').click();
       var dismissedToday = byId('home-notice').hidden &&
         reminderData.homeNoticeDismissedDate === wTodayStr();
@@ -493,6 +514,8 @@ async function run() {
       var homeNoticeHidden = byId('home-notice').hidden;
       var savedOff = JSON.parse(localStorage.getItem(RKEY)).homeNoticeEnabled === false;
       toggleReminderHomeNotice();
+      reminderData.items = savedNoticeItems;
+      renderReminderPage();
       var yesterday = new Date(Date.now() - 86400000);
       reminderData.items.push({
         id: 'completed_once',
@@ -573,7 +596,9 @@ async function run() {
           return index === 0 || rows[index - 1].ts <= row.ts;
         }),
         stored: JSON.parse(localStorage.getItem(RKEY)).items.length,
+        futureNoticeHidden: futureNoticeHidden,
         homeNoticeVisible: homeNoticeVisible,
+        handledNoticeHidden: handledNoticeHidden,
         dismissedToday: dismissedToday,
         returnedNextCycle: returnedNextCycle,
         homeNoticeHidden: homeNoticeHidden,
@@ -603,7 +628,9 @@ async function run() {
     assert.equal(reminders.allHaveNext, true);
     assert.equal(reminders.orderValid, true);
     assert.equal(reminders.stored, 5);
+    assert.equal(reminders.futureNoticeHidden, true);
     assert.equal(reminders.homeNoticeVisible, true);
+    assert.equal(reminders.handledNoticeHidden, true);
     assert.equal(reminders.dismissedToday, true);
     assert.equal(reminders.returnedNextCycle, true);
     assert.equal(reminders.homeNoticeHidden, true);
@@ -624,6 +651,38 @@ async function run() {
     assert.equal(reminders.reminderEditButtonsRemoved, true);
     assert.equal(reminders.reminderRowEditable, true);
     assert.equal(reminders.reminderArchiveEditable, false);
+
+    const notificationDialog = await evaluate(cdp, `(function(){
+      reminderData.items.push({
+        id: 'dialog_once', title: '通知正文提醒', mode: 'once', time: '12:00',
+        date: '2099-01-01', createdAt: new Date().toISOString()
+      });
+      renderReminderPage();
+      openNotificationActionDialog('standalone', 'dialog_once', '通知正文提醒', 777);
+      var opened = byId('sheet').classList.contains('on') &&
+        byId('sheet').querySelector('.snooze-title').textContent === '通知正文提醒';
+      var snoozeAction = byId('sheet').querySelector('[data-action="openSnoozeDialog"]');
+      snoozeAction.click();
+      var snoozeOpened = !!byId('snooze-minutes');
+      closeSheet();
+      openNotificationActionDialog('standalone', 'dialog_once', '通知正文提醒', 777);
+      confirmNotificationAction('standalone', 'dialog_once', 777);
+      var archived = reminderData.archived.some(function(item){
+        return item.id === 'dialog_once' && item.archiveReason === 'completed';
+      });
+      reminderData.archived = reminderData.archived.filter(function(item){
+        return item.id !== 'dialog_once';
+      });
+      saveReminderState(false);
+      renderReminderPage();
+      return { opened: opened, snoozeOpened: snoozeOpened, archived: archived, closed: !byId('sheet').classList.contains('on') };
+    })()`);
+    assert.deepEqual(notificationDialog, {
+      opened: true,
+      snoozeOpened: true,
+      archived: true,
+      closed: true
+    });
 
     const dragActions = await evaluate(cdp, `(function(){
       todoData.items.push({
