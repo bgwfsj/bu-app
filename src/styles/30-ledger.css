@@ -144,7 +144,7 @@ body[data-page="ledger-settings"] #page-pager{opacity:0;pointer-events:none}
 .ledger-list{display:flex;flex-direction:column;gap:6px}
 .ledger-record{
   display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:10px;align-items:center;
-  padding:11px 12px;background:#fff;border:1px solid var(--line2);border-radius:11px
+  padding:11px 12px;background:#fff;border:1px solid var(--line2);border-radius:11px;cursor:pointer
 }
 .ledger-cat{
   width:40px;height:40px;border-radius:11px;display:grid;place-items:center;background:#f5f1ec;

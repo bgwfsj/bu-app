@@ -630,7 +630,7 @@ body[data-page="ledger-settings"] #page-pager{opacity:0;pointer-events:none}
 .ledger-list{display:flex;flex-direction:column;gap:6px}
 .ledger-record{
   display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:10px;align-items:center;
-  padding:11px 12px;background:#fff;border:1px solid var(--line2);border-radius:11px
+  padding:11px 12px;background:#fff;border:1px solid var(--line2);border-radius:11px;cursor:pointer
 }
 .ledger-cat{
   width:40px;height:40px;border-radius:11px;display:grid;place-items:center;background:#f5f1ec;
@@ -2016,6 +2016,7 @@ byId('mask').addEventListener('click', closeSheet);
    应用版本记录
    ============================================================ */
 var APP_CHANGELOG = [
+  { version: '5.9.5', date: '2026-11-06', changes: ['记账记录去掉“编辑”按钮，点击整条记录即可编辑；删除按钮继续独立工作。'] },
   { version: '5.9.4', date: '2026-11-06', changes: ['提醒通知恢复为原生通知实现，移除自定义通知内容和展开布局。', '保留通知正文处理框、首页到点未处理逻辑和一次性提醒稍后归档。'] },
   { version: '5.9.3', date: '2026-11-06', changes: ['修复小米忽略通知展开区导致下滑后没有内容的问题，改为直接注册通知主内容布局。', '仅一次的独立提醒选择稍后后移入归档，并显示“已稍后”状态；补发的稍后通知仍会正常触发。'] },
   { version: '5.9.2', date: '2026-11-06', changes: ['通知下滑展开后的内容区增加“稍后”和“确认”按钮。', '仅增加自定义展开内容，保留原通知小图标、通道、悬浮通知和锁屏逻辑。'] },
@@ -6006,13 +6007,12 @@ function renderLedgerPage(){
   byId('ledger-list').innerHTML = visibleRecords.length ? visibleRecords.map(function(entry){
     var r = entry.record;
     var owner = entry.owner.id !== book.id ? ' · ' + escHtml(entry.owner.name) : '';
-    return '<div class="ledger-record">' +
+    return '<div class="ledger-record"' + actionAttrs('editLedgerRecord', [r.id]) + '>' +
       '<span class="ledger-cat">' + escHtml((r.tag || '未分类').slice(0, 2)) + '</span>' +
       '<span class="ledger-main"><b>' + escHtml(r.note || r.tag) + '</b><span>' +
       workoutDateLabel(r.date) + ' · ' + ledgerRecordTime(r) + owner + '</span></span>' +
       '<span class="ledger-amount"><b>' + ledgerMoney(r.amount) + '</b>' +
-      '<span><button' + actionAttrs('editLedgerRecord', [r.id]) + '>编辑</button>' +
-      '<button' + actionAttrs('deleteLedgerRecord', [r.id]) + '>删除</button></span></span></div>';
+      '<span><button' + actionAttrs('deleteLedgerRecord', [r.id]) + '>删除</button></span></span></div>';
   }).join('') : '<div class="ledger-empty">' +
     (query ? '没有匹配的记录' : '这个事件还没有记录<br>点击“记一笔”开始') + '</div>';
   renderDashboard();

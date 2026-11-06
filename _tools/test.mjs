@@ -316,8 +316,8 @@ async function run() {
       cleanupConfirmOpened: true,
       cleanupCalls: 1,
       aboutOpened: true,
-      changelogCount: 43,
-      aboutVersion: '5.9.4',
+      changelogCount: 44,
+      aboutVersion: '5.9.5',
       updateBackupExposed: true,
       updateCalls: 1,
       handledBack: true,
@@ -919,6 +919,9 @@ async function run() {
       var pieSegments = Math.max(0, byId('ledger-category-pie').querySelectorAll('circle').length - 1);
       var categoryRows = byId('ledger-category-list').querySelectorAll('.ledger-category-row').length;
       var eventMonths = byId('ledger-event-month-list').querySelectorAll('.ledger-event-month-row').length;
+      var recordEditButtonsRemoved = byId('ledger-list').querySelectorAll('button[data-action="editLedgerRecord"]').length === 0;
+      var recordRowsEditable = byId('ledger-list').querySelectorAll('.ledger-record[data-action="editLedgerRecord"]').length > 0;
+      var recordDeleteButtons = byId('ledger-list').querySelectorAll('[data-action="deleteLedgerRecord"]').length > 0;
       openLedgerMonthReport('2026-09');
       var reportHasPie = byId('sheet').querySelectorAll('.ledger-pie').length === 1;
       closeSheet();
@@ -985,6 +988,9 @@ async function run() {
         pieSegments: pieSegments,
         categoryRows: categoryRows,
         eventMonths: eventMonths,
+        recordEditButtonsRemoved: recordEditButtonsRemoved,
+        recordRowsEditable: recordRowsEditable,
+        recordDeleteButtons: recordDeleteButtons,
         reportHasPie: reportHasPie,
         editedTag: editedTag,
         recordsRenamed: recordsRenamed,
@@ -1018,6 +1024,9 @@ async function run() {
     assert.ok(ledger.pieSegments > 0);
     assert.ok(ledger.categoryRows > 0);
     assert.ok(ledger.eventMonths > 0);
+    assert.equal(ledger.recordEditButtonsRemoved, true);
+    assert.equal(ledger.recordRowsEditable, true);
+    assert.equal(ledger.recordDeleteButtons, true);
     assert.equal(ledger.reportHasPie, true);
     assert.equal(ledger.editedTag, true);
     assert.equal(ledger.recordsRenamed, true);

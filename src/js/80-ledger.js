@@ -484,13 +484,12 @@ function renderLedgerPage(){
   byId('ledger-list').innerHTML = visibleRecords.length ? visibleRecords.map(function(entry){
     var r = entry.record;
     var owner = entry.owner.id !== book.id ? ' · ' + escHtml(entry.owner.name) : '';
-    return '<div class="ledger-record">' +
+    return '<div class="ledger-record"' + actionAttrs('editLedgerRecord', [r.id]) + '>' +
       '<span class="ledger-cat">' + escHtml((r.tag || '未分类').slice(0, 2)) + '</span>' +
       '<span class="ledger-main"><b>' + escHtml(r.note || r.tag) + '</b><span>' +
       workoutDateLabel(r.date) + ' · ' + ledgerRecordTime(r) + owner + '</span></span>' +
       '<span class="ledger-amount"><b>' + ledgerMoney(r.amount) + '</b>' +
-      '<span><button' + actionAttrs('editLedgerRecord', [r.id]) + '>编辑</button>' +
-      '<button' + actionAttrs('deleteLedgerRecord', [r.id]) + '>删除</button></span></span></div>';
+      '<span><button' + actionAttrs('deleteLedgerRecord', [r.id]) + '>删除</button></span></span></div>';
   }).join('') : '<div class="ledger-empty">' +
     (query ? '没有匹配的记录' : '这个事件还没有记录<br>点击“记一笔”开始') + '</div>';
   renderDashboard();
