@@ -117,6 +117,8 @@ public class StandaloneReminderReceiver extends BroadcastReceiver {
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_REMINDER);
+        ReminderExpandedNotificationView.apply(
+            notification, context, title, body, contentIntent, snoozeAction, confirmAction);
         manager.notify(notificationId, notification.build());
         return true;
     }

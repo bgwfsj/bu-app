@@ -87,6 +87,9 @@ public class SnoozeReceiver extends BroadcastReceiver {
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_REMINDER);
+        ReminderExpandedNotificationView.apply(
+            notification, context, title, "补 · 稍后提醒时间到了",
+            contentIntent, snoozeAction, confirmAction);
         manager.notify(requestCode, notification.build());
     }
 }

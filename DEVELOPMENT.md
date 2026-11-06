@@ -6,7 +6,7 @@
 
 - 应用名：补
 - 包名：`com.quitsmoke.app`
-- 当前版本：5.9.1
+- 当前版本：5.9.2
 - 最低 Android：API 24
 - Target SDK：34
 - 仓库：`bgwfsj/bu-app`（公开）
@@ -186,9 +186,9 @@ bu_pre_restore_v1    完整恢复前的安全副本
 - `SnoozeScheduler` / `SnoozeReceiver`：一次性稍后提醒。
 - `NotificationActionReceiver`：通知“确认”动作直接收起并记录完成；仍兼容旧通知里的后台“稍后”广播，但新通知不再使用该入口。
 
-提醒通知固定使用 5.7 的稳定实现：`StandaloneReminderReceiver`、`DailyReminderReceiver` 和 `SnoozeReceiver` 直接构造标准 `NotificationCompat`，使用 `ic_launcher_foreground`、标准 `addAction` 和原始通道 `standalone_reminders` / `todo_daily_reminder`。不要重新引入自定义 RemoteViews、全屏 Activity、额外通知图标或新通道 ID；这些改动已在小米设备上验证会造成按钮、锁屏或小图标回归。
+提醒通知以 5.7 的稳定实现为基础：`StandaloneReminderReceiver`、`DailyReminderReceiver` 和 `SnoozeReceiver` 直接构造标准 `NotificationCompat`，使用 `ic_launcher_foreground`、标准 `addAction` 和原始通道 `standalone_reminders` / `todo_daily_reminder`。`ReminderExpandedNotificationView` 只通过 `setCustomBigContentView` 给下滑展开区补按钮，不得改动普通 content view、通知图标、通道、visibility 或锁屏配置。
 
-标准通知的 action 在横幅阶段由系统展示，横幅超时收回成紧凑通知后，是否继续显示操作由小米通知样式决定，应用无法通过普通通知 API 强制保留。不要为了常驻按钮重新改成自定义通知；这会重新引入图标、锁屏和样式回归。
+标准 action 在悬浮横幅中显示；下滑展开后的操作按钮由 `notification_reminder_expanded` 自定义大视图提供。只允许修改这个 big content，其他通知层保持稳定。
 
 待办、提醒及归档标题使用自动换行，不再使用 `nowrap + ellipsis`。
 
