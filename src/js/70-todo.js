@@ -609,6 +609,42 @@ function renderDashboard(){
     each(lbook.records, function(r){ if (String(r.date).indexOf(month) === 0) total += r.amount; });
     setTxt('home-ledger-copy', total ? '本月 ' + ledgerMoney(total) : '本月还没有记录');
   }
+  renderVisitStats();
+}
+
+var webVisitPreviewCounted = false;
+
+function renderVisitStats(){
+  var box = byId('home-visit-stats');
+  if (!box) return;
+  var total = 0, today = 0;
+  if (window.AppNative && window.AppNative.getAppVisitStats) {
+    try {
+      var nativeStats = JSON.parse(window.AppNative.getAppVisitStats() || '{}');
+      total = Math.max(0, Number(nativeStats.total) || 0);
+      today = Math.max(0, Number(nativeStats.today) || 0);
+    } catch (error) {
+      box.hidden = true;
+      return;
+    }
+  } else {
+    var key = 'bu_preview_visit_stats_v1';
+    var stats = storeGet(key, { total: 0, date: '', today: 0 });
+    var todayKey = wTodayStr();
+    if (!webVisitPreviewCounted) {
+      if (stats.date !== todayKey) stats.today = 0;
+      stats.total = (Number(stats.total) || 0) + 1;
+      stats.today = (Number(stats.today) || 0) + 1;
+      stats.date = todayKey;
+      storeSet(key, stats);
+      webVisitPreviewCounted = true;
+    }
+    total = Math.max(0, Number(stats.total) || 0);
+    today = Math.max(0, Number(stats.today) || 0);
+  }
+  box.textContent = '此间相逢 ' + total.toLocaleString('zh-CN') +
+    ' 次 · 今日 ' + today.toLocaleString('zh-CN') + ' 次';
+  box.hidden = false;
 }
 
 function initTodo(){

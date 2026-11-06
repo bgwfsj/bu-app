@@ -1,9 +1,12 @@
 package com.quitsmoke.app;
 
 import android.Manifest;
+import android.app.KeyguardManager;
 import android.content.ContentValues;
 import android.content.ContentUris;
+import android.content.BroadcastReceiver;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -12,6 +15,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.PowerManager;
 import android.provider.MediaStore;
 import android.util.Base64;
 import android.view.View;
@@ -39,10 +43,13 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
 import java.util.HashSet;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
@@ -50,8 +57,13 @@ public class MainActivity extends AppCompatActivity {
     private WebView webView;
     private static final String TAG = "QuitSmoke";
     private static final int REQUEST_NOTIFICATIONS = 901;
+    private static final String VISIT_PREFS = "app_visit_stats";
     private ActivityResultLauncher<Intent> filePickerLauncher;
     private String filePickerPurpose = "csv";
+    private boolean firstVisitResume = true;
+    private boolean leftAppSinceResume = false;
+    private boolean ignoreNextResume = false;
+    private BroadcastReceiver screenStateReceiver;
     private final Handler liveTimerHandler = new Handler(Looper.getMainLooper());
     private final Runnable liveTimerTick = new Runnable() {
         @Override
@@ -71,6 +83,27 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         ReminderScheduler.ensureChannel(this);
         StandaloneReminderScheduler.ensureChannel(this);
+        screenStateReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(android.content.Context context, Intent intent) {
+                String action = intent.getAction();
+                if (Intent.ACTION_SCREEN_OFF.equals(action)) {
+                    ignoreNextResume = true;
+                    leftAppSinceResume = false;
+                } else if (Intent.ACTION_USER_PRESENT.equals(action)) {
+                    liveTimerHandler.postDelayed(() -> {
+                        if (ignoreNextResume && !hasWindowFocus()) {
+                            ignoreNextResume = false;
+                            leftAppSinceResume = true;
+                        }
+                    }, 800);
+                }
+            }
+        };
+        IntentFilter screenFilter = new IntentFilter();
+        screenFilter.addAction(Intent.ACTION_SCREEN_OFF);
+        screenFilter.addAction(Intent.ACTION_USER_PRESENT);
+        registerReceiver(screenStateReceiver, screenFilter);
         filePickerLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
@@ -333,6 +366,23 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @JavascriptInterface
+        public String getAppVisitStats() {
+            android.content.SharedPreferences prefs = getSharedPreferences(
+                VISIT_PREFS, MODE_PRIVATE);
+            String today = visitDateKey();
+            int todayCount = prefs.getString("today_date", "").equals(today)
+                ? prefs.getInt("today_count", 0) : 0;
+            try {
+                return new JSONObject()
+                    .put("total", prefs.getLong("total_count", 0))
+                    .put("today", todayCount)
+                    .toString();
+            } catch (Exception error) {
+                return "{\"total\":0,\"today\":0}";
+            }
+        }
+
+        @JavascriptInterface
         public void pickCsvFile() {
             runOnUiThread(() -> {
                 filePickerPurpose = "csv";
@@ -497,13 +547,27 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        boolean interactive = isScreenInteractive();
+        boolean locked = isDeviceLocked();
+        boolean countVisit = false;
+        if (firstVisitResume) {
+            firstVisitResume = false;
+            countVisit = interactive && !locked;
+        } else if (ignoreNextResume) {
+            ignoreNextResume = false;
+        } else if (leftAppSinceResume && interactive && !locked) {
+            countVisit = true;
+        }
+        leftAppSinceResume = false;
+        if (countVisit) recordAppVisit();
         liveTimerHandler.removeCallbacks(liveTimerTick);
         liveTimerHandler.post(liveTimerTick);
         ReminderScheduler.schedule(this);
         StandaloneReminderScheduler.rescheduleAll(this);
         if (webView != null) {
             webView.evaluateJavascript(
-                "(window.applyConfirmedReminders && window.applyConfirmedReminders(), true)",
+                "(window.applyConfirmedReminders && window.applyConfirmedReminders()," +
+                    "window.refreshVisitStats && window.refreshVisitStats(),true)",
                 null
             );
         }
@@ -511,8 +575,49 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+        if (!isScreenInteractive() || isDeviceLocked()) {
+            ignoreNextResume = true;
+            leftAppSinceResume = false;
+        } else {
+            leftAppSinceResume = true;
+        }
+    }
+
+    @Override
     protected void onDestroy() {
         liveTimerHandler.removeCallbacks(liveTimerTick);
+        if (screenStateReceiver != null) {
+            try { unregisterReceiver(screenStateReceiver); } catch (Exception ignored) {}
+            screenStateReceiver = null;
+        }
         super.onDestroy();
+    }
+
+    private boolean isScreenInteractive() {
+        PowerManager manager = (PowerManager) getSystemService(POWER_SERVICE);
+        return manager == null || manager.isInteractive();
+    }
+
+    private boolean isDeviceLocked() {
+        KeyguardManager manager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
+        return manager != null && manager.isKeyguardLocked();
+    }
+
+    private String visitDateKey() {
+        return new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA).format(new Date());
+    }
+
+    private void recordAppVisit() {
+        android.content.SharedPreferences prefs = getSharedPreferences(VISIT_PREFS, MODE_PRIVATE);
+        String today = visitDateKey();
+        int todayCount = prefs.getString("today_date", "").equals(today)
+            ? prefs.getInt("today_count", 0) : 0;
+        prefs.edit()
+            .putLong("total_count", prefs.getLong("total_count", 0) + 1)
+            .putString("today_date", today)
+            .putInt("today_count", todayCount + 1)
+            .apply();
     }
 }

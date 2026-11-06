@@ -303,6 +303,10 @@ body[data-page="home"]::before{
 .home-card.compact .home-icon{width:28px;height:28px;margin-bottom:12px;font-size:11px}
 .home-card.compact b{font-size:14px}
 .home-card.compact small{font-size:9px}
+.home-visit-stats{
+  margin-top:auto;padding:14px 0 2px;text-align:center;
+  font-size:10px;line-height:1.5;letter-spacing:.07em;color:#98a6aa
+}
 
 /* 15-settings.css */
 /* ---------- 设置 ---------- */
@@ -1110,6 +1114,7 @@ body[data-page="fitness"]::before{
           <small id="home-reminder-copy">没有独立提醒</small>
         </button>
       </div>
+      <div class="home-visit-stats" id="home-visit-stats" aria-live="polite"></div>
     </section>
 
     <!-- ================= 设置 ================= -->
@@ -2016,6 +2021,7 @@ byId('mask').addEventListener('click', closeSheet);
    应用版本记录
    ============================================================ */
 var APP_CHANGELOG = [
+  { version: '5.9.6', date: '2026-11-06', changes: ['首页底部新增“此间相逢 X 次 · 今日 Y 次”访问统计。', '首次启动、从其他应用回到 App 会计数；息屏恢复、开机自启动和 App 内返回首页不计数。'] },
   { version: '5.9.5', date: '2026-11-06', changes: ['记账记录去掉“编辑”按钮，点击整条记录即可编辑；删除按钮继续独立工作。'] },
   { version: '5.9.4', date: '2026-11-06', changes: ['提醒通知恢复为原生通知实现，移除自定义通知内容和展开布局。', '保留通知正文处理框、首页到点未处理逻辑和一次性提醒稍后归档。'] },
   { version: '5.9.3', date: '2026-11-06', changes: ['修复小米忽略通知展开区导致下滑后没有内容的问题，改为直接注册通知主内容布局。', '仅一次的独立提醒选择稍后后移入归档，并显示“已稍后”状态；补发的稍后通知仍会正常触发。'] },
@@ -4832,6 +4838,42 @@ function renderDashboard(){
     each(lbook.records, function(r){ if (String(r.date).indexOf(month) === 0) total += r.amount; });
     setTxt('home-ledger-copy', total ? '本月 ' + ledgerMoney(total) : '本月还没有记录');
   }
+  renderVisitStats();
+}
+
+var webVisitPreviewCounted = false;
+
+function renderVisitStats(){
+  var box = byId('home-visit-stats');
+  if (!box) return;
+  var total = 0, today = 0;
+  if (window.AppNative && window.AppNative.getAppVisitStats) {
+    try {
+      var nativeStats = JSON.parse(window.AppNative.getAppVisitStats() || '{}');
+      total = Math.max(0, Number(nativeStats.total) || 0);
+      today = Math.max(0, Number(nativeStats.today) || 0);
+    } catch (error) {
+      box.hidden = true;
+      return;
+    }
+  } else {
+    var key = 'bu_preview_visit_stats_v1';
+    var stats = storeGet(key, { total: 0, date: '', today: 0 });
+    var todayKey = wTodayStr();
+    if (!webVisitPreviewCounted) {
+      if (stats.date !== todayKey) stats.today = 0;
+      stats.total = (Number(stats.total) || 0) + 1;
+      stats.today = (Number(stats.today) || 0) + 1;
+      stats.date = todayKey;
+      storeSet(key, stats);
+      webVisitPreviewCounted = true;
+    }
+    total = Math.max(0, Number(stats.total) || 0);
+    today = Math.max(0, Number(stats.today) || 0);
+  }
+  box.textContent = '此间相逢 ' + total.toLocaleString('zh-CN') +
+    ' 次 · 今日 ' + today.toLocaleString('zh-CN') + ' 次';
+  box.hidden = false;
 }
 
 function initTodo(){
@@ -6953,6 +6995,7 @@ function checkAppUpdate(){
   window.paintLiveWorkout = paintLiveWorkout;
   window.paintLiveTimers = paintLiveTimers;
   window.applyConfirmedReminders = applyConfirmedReminders;
+  window.refreshVisitStats = renderVisitStats;
   window.exportUpdateBackup = exportAppBackup;
   boot();
 })();

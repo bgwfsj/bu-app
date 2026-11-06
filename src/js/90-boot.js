@@ -81,6 +81,7 @@ function checkAppUpdate(){
   window.paintLiveWorkout = paintLiveWorkout;
   window.paintLiveTimers = paintLiveTimers;
   window.applyConfirmedReminders = applyConfirmedReminders;
+  window.refreshVisitStats = renderVisitStats;
   window.exportUpdateBackup = exportAppBackup;
   boot();
 })();

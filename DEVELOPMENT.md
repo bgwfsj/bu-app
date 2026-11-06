@@ -6,7 +6,7 @@
 
 - 应用名：补
 - 包名：`com.quitsmoke.app`
-- 当前版本：5.9.5
+- 当前版本：5.9.6
 - 最低 Android：API 24
 - Target SDK：34
 - 仓库：`bgwfsj/bu-app`（公开）
@@ -118,6 +118,10 @@ ledger_app_v1        记账
 event-ledger-v2      旧记账只读迁移
 bu_pre_restore_v1    完整恢复前的安全副本
 ```
+
+访问统计不属于 localStorage，使用 Android SharedPreferences 文件 `app_visit_stats`，字段为 `total_count`、`today_date`、`today_count`。不计入完整备份。
+
+访问计数规则由 `MainActivity` 管理：首次前台和离开 App 后重新前台各计一次；`onStop` 时如果屏幕关闭或处于锁屏则设置 `ignoreNextResume`，避免息屏恢复计数。App 内页面切换不触发 Activity 生命周期，因此不会增加；BootReceiver 不启动 Activity，因此自启动也不会增加。
 
 完整备份格式：`bu-app-backup` v3。备份数据库必须包含：
 

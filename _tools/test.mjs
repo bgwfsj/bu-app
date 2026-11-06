@@ -316,13 +316,35 @@ async function run() {
       cleanupConfirmOpened: true,
       cleanupCalls: 1,
       aboutOpened: true,
-      changelogCount: 44,
-      aboutVersion: '5.9.5',
+      changelogCount: 45,
+      aboutVersion: '5.9.6',
       updateBackupExposed: true,
       updateCalls: 1,
       handledBack: true,
       returnedHome: true
     });
+
+    const visitStats = await evaluate(cdp, `(function(){
+      var originalNative = window.AppNative;
+      window.AppNative = {
+        getAppVisitStats: function(){ return '{"total":128,"today":3}'; }
+      };
+      renderVisitStats();
+      var text = byId('home-visit-stats').textContent.trim();
+      var visible = !byId('home-visit-stats').hidden;
+      window.AppNative = originalNative;
+      renderVisitStats();
+      return {
+        text: text,
+        visible: visible,
+        previewVisible: !byId('home-visit-stats').hidden,
+        previewHasText: byId('home-visit-stats').textContent.indexOf('此间相逢 ') === 0
+      };
+    })()`);
+    assert.equal(visitStats.text, '此间相逢 128 次 · 今日 3 次');
+    assert.equal(visitStats.visible, true);
+    assert.equal(visitStats.previewVisible, true);
+    assert.equal(visitStats.previewHasText, true);
 
     const workout = await evaluate(cdp, `(function(){
       startWorkoutFromPlan('plan_default');
