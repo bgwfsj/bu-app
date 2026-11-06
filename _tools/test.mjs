@@ -313,8 +313,8 @@ async function run() {
       cleanupConfirmOpened: true,
       cleanupCalls: 1,
       aboutOpened: true,
-      changelogCount: 37,
-      aboutVersion: '5.8.8',
+      changelogCount: 38,
+      aboutVersion: '5.8.9',
       updateBackupExposed: true,
       updateCalls: 1,
       handledBack: true,
@@ -772,7 +772,9 @@ async function run() {
         waterInput: size('#w-input'),
         waterRecord: waterRecord,
         waterFont: getComputedStyle(document.querySelector('.qbtn')).fontFamily,
-        commonFont: getComputedStyle(document.querySelector('.todo-add')).fontFamily
+        commonFont: getComputedStyle(document.querySelector('.todo-add')).fontFamily,
+        todoTitleWrap: getComputedStyle(document.querySelector('.todo-copy b')).whiteSpace,
+        reminderTitleWrap: getComputedStyle(document.querySelector('.reminder-copy b')).whiteSpace
       };
     })()`);
     assert.equal(typography.waterBody, '13px');
@@ -787,6 +789,8 @@ async function run() {
     assert.equal(typography.waterInput, '14px');
     assert.equal(typography.waterRecord, '13px');
     assert.equal(typography.waterFont, typography.commonFont);
+    assert.equal(typography.todoTitleWrap, 'normal');
+    assert.equal(typography.reminderTitleWrap, 'normal');
 
     const snooze = await evaluate(cdp, `(function(){
       var originalNative = window.AppNative;

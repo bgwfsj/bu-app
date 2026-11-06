@@ -54,14 +54,14 @@ public class DailyReminderReceiver extends BroadcastReceiver {
             confirmIntent,
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
-        Intent snoozeIntent = new Intent(context, MainActivity.class)
-            .putExtra("open_page", "todo")
+        Intent snoozeIntent = new Intent(context, NotificationActionReceiver.class)
+            .putExtra("notification_action", "snooze")
             .putExtra("notification_id", 4101)
             .putExtra("snooze_type", "todo")
             .putExtra("snooze_id", "todo_daily")
             .putExtra("snooze_title", "今晚的待办")
-            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent snoozeAction = PendingIntent.getActivity(
+            .putExtra("snooze_minutes", 10);
+        PendingIntent snoozeAction = PendingIntent.getBroadcast(
             context,
             4101 ^ 0x534E,
             snoozeIntent,

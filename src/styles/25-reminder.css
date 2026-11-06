@@ -24,7 +24,7 @@
 .reminder-item.past{opacity:.58}
 .reminder-time-chip{flex:0 0 43px;height:43px;border-radius:12px;background:rgba(10,168,122,.07);color:#087d5c;display:grid;place-items:center;font:11px ui-monospace,"SF Mono",Menlo,Consolas,monospace;letter-spacing:-.02em}
 .reminder-copy{flex:1;min-width:0}
-.reminder-copy b{display:block;font-size:var(--fs-card);font-weight:500;color:#334b42;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.reminder-copy b{display:block;font-size:var(--fs-card);font-weight:500;color:#334b42;line-height:1.4;overflow-wrap:anywhere}
 .reminder-copy span{display:block;font-size:var(--fs-caption);color:#84959b;margin-top:4px}
 .reminder-copy small{display:block;font-size:10px;color:#a1adb1;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .reminder-convert{border:0;background:transparent;color:#16896a;font-size:var(--fs-meta);padding:4px 2px;cursor:pointer}
@@ -42,7 +42,7 @@
 .reminder-archive-group{display:flex;flex-direction:column;gap:6px}
 .reminder-archive-item{display:flex;align-items:center;gap:9px;padding:10px 11px;border-radius:10px;background:rgba(255,255,255,.6);border:1px solid var(--line2)}
 .reminder-archive-copy{flex:1;min-width:0}
-.reminder-archive-copy b{display:block;font-size:12.5px;font-weight:500;color:#74858b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.reminder-archive-copy b{display:block;font-size:12.5px;font-weight:500;color:#74858b;line-height:1.4;overflow-wrap:anywhere}
 .reminder-archive-copy span{display:block;font-size:var(--fs-caption);color:#9ba8ac;margin-top:3px}
 .reminder-archive-actions{display:flex;align-items:center;gap:7px;white-space:nowrap}
 .reminder-archive-state{font-size:10px;color:#9aa8ad}

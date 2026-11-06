@@ -18,7 +18,7 @@
 .todo-check{width:20px;height:20px;flex:0 0 20px;border-radius:50%;border:1.5px solid rgba(10,168,122,.35);background:#fff;color:transparent;font-size:11px;cursor:pointer;display:grid;place-items:center}
 .todo-item.done .todo-check{background:var(--acc);border-color:var(--acc);color:#fff}
 .todo-copy{flex:1;min-width:0}
-.todo-copy b{display:block;font-size:var(--fs-card);font-weight:500;color:#334b42;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.todo-copy b{display:block;font-size:var(--fs-card);font-weight:500;color:#334b42;line-height:1.4;overflow-wrap:anywhere}
 .todo-item.done .todo-copy b{color:#9aa8a7;text-decoration:line-through}
 .todo-item.overdue{background:#fffaf4;border-color:rgba(210,116,34,.18)}
 .todo-item.overdue .todo-copy span{color:#b57639}
@@ -30,7 +30,8 @@
 .todo-section-title{display:flex;justify-content:space-between;align-items:baseline;margin:22px 0 8px;color:#6d8089;font-size:var(--fs-meta);letter-spacing:.12em}
 .todo-section-title small{font-size:var(--fs-caption);color:#9eabb0;letter-spacing:.04em}
 .todo-upcoming{display:flex;flex-direction:column;gap:6px}
-.todo-up-item{display:flex;align-items:center;justify-content:space-between;padding:10px 11px;background:rgba(255,255,255,.72);border:1px solid var(--line2);border-radius:10px;font-size:12px;color:#657b83;width:100%;text-align:left;font-family:inherit;cursor:pointer}
+.todo-up-item{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:10px 11px;background:rgba(255,255,255,.72);border:1px solid var(--line2);border-radius:10px;font-size:12px;color:#657b83;width:100%;text-align:left;font-family:inherit;cursor:pointer}
+.todo-up-item span:first-child{min-width:0;white-space:normal;overflow-wrap:anywhere;line-height:1.45}
 .todo-up-item span:last-child{font-size:var(--fs-caption);color:#9ca9ad}
 .todo-archive-box{margin-top:20px;border-top:1px solid var(--line2);padding-top:10px}
 .todo-archive-box>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;cursor:pointer;color:#6d8089;font-size:var(--fs-meta);letter-spacing:.08em}
@@ -42,7 +43,7 @@
 .todo-archive-list{display:flex;flex-direction:column;gap:6px;margin-top:10px}
 .todo-archive-item{display:flex;align-items:center;gap:10px;padding:10px 11px;border-radius:10px;background:rgba(255,255,255,.6);border:1px solid var(--line2)}
 .todo-archive-copy{flex:1;min-width:0}
-.todo-archive-copy b{display:block;font-size:12.5px;font-weight:500;color:#74858b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.todo-archive-copy b{display:block;font-size:12.5px;font-weight:500;color:#74858b;line-height:1.4;overflow-wrap:anywhere}
 .todo-archive-copy span{display:block;font-size:var(--fs-caption);color:#a0acb0;margin-top:3px}
 .todo-archive-actions{display:flex;align-items:center;gap:7px;white-space:nowrap}
 .todo-archive-state{font-size:10px;color:#9aa8ad}
