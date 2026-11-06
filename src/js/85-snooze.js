@@ -10,7 +10,7 @@ function openNotificationActionDialog(type, id, title, notificationId, occurrenc
     '<p>选择完成本次提醒，或稍后再次提醒。</p>' +
     '<div class="snooze-title">' + escHtml(String(title)) + '</div>' +
     '<div class="row"><button class="ghost"' +
-      actionAttrs('openSnoozeDialog', [type, String(id), String(title)]) + '>稍后</button>' +
+      actionAttrs('openSnoozeDialog', [type, String(id), String(title), String(occurrenceKey || '')]) + '>稍后</button>' +
     '<button class="primary"' +
       actionAttrs('confirmNotificationAction', [type, String(id), Number(notificationId) || -1, String(occurrenceKey || '')]) +
       '>确认</button></div>'
@@ -52,9 +52,14 @@ function confirmNotificationAction(type, id, notificationId, occurrenceKey){
   toast(type === 'todo' ? '本次待办提醒已确认' : '本次提醒已确认');
 }
 
-function openSnoozeDialog(type, id, title){
+function openSnoozeDialog(type, id, title, occurrenceKey){
   if ((type !== 'todo' && type !== 'standalone') || !id || !title) return;
-  snoozeDraft = { type: type, id: String(id), title: String(title) };
+  snoozeDraft = {
+    type: type,
+    id: String(id),
+    title: String(title),
+    occurrenceKey: occurrenceKey ? String(occurrenceKey) : ''
+  };
   openSheet(
     '<h3>稍后提醒</h3>' +
     '<p>输入分钟后再次提醒。原来的待办或提醒周期不会改变。</p>' +
@@ -98,6 +103,11 @@ function saveSnooze(){
   if (!scheduled) {
     toast('安排稍后提醒失败，请检查通知权限');
     return;
+  }
+  if (snoozeDraft.type === 'standalone' && snoozeDraft.occurrenceKey) {
+    reminderData.handledOccurrences[snoozeDraft.occurrenceKey] = true;
+    saveReminderState(false);
+    renderHomeNotice();
   }
   closeSheet();
   toast(minutes + ' 分钟后再次提醒');

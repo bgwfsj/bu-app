@@ -416,7 +416,8 @@ public class MainActivity extends AppCompatActivity {
             script.append("window.openSnoozeDialog&&window.openSnoozeDialog(")
                 .append(JSONObject.quote(snoozeType)).append(',')
                 .append(JSONObject.quote(snoozeId)).append(',')
-                .append(JSONObject.quote(snoozeTitle)).append(");");
+                .append(JSONObject.quote(snoozeTitle)).append(',')
+                .append(JSONObject.quote(actionEventKey == null ? "" : actionEventKey)).append(");");
         }
         if (openActionDialog && actionType != null && actionId != null && actionTitle != null) {
             script.append("window.openNotificationActionDialog&&window.openNotificationActionDialog(")

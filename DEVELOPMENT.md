@@ -6,7 +6,7 @@
 
 - 应用名：补
 - 包名：`com.quitsmoke.app`
-- 当前版本：5.9.0
+- 当前版本：5.9.1
 - 最低 Android：API 24
 - Target SDK：34
 - 仓库：`bgwfsj/bu-app`（公开）
@@ -184,7 +184,7 @@ bu_pre_restore_v1    完整恢复前的安全副本
 - `StandaloneReminderScheduler`：独立提醒的 AlarmClock 调度。
 - `StandaloneReminderReceiver`：显示独立提醒。
 - `SnoozeScheduler` / `SnoozeReceiver`：一次性稍后提醒。
-- `NotificationActionReceiver`：通知“确认”动作直接收起并记录完成；“稍后”动作直接调用 `SnoozeScheduler` 延后 10 分钟，不启动 Activity。
+- `NotificationActionReceiver`：通知“确认”动作直接收起并记录完成；仍兼容旧通知里的后台“稍后”广播，但新通知不再使用该入口。
 
 提醒通知固定使用 5.7 的稳定实现：`StandaloneReminderReceiver`、`DailyReminderReceiver` 和 `SnoozeReceiver` 直接构造标准 `NotificationCompat`，使用 `ic_launcher_foreground`、标准 `addAction` 和原始通道 `standalone_reminders` / `todo_daily_reminder`。不要重新引入自定义 RemoteViews、全屏 Activity、额外通知图标或新通道 ID；这些改动已在小米设备上验证会造成按钮、锁屏或小图标回归。
 
@@ -195,7 +195,7 @@ bu_pre_restore_v1    完整恢复前的安全副本
 通知点击：
 
 - 通知主体：打开对应页面并调用 `openNotificationActionDialog`，弹框提供“确认”和“稍后”。
-- 点通知“稍后”：后台广播直接安排 10 分钟后补发通知，不打开 App。
+- 点通知“稍后”：打开 `MainActivity` 并直接调用 `openSnoozeDialog`，由用户输入 1–1440 分钟。
 - 点通知“确认”：直接收起通知；一次性提醒记录完成标记，App 下次恢复时归档。
 - 在弹框内使用稍后入口时，仍通过 `openSnoozeDialog` 输入 1–1440 分钟。
 

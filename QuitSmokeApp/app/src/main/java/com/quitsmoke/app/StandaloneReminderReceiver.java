@@ -90,15 +90,15 @@ public class StandaloneReminderReceiver extends BroadcastReceiver {
             confirmIntent,
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
-        Intent snoozeIntent = new Intent(context, NotificationActionReceiver.class)
-            .putExtra("notification_action", "snooze")
+        Intent snoozeIntent = new Intent(context, MainActivity.class)
+            .putExtra("open_page", "reminder")
             .putExtra("notification_id", notificationId)
             .putExtra("snooze_type", "standalone")
             .putExtra("snooze_id", id)
             .putExtra("snooze_title", title)
             .putExtra("reminder_event_key", occurrenceKey)
-            .putExtra("snooze_minutes", 10);
-        PendingIntent snoozeAction = PendingIntent.getBroadcast(
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        PendingIntent snoozeAction = PendingIntent.getActivity(
             context,
             notificationId ^ 0x534E,
             snoozeIntent,

@@ -229,6 +229,7 @@ async function run() {
       var pagerRect = byId('page-pager').getBoundingClientRect();
       var controlsSeparate = breakRect.bottom < pagerRect.top;
       var activeQuickLabel = byId('page-pager').querySelector('button.on').textContent.trim();
+      var homeFootnoteRemoved = !document.querySelector('.home-footnote');
       var dragTarget = document.createElement('span');
       var dragRow = document.createElement('div');
       dragRow.setAttribute('data-drag-kind', 'todo');
@@ -247,6 +248,7 @@ async function run() {
         pagerLabels: pagerLabels,
         controlsSeparate: controlsSeparate,
         activeQuickLabel: activeQuickLabel,
+        homeFootnoteRemoved: homeFootnoteRemoved,
         dragOwnsHorizontalGesture: targetOwnsHorizontalGesture(dragTarget),
         plainOwnsHorizontalGesture: targetOwnsHorizontalGesture(document.body)
       };
@@ -261,6 +263,7 @@ async function run() {
       pagerLabels: ['练', '水', '戒', '记', '账', '醒'],
       controlsSeparate: true,
       activeQuickLabel: '戒',
+      homeFootnoteRemoved: true,
       dragOwnsHorizontalGesture: true,
       plainOwnsHorizontalGesture: false
     });
@@ -313,8 +316,8 @@ async function run() {
       cleanupConfirmOpened: true,
       cleanupCalls: 1,
       aboutOpened: true,
-      changelogCount: 39,
-      aboutVersion: '5.9.0',
+      changelogCount: 40,
+      aboutVersion: '5.9.1',
       updateBackupExposed: true,
       updateCalls: 1,
       handledBack: true,
@@ -863,17 +866,23 @@ async function run() {
       openSnoozeDialog('todo', 'todo_daily', '今晚的待办');
       byId('snooze-minutes').value = '17';
       saveSnooze();
-      openSnoozeDialog('standalone', 'reminder_1', '测试提醒');
+      var occurrenceKey = 'reminder_1|2026-11-06|09:00';
+      openSnoozeDialog('standalone', 'reminder_1', '测试提醒', occurrenceKey);
       byId('snooze-minutes').value = '30';
       saveSnooze();
       window.AppNative = originalNative;
-      return { calls: calls, sheetClosed: !byId('sheet').classList.contains('on') };
+      return {
+        calls: calls,
+        sheetClosed: !byId('sheet').classList.contains('on'),
+        occurrenceHandled: reminderData.handledOccurrences[occurrenceKey] === true
+      };
     })()`);
     assert.deepEqual(snooze.calls, [
       { type: 'todo', id: 'todo_daily', title: '今晚的待办', minutes: 17 },
       { type: 'standalone', id: 'reminder_1', title: '测试提醒', minutes: 30 }
     ]);
     assert.equal(snooze.sheetClosed, true);
+    assert.equal(snooze.occurrenceHandled, true);
 
     const csv = fs.readFileSync(csvPath, 'utf8');
     const ledger = await evaluate(cdp, `(function(){

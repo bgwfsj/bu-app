@@ -303,7 +303,6 @@ body[data-page="home"]::before{
 .home-card.compact .home-icon{width:28px;height:28px;margin-bottom:12px;font-size:11px}
 .home-card.compact b{font-size:14px}
 .home-card.compact small{font-size:9px}
-.home-footnote{font-size:9.5px;color:#9aa8ad;text-align:center;margin-top:auto;padding-top:25px;letter-spacing:.08em}
 
 /* 15-settings.css */
 /* ---------- 设置 ---------- */
@@ -1111,7 +1110,6 @@ body[data-page="fitness"]::before{
           <small id="home-reminder-copy">没有独立提醒</small>
         </button>
       </div>
-      <div class="home-footnote">点击进入，功能页之间可以滑动切换</div>
     </section>
 
     <!-- ================= 设置 ================= -->
@@ -2018,6 +2016,7 @@ byId('mask').addEventListener('click', closeSheet);
    应用版本记录
    ============================================================ */
 var APP_CHANGELOG = [
+  { version: '5.9.1', date: '2026-11-06', changes: ['删除首页“点击进入，功能页之间可以滑动切换”的辅助文字。', '通知栏点“稍后”改为进入 App 的时间输入框，不再使用固定 10 分钟。'] },
   { version: '5.9.0', date: '2026-11-06', changes: ['首页提醒只在到点且本次未处理时显示，未来提醒和已确认、已稍后的提醒不再显示。', '点击通知正文进入页面后自动弹出“确认/稍后”处理框。', '通知栏上的“确认”“稍后”继续在后台直接处理，不打开 App。'] },
   { version: '5.8.9', date: '2026-11-06', changes: ['待办和提醒的长内容改为自动换行，正常和归档列表都完整显示。', '通知栏的“确认”“稍后”改为后台直接处理，不再打开 App；通知栏“稍后”默认延后 10 分钟。', '点击通知正文仍会进入对应页面，可在页面中手动选择确认或自定义稍后时间。'] },
   { version: '5.8.8', date: '2026-11-05', changes: ['提醒通知完整恢复为 5.7 的稳定实现，保留“确认”“稍后”和原通知通道。', '移回已结束的仅一次提醒时保持原日期，不再自动改到后一天。', '完整备份自动只保留最近 5 份，设置页新增手动清理旧备份。'] },
@@ -6621,7 +6620,7 @@ function openNotificationActionDialog(type, id, title, notificationId, occurrenc
     '<p>选择完成本次提醒，或稍后再次提醒。</p>' +
     '<div class="snooze-title">' + escHtml(String(title)) + '</div>' +
     '<div class="row"><button class="ghost"' +
-      actionAttrs('openSnoozeDialog', [type, String(id), String(title)]) + '>稍后</button>' +
+      actionAttrs('openSnoozeDialog', [type, String(id), String(title), String(occurrenceKey || '')]) + '>稍后</button>' +
     '<button class="primary"' +
       actionAttrs('confirmNotificationAction', [type, String(id), Number(notificationId) || -1, String(occurrenceKey || '')]) +
       '>确认</button></div>'
@@ -6663,9 +6662,14 @@ function confirmNotificationAction(type, id, notificationId, occurrenceKey){
   toast(type === 'todo' ? '本次待办提醒已确认' : '本次提醒已确认');
 }
 
-function openSnoozeDialog(type, id, title){
+function openSnoozeDialog(type, id, title, occurrenceKey){
   if ((type !== 'todo' && type !== 'standalone') || !id || !title) return;
-  snoozeDraft = { type: type, id: String(id), title: String(title) };
+  snoozeDraft = {
+    type: type,
+    id: String(id),
+    title: String(title),
+    occurrenceKey: occurrenceKey ? String(occurrenceKey) : ''
+  };
   openSheet(
     '<h3>稍后提醒</h3>' +
     '<p>输入分钟后再次提醒。原来的待办或提醒周期不会改变。</p>' +
@@ -6709,6 +6713,11 @@ function saveSnooze(){
   if (!scheduled) {
     toast('安排稍后提醒失败，请检查通知权限');
     return;
+  }
+  if (snoozeDraft.type === 'standalone' && snoozeDraft.occurrenceKey) {
+    reminderData.handledOccurrences[snoozeDraft.occurrenceKey] = true;
+    saveReminderState(false);
+    renderHomeNotice();
   }
   closeSheet();
   toast(minutes + ' 分钟后再次提醒');
