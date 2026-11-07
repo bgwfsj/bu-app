@@ -50,11 +50,6 @@
 .todo-archive-actions button{border:0;background:transparent;color:#5f8f82;font-size:var(--fs-caption);padding:3px 1px;cursor:pointer}
 .todo-archive-actions button.danger{color:#bb8585;font-size:14px;padding:1px 2px}
 .todo-archive-empty{text-align:center;padding:12px 8px;color:#9aa8ad;font-size:11.5px}
-.todo-reminder{margin-top:22px;padding:14px;border-radius:14px;background:#fff;border:1px solid var(--line2);display:flex;align-items:center;gap:11px}
-.todo-reminder div{flex:1}
-.todo-reminder b{display:block;font-size:12.5px;color:#3b544a;font-weight:500}
-.todo-reminder span{display:block;font-size:var(--fs-caption);color:#93a2a7;margin-top:4px;line-height:1.55}
-.todo-reminder button{height:32px;padding:0 11px;border-radius:9px;border:1px solid rgba(10,168,122,.22);background:rgba(10,168,122,.06);color:#09805e;font-size:var(--fs-meta);cursor:pointer;white-space:nowrap}
 .todo-form-label{display:block;font-size:var(--fs-meta);letter-spacing:.12em;color:#788a92;margin:0 0 7px}
 .todo-form-input{display:block;width:100%;height:43px;border-radius:11px;border:1px solid var(--line);background:#f8faf9;padding:0 12px;font-size:13px;color:#2f473d;outline:none;margin-bottom:13px}
 .todo-repeat{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:13px}

@@ -200,13 +200,6 @@ function renderTodoPage(){
       '<button class="danger"' + actionAttrs('permanentDeleteTodo', [item.id]) + ' aria-label="彻底删除">×</button></span></div>';
   }).join('') : '<div class="todo-archive-empty">还没有失效的待办</div>';
 
-  var r = todoData.reminder;
-  var time = pad2(r.hour) + ':' + pad2(r.minute);
-  setTxt('todo-reminder-title', r.enabled ? '每天晚上 ' + time + ' 提醒' : '每天晚上提醒');
-  setTxt('todo-reminder-desc', r.enabled ?
-    '已开启 · 当前 ' + pendingTodoCount() + ' 项未完成' :
-    '设置提醒时间，装成 App 后可在后台收到通知');
-  byId('btn-todo-reminder').textContent = r.enabled ? '修改' : '设置';
   renderDashboard();
 }
 
@@ -507,6 +500,21 @@ function openReminderSettings(){
   );
 }
 
+function openTodoMenu(){
+  if (!todoData) return;
+  var r = todoData.reminder;
+  var time = pad2(r.hour) + ':' + pad2(r.minute);
+  openSheet(
+    '<h3>待办设置</h3>' +
+    '<p>每天到点提醒今天还没有完成的事项。</p>' +
+    '<button class="settings-row" data-action="openReminderSettings">' +
+      '<span><b>每日提醒</b><small>' +
+        (r.enabled ? '每天 ' + time + ' · 当前 ' + pendingTodoCount() + ' 项未完成' : '当前未开启') +
+      '</small></span><em>' + (r.enabled ? '修改 ›' : '设置 ›') + '</em></button>' +
+    '<div class="row"><button class="ghost" style="flex:1"' + actionAttrs('closeSheet') + '>关闭</button></div>'
+  );
+}
+
 function enableTodoReminder(){
   var value = byId('todo-reminder-time').value || '20:00';
   var hm = value.split(':');
@@ -650,8 +658,6 @@ function renderVisitStats(){
 function initTodo(){
   loadTodoState();
   byId('btn-todo-add').addEventListener('click', openTodoEditor);
-  byId('btn-todo-add-top').addEventListener('click', openTodoEditor);
-  byId('btn-todo-reminder').addEventListener('click', openReminderSettings);
   renderTodoPage();
   syncTodoReminder();
 }

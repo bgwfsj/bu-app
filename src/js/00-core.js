@@ -116,6 +116,8 @@ var APP_ACTION_NAMES = {
   toggleTodo: true,
   editTodo: true,
   deleteTodo: true,
+  openTodoMenu: true,
+  openReminderSettings: true,
   restoreTodo: true,
   permanentDeleteTodo: true,
   removeTodoDraftDate: true,

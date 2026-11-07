@@ -351,7 +351,7 @@
     <section class="page" id="p-todo">
       <div class="top">
         <div class="brand"><span class="led"></span>待办</div>
-        <button class="iconbtn" id="btn-todo-add-top" title="添加待办">＋</button>
+        <button class="iconbtn" id="btn-todo-menu" data-action="openTodoMenu" title="待办设置">⋯</button>
       </div>
       <div class="todo-hero">
         <div class="todo-kicker" id="todo-kicker">今天</div>
@@ -367,10 +367,6 @@
         <summary><span>归档</span><small><i id="todo-archive-count">0 项</i><em>&#9662;</em></small></summary>
         <div class="todo-archive-list" id="todo-archive-list"></div>
       </details>
-      <div class="todo-reminder">
-        <div><b id="todo-reminder-title">每天晚上提醒</b><span id="todo-reminder-desc">每天 20:00 提醒今天还没完成的事项</span></div>
-        <button id="btn-todo-reminder">设置</button>
-      </div>
     </section>
 
     <!-- ================= 独立提醒 ================= -->

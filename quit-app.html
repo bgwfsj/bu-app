@@ -411,11 +411,6 @@ body[data-page="settings"] #page-pager{opacity:0;pointer-events:none}
 .todo-archive-actions button{border:0;background:transparent;color:#5f8f82;font-size:var(--fs-caption);padding:3px 1px;cursor:pointer}
 .todo-archive-actions button.danger{color:#bb8585;font-size:14px;padding:1px 2px}
 .todo-archive-empty{text-align:center;padding:12px 8px;color:#9aa8ad;font-size:11.5px}
-.todo-reminder{margin-top:22px;padding:14px;border-radius:14px;background:#fff;border:1px solid var(--line2);display:flex;align-items:center;gap:11px}
-.todo-reminder div{flex:1}
-.todo-reminder b{display:block;font-size:12.5px;color:#3b544a;font-weight:500}
-.todo-reminder span{display:block;font-size:var(--fs-caption);color:#93a2a7;margin-top:4px;line-height:1.55}
-.todo-reminder button{height:32px;padding:0 11px;border-radius:9px;border:1px solid rgba(10,168,122,.22);background:rgba(10,168,122,.06);color:#09805e;font-size:var(--fs-meta);cursor:pointer;white-space:nowrap}
 .todo-form-label{display:block;font-size:var(--fs-meta);letter-spacing:.12em;color:#788a92;margin:0 0 7px}
 .todo-form-input{display:block;width:100%;height:43px;border-radius:11px;border:1px solid var(--line);background:#f8faf9;padding:0 12px;font-size:13px;color:#2f473d;outline:none;margin-bottom:13px}
 .todo-repeat{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:13px}
@@ -1420,7 +1415,7 @@ body[data-page="fitness"]::before{
     <section class="page" id="p-todo">
       <div class="top">
         <div class="brand"><span class="led"></span>待办</div>
-        <button class="iconbtn" id="btn-todo-add-top" title="添加待办">＋</button>
+        <button class="iconbtn" id="btn-todo-menu" data-action="openTodoMenu" title="待办设置">⋯</button>
       </div>
       <div class="todo-hero">
         <div class="todo-kicker" id="todo-kicker">今天</div>
@@ -1436,10 +1431,6 @@ body[data-page="fitness"]::before{
         <summary><span>归档</span><small><i id="todo-archive-count">0 项</i><em>&#9662;</em></small></summary>
         <div class="todo-archive-list" id="todo-archive-list"></div>
       </details>
-      <div class="todo-reminder">
-        <div><b id="todo-reminder-title">每天晚上提醒</b><span id="todo-reminder-desc">每天 20:00 提醒今天还没完成的事项</span></div>
-        <button id="btn-todo-reminder">设置</button>
-      </div>
     </section>
 
     <!-- ================= 独立提醒 ================= -->
@@ -1710,6 +1701,8 @@ var APP_ACTION_NAMES = {
   toggleTodo: true,
   editTodo: true,
   deleteTodo: true,
+  openTodoMenu: true,
+  openReminderSettings: true,
   restoreTodo: true,
   permanentDeleteTodo: true,
   removeTodoDraftDate: true,
@@ -2033,6 +2026,7 @@ byId('mask').addEventListener('click', closeSheet);
    应用版本记录
    ============================================================ */
 var APP_CHANGELOG = [
+  { version: '5.9.9', date: '2026-11-07', changes: ['待办页的每日提醒设置移入右上角菜单，底部提示卡片移除。'] },
   { version: '5.9.8', date: '2026-11-07', changes: ['戒烟顶部：当前这次达到历史最长时显示“你第一次走这么远”。', '历史某次仍为最长时，只显示最久时长和那次破戒日期。'] },
   { version: '5.9.7', date: '2026-11-07', changes: ['提醒页“首页通知”移入右上角菜单。', '训练日改为蓝点、放纵餐改为黄点，只有今天显示日期边框。', '戒烟顶部新增最久一次、上次破戒日期和当前是否走得最远。'] },
   { version: '5.9.6', date: '2026-11-06', changes: ['首页底部新增“此间相逢 X 次 · 今日 Y 次”访问统计。', '首次启动、从其他应用回到 App 会计数；息屏恢复、开机自启动和 App 内返回首页不计数。'] },
@@ -4508,13 +4502,6 @@ function renderTodoPage(){
       '<button class="danger"' + actionAttrs('permanentDeleteTodo', [item.id]) + ' aria-label="彻底删除">×</button></span></div>';
   }).join('') : '<div class="todo-archive-empty">还没有失效的待办</div>';
 
-  var r = todoData.reminder;
-  var time = pad2(r.hour) + ':' + pad2(r.minute);
-  setTxt('todo-reminder-title', r.enabled ? '每天晚上 ' + time + ' 提醒' : '每天晚上提醒');
-  setTxt('todo-reminder-desc', r.enabled ?
-    '已开启 · 当前 ' + pendingTodoCount() + ' 项未完成' :
-    '设置提醒时间，装成 App 后可在后台收到通知');
-  byId('btn-todo-reminder').textContent = r.enabled ? '修改' : '设置';
   renderDashboard();
 }
 
@@ -4815,6 +4802,21 @@ function openReminderSettings(){
   );
 }
 
+function openTodoMenu(){
+  if (!todoData) return;
+  var r = todoData.reminder;
+  var time = pad2(r.hour) + ':' + pad2(r.minute);
+  openSheet(
+    '<h3>待办设置</h3>' +
+    '<p>每天到点提醒今天还没有完成的事项。</p>' +
+    '<button class="settings-row" data-action="openReminderSettings">' +
+      '<span><b>每日提醒</b><small>' +
+        (r.enabled ? '每天 ' + time + ' · 当前 ' + pendingTodoCount() + ' 项未完成' : '当前未开启') +
+      '</small></span><em>' + (r.enabled ? '修改 ›' : '设置 ›') + '</em></button>' +
+    '<div class="row"><button class="ghost" style="flex:1"' + actionAttrs('closeSheet') + '>关闭</button></div>'
+  );
+}
+
 function enableTodoReminder(){
   var value = byId('todo-reminder-time').value || '20:00';
   var hm = value.split(':');
@@ -4958,8 +4960,6 @@ function renderVisitStats(){
 function initTodo(){
   loadTodoState();
   byId('btn-todo-add').addEventListener('click', openTodoEditor);
-  byId('btn-todo-add-top').addEventListener('click', openTodoEditor);
-  byId('btn-todo-reminder').addEventListener('click', openReminderSettings);
   renderTodoPage();
   syncTodoReminder();
 }

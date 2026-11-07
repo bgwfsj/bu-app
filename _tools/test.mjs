@@ -322,8 +322,8 @@ async function run() {
       cleanupConfirmOpened: true,
       cleanupCalls: 1,
       aboutOpened: true,
-      changelogCount: 47,
-      aboutVersion: '5.9.8',
+      changelogCount: 48,
+      aboutVersion: '5.9.9',
       updateBackupExposed: true,
       updateCalls: 1,
       handledBack: true,
@@ -483,6 +483,11 @@ async function run() {
       var permanentRemoved = !todoData.archived.some(function(item){ return item.id === 'pastDone'; });
       deleteTodo('overdue');
       document.querySelector('[data-action="resolveAppConfirm"][data-args="[true]"]').click();
+      byId('btn-todo-menu').click();
+      var todoMenuOpened = byId('sheet').classList.contains('on') &&
+        !!byId('sheet').querySelector('[data-action="openReminderSettings"]');
+      var todoBottomReminderRemoved = !byId('p-todo').querySelector('.todo-reminder');
+      closeSheet();
       return {
         before: before,
         after: after,
@@ -492,7 +497,9 @@ async function run() {
         permanentRemoved: permanentRemoved,
         finalArchived: todoArchivedItems().map(function(item){ return item.id; }).sort(),
         archiveCollapsed: byId('todo-archive-box').open === false,
-        archiveCount: byId('todo-archive-count').textContent
+        archiveCount: byId('todo-archive-count').textContent,
+        todoMenuOpened: todoMenuOpened,
+        todoBottomReminderRemoved: todoBottomReminderRemoved
       };
     })()`);
     assert.deepEqual(todo.before, ['daily']);
@@ -504,6 +511,8 @@ async function run() {
     assert.deepEqual(todo.finalArchived, ['expiredCustom', 'overdue']);
     assert.equal(todo.archiveCollapsed, true);
     assert.equal(todo.archiveCount, '2 项');
+    assert.equal(todo.todoMenuOpened, true);
+    assert.equal(todo.todoBottomReminderRemoved, true);
 
     const todoEdit = await evaluate(cdp, `(function(){
       var today = wTodayStr();
