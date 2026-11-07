@@ -3,17 +3,29 @@
    ============================================================ */
 function loadState(){
   var d = storeGet(AKEY, null);
-  if (d && typeof d.quitDate === 'number' && d.quitDate > 0) { S = d; return true; }
+  if (d && typeof d.quitDate === 'number' && d.quitDate > 0) {
+    S = d;
+    normalizeQuitHistory();
+    return true;
+  }
 
   // 首次运行：从旧游戏存档里只读取 quitDate，不碰旧存档
   var old = storeGet(QKEY, null);
   var legacy = old && old.registration && old.registration.quitDate;
   if (legacy > 0 && legacy <= Date.now()) {
-    S = { quitDate: legacy };
+    S = { quitDate: legacy, quitHistory: [] };
     saveS();
     return true;
   }
   return false;
+}
+
+function normalizeQuitHistory(){
+  if (!Array.isArray(S.quitHistory)) S.quitHistory = [];
+  S.quitHistory = S.quitHistory.filter(function(item){
+    return item && Number(item.startedAt) > 0 && Number(item.endedAt) > 0 &&
+      Number(item.durationMs) >= 0;
+  }).slice(-100);
 }
 
 /* ============================================================
@@ -37,6 +49,7 @@ function setCurHead(label, badge){
 
 function renderQuit(){
   if (!S.quitDate) {
+    renderQuitRecord(0);
     setTxt('r-d', '--'); setTxt('r-h', '--'); setTxt('r-m', '--'); setTxt('r-s', '--');
     setTxt('e-d', '--'); setTxt('e-h', '--'); setTxt('e-m', '--'); setTxt('e-s', '--');
     setTxt('f-d', '--'); setTxt('f-h', '--'); setTxt('f-m', '--'); setTxt('f-s', '--');
@@ -55,6 +68,7 @@ function renderQuit(){
   }
   var now = Date.now();
   var ms = Math.max(0, now - S.quitDate);
+  renderQuitRecord(ms);
   var s = Math.floor(ms / 1000);
   var d = Math.floor(s / 86400);
   var h = Math.floor((s % 86400) / 3600);
@@ -118,6 +132,47 @@ function renderQuit(){
   if (idx !== lastStageIdx) {
     lastStageIdx = idx;
     renderStageList(idx);
+  }
+}
+
+function quitRecordDuration(ms){
+  var minutes = Math.floor(Math.max(0, ms) / 60000);
+  if (minutes >= 1440) return Math.floor(minutes / 1440) + ' 天';
+  if (minutes >= 60) return Math.floor(minutes / 60) + ' 小时';
+  return Math.max(1, minutes) + ' 分钟';
+}
+
+function quitRecordDate(ms){
+  var d = new Date(ms);
+  return d.getFullYear() + '.' + pad2(d.getMonth() + 1) + '.' + pad2(d.getDate());
+}
+
+function renderQuitRecord(currentMs){
+  var box = byId('quit-record');
+  if (!box) return;
+  if (!S.quitDate) {
+    box.innerHTML = '';
+    box.hidden = true;
+    return;
+  }
+  normalizeQuitHistory();
+  var history = S.quitHistory || [];
+  box.hidden = false;
+  if (!history.length) {
+    box.innerHTML = '<b>你第一次走这么远</b>';
+    return;
+  }
+  var longest = history.slice().sort(function(a, b){
+    return Number(b.durationMs) - Number(a.durationMs);
+  })[0];
+  var last = history.slice().sort(function(a, b){
+    return Number(b.endedAt) - Number(a.endedAt);
+  })[0];
+  if (currentMs >= Number(longest.durationMs)) {
+    box.innerHTML = '<b>你第一次走这么远</b>';
+  } else {
+    box.innerHTML = '<b>最久 ' + quitRecordDuration(longest.durationMs) +
+      '</b><small>' + quitRecordDate(last.endedAt) + '</small>';
   }
 }
 

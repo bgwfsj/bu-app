@@ -160,6 +160,17 @@ body[data-page="water"] .section-kicker{color:var(--acc2)}
 .breakdot svg{display:block;overflow:visible}
 .breakdot:active{transform:scale(.9);color:rgba(229,72,77,1);background:rgba(229,72,77,.1)}
 .quit-top-actions{display:flex;align-items:center;gap:5px}
+.quit-record{
+  display:flex;flex-direction:column;align-items:flex-end;justify-content:center;
+  max-width:155px;line-height:1.35;text-align:right
+}
+.quit-record b{
+  font-size:10.5px;font-weight:500;color:#506b62;letter-spacing:.01em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:155px
+}
+.quit-record small{
+  font-size:8.5px;color:#9aa8ad;margin-top:2px;white-space:nowrap
+}
 
 /* ---------- 喝水页 ---------- */
 .ringwrap{position:relative;flex:0 0 auto;width:min(66vw,250px);height:min(66vw,250px);aspect-ratio:1;margin:4px auto 4px}

@@ -136,6 +136,7 @@ var APP_ACTION_NAMES = {
   convertReminderToTodo: true,
   convertTodoToReminder: true,
   toggleReminderGroup: true,
+  openReminderMenu: true,
   toggleReminderHomeNotice: true,
   dismissHomeNoticeToday: true,
   saveSnooze: true,

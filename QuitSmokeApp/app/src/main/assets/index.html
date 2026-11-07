@@ -171,6 +171,17 @@ body[data-page="water"] .section-kicker{color:var(--acc2)}
 .breakdot svg{display:block;overflow:visible}
 .breakdot:active{transform:scale(.9);color:rgba(229,72,77,1);background:rgba(229,72,77,.1)}
 .quit-top-actions{display:flex;align-items:center;gap:5px}
+.quit-record{
+  display:flex;flex-direction:column;align-items:flex-end;justify-content:center;
+  max-width:155px;line-height:1.35;text-align:right
+}
+.quit-record b{
+  font-size:10.5px;font-weight:500;color:#506b62;letter-spacing:.01em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:155px
+}
+.quit-record small{
+  font-size:8.5px;color:#9aa8ad;margin-top:2px;white-space:nowrap
+}
 
 /* ---------- 喝水页 ---------- */
 .ringwrap{position:relative;flex:0 0 auto;width:min(66vw,250px);height:min(66vw,250px);aspect-ratio:1;margin:4px auto 4px}
@@ -745,17 +756,22 @@ body[data-page="fitness"]::before{
 .fit-cal-grid{row-gap:5px}
 .fit-day{position:relative;height:32px;padding:0;border:1px solid transparent;border-radius:9px;background:transparent;color:#7e9099;font-size:11.5px;font-family:var(--font-mono)}
 .fit-day.blank{pointer-events:none}
-.fit-day.today{color:#0a7d5d;border-color:rgba(10,168,122,.20);font-weight:600}
-.fit-day.trained{background:rgba(10,168,122,.11);border-color:rgba(10,168,122,.14);color:#08795a;font-weight:600;cursor:pointer}
-.fit-day.trained.today{background:var(--acc);border-color:var(--acc);color:#fff}
-.fit-day.cheat{background:rgba(232,141,58,.10);border-color:rgba(210,116,34,.20);color:#a45c1d;cursor:pointer}
-.fit-day.cheat::after{content:'';position:absolute;left:50%;bottom:3px;width:3px;height:3px;border-radius:50%;background:#df8734;transform:translateX(-50%)}
-.fit-day.trained.cheat{background:rgba(10,168,122,.11);border-color:rgba(10,168,122,.18);color:#08795a}
-.fit-day.trained.today.cheat{background:var(--acc);border-color:var(--acc);color:#fff}
+.fit-day.trained,.fit-day.cheat{background:transparent;border-color:transparent;font-weight:600;cursor:pointer}
+.fit-day.trained{color:#426779}
+.fit-day.cheat{color:#86662d}
+.fit-day.trained::before,.fit-day.cheat::after{
+  content:'';position:absolute;left:50%;bottom:3px;width:4px;height:4px;
+  border-radius:50%;transform:translateX(-50%)
+}
+.fit-day.trained::before{background:#5f9ec7}
+.fit-day.cheat::after{background:#e2b34b}
+.fit-day.trained.cheat::before{left:calc(50% - 4px);transform:none}
+.fit-day.trained.cheat::after{left:calc(50% + 4px);transform:none}
+.fit-day.today{color:#0a7d5d;border-color:rgba(10,168,122,.24);font-weight:600}
 .fit-cal-legend{display:flex;justify-content:center;gap:13px;margin:-2px 0 5px;color:#8b9ba2;font-size:10px}
 .fit-cal-legend span{display:inline-flex;align-items:center;gap:4px}
-.fit-cal-legend i{display:inline-block;width:7px;height:7px;border-radius:3px;background:rgba(10,168,122,.14);border:1px solid rgba(10,168,122,.25)}
-.fit-cal-legend .cheat i{background:rgba(232,141,58,.12);border-color:#df8734}
+.fit-cal-legend i{display:inline-block;width:7px;height:7px;border-radius:50%;background:#5f9ec7}
+.fit-cal-legend .cheat i{background:#e2b34b}
 .fit-cal-summary{font-size:var(--fs-caption);color:#8799a1;text-align:center;margin-top:9px;letter-spacing:.02em}
 .fit-cheat-actions{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:9px;border-top:1px solid var(--line2)}
 .fit-cheat-actions span{font-size:var(--fs-caption);color:#9a8a7c}
@@ -1157,6 +1173,7 @@ body[data-page="fitness"]::before{
       <div class="top">
         <div class="brand"><span class="led"></span>戒烟</div>
         <div class="quit-top-actions">
+          <span class="quit-record" id="quit-record" aria-live="polite"></span>
           <button class="breakdot" id="btn-break" aria-label="破戒"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M5.4 5.4 L18.6 18.6 M18.6 5.4 L5.4 18.6" stroke="currentColor" stroke-width="1.15" stroke-linecap="round" fill="none"/></svg></button>
           <button class="iconbtn" id="btn-set" title="设置">&#8942;</button>
         </div>
@@ -1429,7 +1446,7 @@ body[data-page="fitness"]::before{
     <section class="page" id="p-reminder">
       <div class="top">
         <div class="brand"><span class="led"></span>提醒</div>
-        <button class="iconbtn" id="btn-reminder-add-top" title="添加提醒">＋</button>
+        <button class="iconbtn" id="btn-reminder-menu" data-action="openReminderMenu" title="提醒设置">⋯</button>
       </div>
       <div class="reminder-hero">
         <div class="reminder-kicker">独立提醒</div>
@@ -1447,12 +1464,6 @@ body[data-page="fitness"]::before{
         <div class="reminder-archive-list" id="reminder-archive-list"></div>
       </details>
       <p class="reminder-hint" id="reminder-hint">提醒只保存在这台设备上。</p>
-      <div class="reminder-settings">
-        <div class="reminder-setting-row">
-          <span><b>首页通知</b><small>当天有提醒时，每次打开软件都在首页显示</small></span>
-          <button id="btn-reminder-home-toggle" data-action="toggleReminderHomeNotice">已开启</button>
-        </div>
-      </div>
     </section>
 
     <!-- ================= 记账 ================= -->
@@ -1719,6 +1730,7 @@ var APP_ACTION_NAMES = {
   convertReminderToTodo: true,
   convertTodoToReminder: true,
   toggleReminderGroup: true,
+  openReminderMenu: true,
   toggleReminderHomeNotice: true,
   dismissHomeNoticeToday: true,
   saveSnooze: true,
@@ -2021,6 +2033,8 @@ byId('mask').addEventListener('click', closeSheet);
    应用版本记录
    ============================================================ */
 var APP_CHANGELOG = [
+  { version: '5.9.8', date: '2026-11-07', changes: ['戒烟顶部：当前这次达到历史最长时显示“你第一次走这么远”。', '历史某次仍为最长时，只显示最久时长和那次破戒日期。'] },
+  { version: '5.9.7', date: '2026-11-07', changes: ['提醒页“首页通知”移入右上角菜单。', '训练日改为蓝点、放纵餐改为黄点，只有今天显示日期边框。', '戒烟顶部新增最久一次、上次破戒日期和当前是否走得最远。'] },
   { version: '5.9.6', date: '2026-11-06', changes: ['首页底部新增“此间相逢 X 次 · 今日 Y 次”访问统计。', '首次启动、从其他应用回到 App 会计数；息屏恢复、开机自启动和 App 内返回首页不计数。'] },
   { version: '5.9.5', date: '2026-11-06', changes: ['记账记录去掉“编辑”按钮，点击整条记录即可编辑；删除按钮继续独立工作。'] },
   { version: '5.9.4', date: '2026-11-06', changes: ['提醒通知恢复为原生通知实现，移除自定义通知内容和展开布局。', '保留通知正文处理框、首页到点未处理逻辑和一次性提醒稍后归档。'] },
@@ -2102,17 +2116,29 @@ function openAboutSheet(){
    ============================================================ */
 function loadState(){
   var d = storeGet(AKEY, null);
-  if (d && typeof d.quitDate === 'number' && d.quitDate > 0) { S = d; return true; }
+  if (d && typeof d.quitDate === 'number' && d.quitDate > 0) {
+    S = d;
+    normalizeQuitHistory();
+    return true;
+  }
 
   // 首次运行：从旧游戏存档里只读取 quitDate，不碰旧存档
   var old = storeGet(QKEY, null);
   var legacy = old && old.registration && old.registration.quitDate;
   if (legacy > 0 && legacy <= Date.now()) {
-    S = { quitDate: legacy };
+    S = { quitDate: legacy, quitHistory: [] };
     saveS();
     return true;
   }
   return false;
+}
+
+function normalizeQuitHistory(){
+  if (!Array.isArray(S.quitHistory)) S.quitHistory = [];
+  S.quitHistory = S.quitHistory.filter(function(item){
+    return item && Number(item.startedAt) > 0 && Number(item.endedAt) > 0 &&
+      Number(item.durationMs) >= 0;
+  }).slice(-100);
 }
 
 /* ============================================================
@@ -2136,6 +2162,7 @@ function setCurHead(label, badge){
 
 function renderQuit(){
   if (!S.quitDate) {
+    renderQuitRecord(0);
     setTxt('r-d', '--'); setTxt('r-h', '--'); setTxt('r-m', '--'); setTxt('r-s', '--');
     setTxt('e-d', '--'); setTxt('e-h', '--'); setTxt('e-m', '--'); setTxt('e-s', '--');
     setTxt('f-d', '--'); setTxt('f-h', '--'); setTxt('f-m', '--'); setTxt('f-s', '--');
@@ -2154,6 +2181,7 @@ function renderQuit(){
   }
   var now = Date.now();
   var ms = Math.max(0, now - S.quitDate);
+  renderQuitRecord(ms);
   var s = Math.floor(ms / 1000);
   var d = Math.floor(s / 86400);
   var h = Math.floor((s % 86400) / 3600);
@@ -2217,6 +2245,47 @@ function renderQuit(){
   if (idx !== lastStageIdx) {
     lastStageIdx = idx;
     renderStageList(idx);
+  }
+}
+
+function quitRecordDuration(ms){
+  var minutes = Math.floor(Math.max(0, ms) / 60000);
+  if (minutes >= 1440) return Math.floor(minutes / 1440) + ' 天';
+  if (minutes >= 60) return Math.floor(minutes / 60) + ' 小时';
+  return Math.max(1, minutes) + ' 分钟';
+}
+
+function quitRecordDate(ms){
+  var d = new Date(ms);
+  return d.getFullYear() + '.' + pad2(d.getMonth() + 1) + '.' + pad2(d.getDate());
+}
+
+function renderQuitRecord(currentMs){
+  var box = byId('quit-record');
+  if (!box) return;
+  if (!S.quitDate) {
+    box.innerHTML = '';
+    box.hidden = true;
+    return;
+  }
+  normalizeQuitHistory();
+  var history = S.quitHistory || [];
+  box.hidden = false;
+  if (!history.length) {
+    box.innerHTML = '<b>你第一次走这么远</b>';
+    return;
+  }
+  var longest = history.slice().sort(function(a, b){
+    return Number(b.durationMs) - Number(a.durationMs);
+  })[0];
+  var last = history.slice().sort(function(a, b){
+    return Number(b.endedAt) - Number(a.endedAt);
+  })[0];
+  if (currentMs >= Number(longest.durationMs)) {
+    box.innerHTML = '<b>你第一次走这么远</b>';
+  } else {
+    box.innerHTML = '<b>最久 ' + quitRecordDuration(longest.durationMs) +
+      '</b><small>' + quitRecordDate(last.endedAt) + '</small>';
   }
 }
 
@@ -2447,7 +2516,17 @@ byId('btn-break').addEventListener('click', function(){
 });
 
 function doBreak(){
-  S.quitDate = Date.now();
+  var now = Date.now();
+  if (!Array.isArray(S.quitHistory)) S.quitHistory = [];
+  if (S.quitDate > 0) {
+    S.quitHistory.push({
+      startedAt: S.quitDate,
+      endedAt: now,
+      durationMs: Math.max(0, now - S.quitDate)
+    });
+    S.quitHistory = S.quitHistory.slice(-100);
+  }
+  S.quitDate = now;
   saveS();
   closeSheet();
   lastStageIdx = -99;
@@ -5121,12 +5200,19 @@ function renderHomeNotice(){
 
 function updateReminderSettings(){
   if (!reminderData) return;
-  var toggle = byId('btn-reminder-home-toggle');
-  if (toggle) {
-    var enabled = reminderData.homeNoticeEnabled !== false;
-    toggle.textContent = enabled ? '已开启' : '已关闭';
-    toggle.classList.toggle('off', !enabled);
-  }
+}
+
+function openReminderMenu(){
+  if (!reminderData) return;
+  var enabled = reminderData.homeNoticeEnabled !== false;
+  openSheet(
+    '<h3>提醒设置</h3>' +
+    '<p>每天到点的提醒会发出系统通知；首页通知只显示到点且尚未处理的事项。</p>' +
+    '<button class="settings-row" data-action="toggleReminderHomeNotice">' +
+      '<span><b>首页通知</b><small>在首页显示已经到点、尚未处理的提醒</small></span>' +
+      '<em>' + (enabled ? '已开启' : '已关闭') + ' ›</em></button>' +
+    '<div class="row"><button class="ghost" style="flex:1"' + actionAttrs('closeSheet') + '>关闭</button></div>'
+  );
 }
 
 function reminderSortedItems(){
@@ -5518,6 +5604,7 @@ function toggleReminderHomeNotice(){
   if (reminderData.homeNoticeEnabled) reminderData.homeNoticeDismissedDate = '';
   saveReminderState(false);
   renderReminderPage();
+  if (byId('sheet').classList.contains('on')) openReminderMenu();
 }
 
 function dismissHomeNoticeToday(){
@@ -5558,7 +5645,6 @@ function initReminder(){
   loadReminderState();
   applyConfirmedReminders();
   byId('btn-reminder-add').addEventListener('click', function(){ openReminderForm(); });
-  byId('btn-reminder-add-top').addEventListener('click', function(){ openReminderForm(); });
   renderReminderPage();
 }
 

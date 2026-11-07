@@ -233,12 +233,19 @@ function renderHomeNotice(){
 
 function updateReminderSettings(){
   if (!reminderData) return;
-  var toggle = byId('btn-reminder-home-toggle');
-  if (toggle) {
-    var enabled = reminderData.homeNoticeEnabled !== false;
-    toggle.textContent = enabled ? '已开启' : '已关闭';
-    toggle.classList.toggle('off', !enabled);
-  }
+}
+
+function openReminderMenu(){
+  if (!reminderData) return;
+  var enabled = reminderData.homeNoticeEnabled !== false;
+  openSheet(
+    '<h3>提醒设置</h3>' +
+    '<p>每天到点的提醒会发出系统通知；首页通知只显示到点且尚未处理的事项。</p>' +
+    '<button class="settings-row" data-action="toggleReminderHomeNotice">' +
+      '<span><b>首页通知</b><small>在首页显示已经到点、尚未处理的提醒</small></span>' +
+      '<em>' + (enabled ? '已开启' : '已关闭') + ' ›</em></button>' +
+    '<div class="row"><button class="ghost" style="flex:1"' + actionAttrs('closeSheet') + '>关闭</button></div>'
+  );
 }
 
 function reminderSortedItems(){
@@ -630,6 +637,7 @@ function toggleReminderHomeNotice(){
   if (reminderData.homeNoticeEnabled) reminderData.homeNoticeDismissedDate = '';
   saveReminderState(false);
   renderReminderPage();
+  if (byId('sheet').classList.contains('on')) openReminderMenu();
 }
 
 function dismissHomeNoticeToday(){
@@ -670,6 +678,5 @@ function initReminder(){
   loadReminderState();
   applyConfirmedReminders();
   byId('btn-reminder-add').addEventListener('click', function(){ openReminderForm(); });
-  byId('btn-reminder-add-top').addEventListener('click', function(){ openReminderForm(); });
   renderReminderPage();
 }

@@ -224,10 +224,14 @@ async function run() {
       );
       S.quitDate = Date.now() - 3600000;
       saveS();
+      renderQuit();
       goPage(3);
       var breakRect = byId('btn-break').getBoundingClientRect();
+      var quitRecordRect = byId('quit-record').getBoundingClientRect();
       var pagerRect = byId('page-pager').getBoundingClientRect();
       var controlsSeparate = breakRect.bottom < pagerRect.top;
+      var quitRecordBesideBreak = quitRecordRect.width > 0 &&
+        quitRecordRect.right <= breakRect.left + 1;
       var activeQuickLabel = byId('page-pager').querySelector('button.on').textContent.trim();
       var homeFootnoteRemoved = !document.querySelector('.home-footnote');
       var dragTarget = document.createElement('span');
@@ -247,6 +251,7 @@ async function run() {
         handledBack: handledBack,
         pagerLabels: pagerLabels,
         controlsSeparate: controlsSeparate,
+        quitRecordBesideBreak: quitRecordBesideBreak,
         activeQuickLabel: activeQuickLabel,
         homeFootnoteRemoved: homeFootnoteRemoved,
         dragOwnsHorizontalGesture: targetOwnsHorizontalGesture(dragTarget),
@@ -262,6 +267,7 @@ async function run() {
       handledBack: true,
       pagerLabels: ['练', '水', '戒', '记', '账', '醒'],
       controlsSeparate: true,
+      quitRecordBesideBreak: true,
       activeQuickLabel: '戒',
       homeFootnoteRemoved: true,
       dragOwnsHorizontalGesture: true,
@@ -316,8 +322,8 @@ async function run() {
       cleanupConfirmOpened: true,
       cleanupCalls: 1,
       aboutOpened: true,
-      changelogCount: 45,
-      aboutVersion: '5.9.6',
+      changelogCount: 47,
+      aboutVersion: '5.9.8',
       updateBackupExposed: true,
       updateCalls: 1,
       handledBack: true,
@@ -345,6 +351,42 @@ async function run() {
     assert.equal(visitStats.visible, true);
     assert.equal(visitStats.previewVisible, true);
     assert.equal(visitStats.previewHasText, true);
+
+    const quitRecord = await evaluate(cdp, `(function(){
+      var original = JSON.parse(JSON.stringify(S));
+      var now = Date.now();
+      S.quitDate = now - 5 * 86400000;
+      S.quitHistory = [{
+        startedAt: now - 30 * 86400000,
+        endedAt: now - 20 * 86400000,
+        durationMs: 10 * 86400000
+      }];
+      renderQuit();
+      var historical = byId('quit-record').textContent;
+      S.quitHistory = [{
+        startedAt: now - 10 * 86400000,
+        endedAt: now - 8 * 86400000,
+        durationMs: 2 * 86400000
+      }];
+      renderQuit();
+      var currentLongest = byId('quit-record').textContent;
+      S.quitHistory = [];
+      renderQuit();
+      var firstJourney = byId('quit-record').textContent;
+      S = original;
+      saveS();
+      renderQuit();
+      return {
+        historical: historical,
+        currentLongest: currentLongest,
+        firstJourney: firstJourney
+      };
+    })()`);
+    assert.ok(quitRecord.historical.indexOf('最久 10 天') >= 0);
+    assert.ok(quitRecord.historical.indexOf('上次破戒') < 0);
+    assert.ok(/\d{4}\.\d{2}\.\d{2}/.test(quitRecord.historical));
+    assert.ok(quitRecord.currentLongest.indexOf('你第一次走这么远') >= 0);
+    assert.ok(quitRecord.firstJourney.indexOf('你第一次走这么远') >= 0);
 
     const workout = await evaluate(cdp, `(function(){
       startWorkoutFromPlan('plan_default');
@@ -389,6 +431,28 @@ async function run() {
     assert.ok(workout.planRows >= 5);
     assert.ok(workout.planListHeight > 0);
     assert.ok(workout.planNames.some(function(name){ return name.indexOf('背') === 0; }));
+
+    const calendarDots = await evaluate(cdp, `(function(){
+      var sample = document.createElement('button');
+      sample.className = 'fit-day trained cheat today';
+      sample.textContent = '1';
+      byId('cal-grid').appendChild(sample);
+      var box = getComputedStyle(sample);
+      var blue = getComputedStyle(sample, '::before');
+      var yellow = getComputedStyle(sample, '::after');
+      var result = {
+        transparent: box.backgroundColor === 'rgba(0, 0, 0, 0)',
+        todayBorder: box.borderTopColor,
+        blueDot: blue.backgroundColor,
+        yellowDot: yellow.backgroundColor
+      };
+      sample.remove();
+      return result;
+    })()`);
+    assert.equal(calendarDots.transparent, true);
+    assert.equal(calendarDots.blueDot, 'rgb(95, 158, 199)');
+    assert.equal(calendarDots.yellowDot, 'rgb(226, 179, 75)');
+    assert.notEqual(calendarDots.todayBorder, 'rgba(0, 0, 0, 0)');
 
     const todo = await evaluate(cdp, `(function(){
       var today = wTodayStr();
@@ -507,6 +571,11 @@ async function run() {
       var edited = reminderItemById(weekly.id);
       var dailyItem = reminderData.items.filter(function(item){ return item.mode === 'daily'; })[0];
       var rows = reminderSortedItems();
+      byId('btn-reminder-menu').click();
+      var reminderMenuOpened = byId('sheet').classList.contains('on') &&
+        !!byId('sheet').querySelector('[data-action="toggleReminderHomeNotice"]');
+      var reminderBottomSettingsRemoved = !byId('p-reminder').querySelector('.reminder-settings');
+      closeSheet();
       var savedNoticeItems = reminderData.items.slice();
       var tomorrow = new Date(Date.now() + 86400000);
       var tomorrowText = tomorrow.getFullYear() + '-' + pad2(tomorrow.getMonth() + 1) + '-' + pad2(tomorrow.getDate());
@@ -641,6 +710,8 @@ async function run() {
         activeGroupCollapsed: activeGroupCollapsed,
         archiveGroupCollapsed: archiveGroupCollapsed,
         confirmedArchived: confirmedArchived,
+        reminderMenuOpened: reminderMenuOpened,
+        reminderBottomSettingsRemoved: reminderBottomSettingsRemoved,
         reminderEditButtonsRemoved: reminderEditButtonsRemoved,
         reminderRowEditable: !!weeklyRow && weeklyRow.getAttribute('data-action') === 'editReminder',
         reminderArchiveEditable: byId('reminder-archive-list').querySelectorAll('[data-action="editReminder"]').length > 0
@@ -673,6 +744,8 @@ async function run() {
     assert.equal(reminders.activeGroupCollapsed, true);
     assert.equal(reminders.archiveGroupCollapsed, true);
     assert.equal(reminders.confirmedArchived, true);
+    assert.equal(reminders.reminderMenuOpened, true);
+    assert.equal(reminders.reminderBottomSettingsRemoved, true);
     assert.equal(reminders.reminderEditButtonsRemoved, true);
     assert.equal(reminders.reminderRowEditable, true);
     assert.equal(reminders.reminderArchiveEditable, false);

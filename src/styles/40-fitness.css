@@ -84,17 +84,22 @@ body[data-page="fitness"]::before{
 .fit-cal-grid{row-gap:5px}
 .fit-day{position:relative;height:32px;padding:0;border:1px solid transparent;border-radius:9px;background:transparent;color:#7e9099;font-size:11.5px;font-family:var(--font-mono)}
 .fit-day.blank{pointer-events:none}
-.fit-day.today{color:#0a7d5d;border-color:rgba(10,168,122,.20);font-weight:600}
-.fit-day.trained{background:rgba(10,168,122,.11);border-color:rgba(10,168,122,.14);color:#08795a;font-weight:600;cursor:pointer}
-.fit-day.trained.today{background:var(--acc);border-color:var(--acc);color:#fff}
-.fit-day.cheat{background:rgba(232,141,58,.10);border-color:rgba(210,116,34,.20);color:#a45c1d;cursor:pointer}
-.fit-day.cheat::after{content:'';position:absolute;left:50%;bottom:3px;width:3px;height:3px;border-radius:50%;background:#df8734;transform:translateX(-50%)}
-.fit-day.trained.cheat{background:rgba(10,168,122,.11);border-color:rgba(10,168,122,.18);color:#08795a}
-.fit-day.trained.today.cheat{background:var(--acc);border-color:var(--acc);color:#fff}
+.fit-day.trained,.fit-day.cheat{background:transparent;border-color:transparent;font-weight:600;cursor:pointer}
+.fit-day.trained{color:#426779}
+.fit-day.cheat{color:#86662d}
+.fit-day.trained::before,.fit-day.cheat::after{
+  content:'';position:absolute;left:50%;bottom:3px;width:4px;height:4px;
+  border-radius:50%;transform:translateX(-50%)
+}
+.fit-day.trained::before{background:#5f9ec7}
+.fit-day.cheat::after{background:#e2b34b}
+.fit-day.trained.cheat::before{left:calc(50% - 4px);transform:none}
+.fit-day.trained.cheat::after{left:calc(50% + 4px);transform:none}
+.fit-day.today{color:#0a7d5d;border-color:rgba(10,168,122,.24);font-weight:600}
 .fit-cal-legend{display:flex;justify-content:center;gap:13px;margin:-2px 0 5px;color:#8b9ba2;font-size:10px}
 .fit-cal-legend span{display:inline-flex;align-items:center;gap:4px}
-.fit-cal-legend i{display:inline-block;width:7px;height:7px;border-radius:3px;background:rgba(10,168,122,.14);border:1px solid rgba(10,168,122,.25)}
-.fit-cal-legend .cheat i{background:rgba(232,141,58,.12);border-color:#df8734}
+.fit-cal-legend i{display:inline-block;width:7px;height:7px;border-radius:50%;background:#5f9ec7}
+.fit-cal-legend .cheat i{background:#e2b34b}
 .fit-cal-summary{font-size:var(--fs-caption);color:#8799a1;text-align:center;margin-top:9px;letter-spacing:.02em}
 .fit-cheat-actions{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:9px;border-top:1px solid var(--line2)}
 .fit-cheat-actions span{font-size:var(--fs-caption);color:#9a8a7c}

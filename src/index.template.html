@@ -104,6 +104,7 @@
       <div class="top">
         <div class="brand"><span class="led"></span>戒烟</div>
         <div class="quit-top-actions">
+          <span class="quit-record" id="quit-record" aria-live="polite"></span>
           <button class="breakdot" id="btn-break" aria-label="破戒"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M5.4 5.4 L18.6 18.6 M18.6 5.4 L5.4 18.6" stroke="currentColor" stroke-width="1.15" stroke-linecap="round" fill="none"/></svg></button>
           <button class="iconbtn" id="btn-set" title="设置">&#8942;</button>
         </div>
@@ -376,7 +377,7 @@
     <section class="page" id="p-reminder">
       <div class="top">
         <div class="brand"><span class="led"></span>提醒</div>
-        <button class="iconbtn" id="btn-reminder-add-top" title="添加提醒">＋</button>
+        <button class="iconbtn" id="btn-reminder-menu" data-action="openReminderMenu" title="提醒设置">⋯</button>
       </div>
       <div class="reminder-hero">
         <div class="reminder-kicker">独立提醒</div>
@@ -394,12 +395,6 @@
         <div class="reminder-archive-list" id="reminder-archive-list"></div>
       </details>
       <p class="reminder-hint" id="reminder-hint">提醒只保存在这台设备上。</p>
-      <div class="reminder-settings">
-        <div class="reminder-setting-row">
-          <span><b>首页通知</b><small>当天有提醒时，每次打开软件都在首页显示</small></span>
-          <button id="btn-reminder-home-toggle" data-action="toggleReminderHomeNotice">已开启</button>
-        </div>
-      </div>
     </section>
 
     <!-- ================= 记账 ================= -->

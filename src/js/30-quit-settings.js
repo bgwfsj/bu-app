@@ -11,7 +11,17 @@ byId('btn-break').addEventListener('click', function(){
 });
 
 function doBreak(){
-  S.quitDate = Date.now();
+  var now = Date.now();
+  if (!Array.isArray(S.quitHistory)) S.quitHistory = [];
+  if (S.quitDate > 0) {
+    S.quitHistory.push({
+      startedAt: S.quitDate,
+      endedAt: now,
+      durationMs: Math.max(0, now - S.quitDate)
+    });
+    S.quitHistory = S.quitHistory.slice(-100);
+  }
+  S.quitDate = now;
   saveS();
   closeSheet();
   lastStageIdx = -99;
