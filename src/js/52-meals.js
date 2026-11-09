@@ -262,7 +262,7 @@ function paintMealCountdown(){
   var current = mealTypeMeta(mealTypeForDate(now));
   var next = mealNextTargetAt(now);
   setTxt('meal-top-date', (now.getMonth() + 1) + '月' + now.getDate() + '日 · 周' + ['日', '一', '二', '三', '四', '五', '六'][now.getDay()]);
-  setTxt('meal-record-hint', '现在 · 将记为' + current.name);
+  setTxt('meal-record-hint', '将记为' + current.name);
   setTxt('meal-next-name', next.name);
   setTxt('meal-next-timer', mealCountdownText(next.target.getTime() - now.getTime()));
   setTxt('meal-next-time', (next.tomorrow ? '明天 ' : '今天 ') + mealClock(next.target));
