@@ -343,7 +343,7 @@ function saveTextFile(filename, text, mime){
   return true;
 }
 
-var APP_BACKUP_KEEP = 5;
+var APP_BACKUP_KEEP = 2;
 
 function backupTimeSuffix(){
   var now = new Date();

@@ -172,7 +172,7 @@ bu_pre_restore_v1    完整恢复前的安全副本
 
 ## 备份清理
 
-- 每次手动导出或应用更新前自动备份后，调用 `AppNative.cleanupOldBackups(5)` 自动保留最近 5 份。
+- 每次手动导出或应用更新前自动备份后，调用 `AppNative.cleanupOldBackups(2)` 自动保留最近 2 份。
 - 设置页“清理旧备份”可手动执行同一规则。
 - Android 10 及以上查询 `Downloads` 中名称匹配 `补-%备份-%.json` 的文件；更早系统清理应用下载目录。
 

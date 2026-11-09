@@ -280,7 +280,7 @@ async function run() {
       var cleanupCalls = 0;
       window.AppNative = {
         checkForUpdates: function(){ calls++; },
-        cleanupOldBackups: function(keep){ cleanupCalls++; return keep === 5 ? 2 : -1; }
+        cleanupOldBackups: function(keep){ cleanupCalls++; return keep === 2 ? 2 : -1; }
       };
       byId('btn-app-settings').click();
       var opened = byId('p-settings').classList.contains('on') &&
@@ -322,8 +322,8 @@ async function run() {
       cleanupConfirmOpened: true,
       cleanupCalls: 1,
       aboutOpened: true,
-      changelogCount: 49,
-      aboutVersion: '5.9.10',
+      changelogCount: 50,
+      aboutVersion: '5.9.11',
       updateBackupExposed: true,
       updateCalls: 1,
       handledBack: true,

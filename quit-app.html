@@ -1149,7 +1149,7 @@ body[data-page="fitness"]::before{
           <span><b>恢复完整备份</b><small>使用之前导出的 JSON 备份文件</small></span><em>选择文件 ›</em>
         </button>
         <button class="settings-row" data-action="requestCleanupOldBackups">
-          <span><b>清理旧备份</b><small>自动和手动清理都只保留最近 5 份</small></span><em>清理 ›</em>
+          <span><b>清理旧备份</b><small>自动和手动清理都只保留最近 2 份</small></span><em>清理 ›</em>
         </button>
       </div>
       <div class="settings-group">
@@ -1928,7 +1928,7 @@ function saveTextFile(filename, text, mime){
   return true;
 }
 
-var APP_BACKUP_KEEP = 5;
+var APP_BACKUP_KEEP = 2;
 
 function backupTimeSuffix(){
   var now = new Date();
@@ -2026,6 +2026,7 @@ byId('mask').addEventListener('click', closeSheet);
    应用版本记录
    ============================================================ */
 var APP_CHANGELOG = [
+  { version: '5.9.11', date: '2026-11-09', changes: ['完整备份默认只保留最近 2 份，自动清理和手动清理规则同步调整。'] },
   { version: '5.9.10', date: '2026-11-09', changes: ['修复从系统通知正文进入 App 后没有弹出确认/稍后处理框的问题。', '通知入口固定复用主页面，并在页面脚本未就绪时自动重试。'] },
   { version: '5.9.9', date: '2026-11-07', changes: ['待办页的每日提醒设置移入右上角菜单，底部提示卡片移除。'] },
   { version: '5.9.8', date: '2026-11-07', changes: ['戒烟顶部：当前这次达到历史最长时显示“你第一次走这么远”。', '历史某次仍为最长时，只显示最久时长和那次破戒日期。'] },
