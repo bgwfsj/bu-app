@@ -478,8 +478,14 @@ public class MainActivity extends AppCompatActivity {
                 .append(JSONObject.quote(actionEventKey == null ? "" : actionEventKey)).append(");");
         }
         intent.removeExtra("open_page");
+        String readiness = "window.goPage";
+        if (openActionDialog) readiness += " && window.openNotificationActionDialog";
+        if (snoozeType != null) readiness += " && window.openSnoozeDialog";
         view.evaluateJavascript(
-            "(function(){" + script + "}()),true",
+            "(function attempt(n){" +
+                "if(!(" + readiness + ")){if(n>0)setTimeout(function(){attempt(n-1);},100);return;}" +
+                "try{" + script + "}catch(e){}" +
+            "})(20)",
             null
         );
         intent.removeExtra("snooze_type");

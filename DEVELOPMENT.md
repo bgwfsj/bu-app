@@ -6,7 +6,7 @@
 
 - 应用名：补
 - 包名：`com.quitsmoke.app`
-- 当前版本：5.9.9
+- 当前版本：5.9.10
 - 最低 Android：API 24
 - Target SDK：34
 - 仓库：`bgwfsj/bu-app`（公开）
@@ -208,6 +208,8 @@ bu_pre_restore_v1    完整恢复前的安全副本
 - 点通知“稍后”：打开 `MainActivity` 并直接调用 `openSnoozeDialog`，由用户输入 1–1440 分钟。
 - 点通知“确认”：直接收起通知；一次性提醒记录完成标记，App 下次恢复时归档。
 - 在弹框内使用稍后入口时，仍通过 `openSnoozeDialog` 输入 1–1440 分钟。
+
+`MainActivity` 使用 `launchMode="singleTop"`，已有任务从通知正文进入时走 `onNewIntent`。执行待处理通知脚本前会检查 `goPage`、`openNotificationActionDialog` / `openSnoozeDialog` 是否定义；页面脚本尚未就绪时最多重试 20 次、每次 100ms，避免参数被提前消费后弹框丢失。
 - 仅一次的独立提醒保存稍后时间后，从活动列表移入归档并标记 `archiveReason = snoozed`；补发通知由 `SnoozeScheduler` 独立调度，不依赖活动列表中的原提醒。
 
 系统权限：
