@@ -12,6 +12,7 @@ const styleNames = [
   '20-todo.css',
   '25-reminder.css',
   '30-ledger.css',
+  '35-meals.css',
   '40-fitness.css',
   '50-overlays.css',
   '60-clocks.css'
@@ -25,6 +26,7 @@ const scriptNames = [
   '30-quit-settings.js',
   '40-navigation.js',
   '50-water.js',
+  '52-meals.js',
   '60-fitness.js',
   '70-todo.js',
   '75-reminder.js',

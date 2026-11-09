@@ -598,6 +598,15 @@ function renderDashboard(){
     setTxt('home-fitness-copy', active ? '训练进行中 · ' + formatWorkoutDuration(Date.now() - active.startAt) : (todayCount ? '今天已训练 ' + todayCount + ' 次' : '记录今天的训练'));
   }
   if (wd) setTxt('home-water-copy', '今天 ' + wTotal() + ' / ' + (wd.dailyGoal || 2000) + ' ml');
+  if (mealData) {
+    var todayMeals = mealRecordsForDate(new Date());
+    var lastMeal = todayMeals.slice().sort(function(a, b){
+      return String(b.createdAt).localeCompare(String(a.createdAt));
+    })[0];
+    setTxt('home-meal-copy', todayMeals.length ?
+      '今天 ' + todayMeals.length + ' 顿 · 最近 ' + mealTypeMeta(lastMeal.type).name :
+      '记录今天吃了什么');
+  }
   if (S && S.quitDate) setTxt('home-quit-copy', '已经坚持 ' + Math.floor((Date.now() - S.quitDate) / 86400000) + ' 天');
   if (todoData) {
     var pending = pendingTodoCount();

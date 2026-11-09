@@ -391,7 +391,7 @@ function paintLiveWorkout(){
 
 function paintLiveTimers(){
   paintLiveWorkout();
-  if (page === 3) renderQuit();
+  if (page === 4) renderQuit();
 }
 
 function workoutAnimationFrame(timestamp){

@@ -28,7 +28,7 @@
         <p class="home-sub">人生难求圆满，日日可补。把训练、喝水、戒烟和每一件小事，一点点补回来。</p>
       </div>
       <div class="home-notice" id="home-notice" hidden>
-        <button class="home-notice-main" data-action="goPage" data-args="[6]">
+        <button class="home-notice-main" data-action="goPage" data-args="[7]">
           <span class="home-notice-dot"></span>
           <span><b id="home-notice-title">今天的提醒</b><small id="home-notice-copy"></small></span>
           <em>查看</em>
@@ -44,19 +44,23 @@
           <span class="home-icon">水</span><b>喝水</b>
           <small id="home-water-copy">今天 0 / 2000 ml</small>
         </button>
-        <button class="home-card" data-action="goPage" data-args="[3]">
+        <button class="home-card meal-card" data-action="goPage" data-args="[3]">
+          <span class="home-icon">饭</span><b>三餐</b>
+          <small id="home-meal-copy">记录今天吃了什么</small>
+        </button>
+        <button class="home-card" data-action="goPage" data-args="[4]">
           <span class="home-icon">戒</span><b>戒烟</b>
           <small id="home-quit-copy">看看身体恢复进度</small>
         </button>
-        <button class="home-card" data-action="goPage" data-args="[4]">
+        <button class="home-card" data-action="goPage" data-args="[5]">
           <span class="home-icon">记</span><b>待办</b>
           <small id="home-todo-copy">今天没有待办</small>
         </button>
-        <button class="home-card compact ledger-card" data-action="goPage" data-args="[5]">
+        <button class="home-card ledger-card" data-action="goPage" data-args="[6]">
           <span class="home-icon">账</span><b>记账</b>
           <small id="home-ledger-copy">本月还没有记录</small>
         </button>
-        <button class="home-card compact reminder-card" data-action="goPage" data-args="[6]">
+        <button class="home-card reminder-card" data-action="goPage" data-args="[7]">
           <span class="home-icon">醒</span><b>提醒</b>
           <small id="home-reminder-copy">没有独立提醒</small>
         </button>
@@ -278,6 +282,63 @@
           <button id="w-hist-clear">清空历史</button>
         </div>
       </details>
+    </section>
+
+    <!-- ================= 三餐 ================= -->
+    <section class="page" id="p-meals">
+      <div class="top">
+        <div class="brand"><span class="led"></span>三餐</div>
+        <span class="meal-top-date" id="meal-top-date"></span>
+      </div>
+      <div class="section-hero meal-hero">
+        <div class="section-kicker">今日饮食</div>
+        <h1 class="section-title">好好吃饭</h1>
+        <p class="section-sub">不用每一顿都完美，只要大多数时候，认真照顾身体。</p>
+      </div>
+      <button class="meal-record-btn" type="button" data-action="recordMealNow">
+        <span class="meal-record-plus">＋</span>
+        <span class="meal-record-copy"><b>吃饭啦！</b><small id="meal-record-hint">现在 · 自动识别餐次</small></span>
+        <em>记录</em>
+      </button>
+      <button class="meal-backfill-btn" type="button" data-action="openMealBackfill">补记一顿</button>
+      <section class="meal-next-card">
+        <div class="meal-next-head"><span>距离下一顿最佳时间</span><b id="meal-next-name">午餐</b></div>
+        <div class="meal-next-timer" id="meal-next-timer">00:00:00</div>
+        <div class="meal-next-meta">
+          <span id="meal-next-time">今天 12:00</span>
+          <span id="meal-next-window">建议 11:30–13:00</span>
+        </div>
+        <p id="meal-next-hint">给一顿饭留出二十多分钟，也给自己留一点停顿。</p>
+      </section>
+      <section class="meal-today">
+        <div class="meal-section-head"><h3>今天吃了什么</h3><small id="meal-today-summary">还没有记录</small></div>
+        <div class="meal-type-strip" id="meal-type-strip"></div>
+        <div class="meal-list" id="meal-list"></div>
+        <details class="meal-extra-box" id="meal-extra-box" hidden>
+          <summary><span>下午茶与夜宵</span><small id="meal-extra-count">0 笔</small></summary>
+          <div class="meal-extra-list" id="meal-extra-list"></div>
+        </details>
+      </section>
+      <details class="meal-history-box">
+        <summary><span>过去 7 天</span><small id="meal-week-summary">0 顿</small></summary>
+        <div class="meal-week-list" id="meal-week-list"></div>
+      </details>
+      <section class="meal-calendar-card">
+        <div class="meal-calendar-head">
+          <button type="button" data-action="changeMealCalendarMonth" data-args="[-1]" aria-label="上个月">‹</button>
+          <b id="meal-calendar-title"></b>
+          <button type="button" data-action="changeMealCalendarMonth" data-args="[1]" aria-label="下个月">›</button>
+        </div>
+        <div class="meal-calendar-week"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div>
+        <div class="meal-calendar-grid" id="meal-calendar-grid"></div>
+        <div class="meal-calendar-legend">
+          <span><i class="green"></i>三顿规律</span>
+          <span><i class="yellow"></i>两顿规律</span>
+          <span><i class="red"></i>一顿规律</span>
+          <span><i class="none">×</i>都不规律</span>
+          <span><i class="late"></i>夜宵</span>
+        </div>
+      </section>
     </section>
 
     <!-- ================= 训练首页 ================= -->
@@ -512,10 +573,11 @@
   <nav class="page-pager" id="page-pager" aria-label="页面切换">
     <button data-page-index="1" data-action="goPage" data-args="[1]" aria-label="训练"><span>练</span></button>
     <button data-page-index="2" data-action="goPage" data-args="[2]" aria-label="喝水"><span>水</span></button>
-    <button data-page-index="3" data-action="goPage" data-args="[3]" aria-label="戒烟"><span>戒</span></button>
-    <button data-page-index="4" data-action="goPage" data-args="[4]" aria-label="待办"><span>记</span></button>
-    <button data-page-index="5" data-action="goPage" data-args="[5]" aria-label="记账"><span>账</span></button>
-    <button data-page-index="6" data-action="goPage" data-args="[6]" aria-label="提醒"><span>醒</span></button>
+    <button data-page-index="3" data-action="goPage" data-args="[3]" aria-label="三餐"><span>饭</span></button>
+    <button data-page-index="4" data-action="goPage" data-args="[4]" aria-label="戒烟"><span>戒</span></button>
+    <button data-page-index="5" data-action="goPage" data-args="[5]" aria-label="待办"><span>记</span></button>
+    <button data-page-index="6" data-action="goPage" data-args="[6]" aria-label="记账"><span>账</span></button>
+    <button data-page-index="7" data-action="goPage" data-args="[7]" aria-label="提醒"><span>醒</span></button>
   </nav>
 
 </div>

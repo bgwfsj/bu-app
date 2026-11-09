@@ -36,6 +36,7 @@ function boot(){
   initFitness();
   renderQuit();
   initWater();
+  initMeals();
   initTodo();
   initReminder();
   initLedger();
@@ -44,6 +45,7 @@ function boot(){
 
   setInterval(function(){
     paintLiveTimers();
+    paintMealCountdown();
   }, 1000);
   // 跨天检查（喝水）
   setInterval(function(){
@@ -52,8 +54,9 @@ function boot(){
       saveWorkout();
       renderWorkoutHome();
     }
-    if (todoData && page === 4) renderTodoPage();
-    if (reminderData && page === 6) renderReminderPage();
+    if (todoData && page === 5) renderTodoPage();
+    if (mealData && page === 3) renderMealPage();
+    if (reminderData && page === 7) renderReminderPage();
     checkTodoReminder();
   }, 30000);
 }

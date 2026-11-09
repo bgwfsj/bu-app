@@ -4,10 +4,10 @@
 function goPage(i){
   settingsOpen = false;
   ledgerSettingsOpen = false;
-  page = i < 0 ? 0 : (i > 6 ? 6 : i);
-  var pages = ['home', 'fitness', 'water', 'quit', 'todo', 'ledger', 'reminder'];
+  page = i < 0 ? 0 : (i > 7 ? 7 : i);
+  var pages = ['home', 'fitness', 'water', 'meals', 'quit', 'todo', 'ledger', 'reminder'];
   document.body.dataset.page = pages[page];
-  var sections = ['p-home', 'p-fitness', 'p-water', 'p-quit', 'p-todo', 'p-ledger', 'p-reminder'];
+  var sections = ['p-home', 'p-fitness', 'p-water', 'p-meals', 'p-quit', 'p-todo', 'p-ledger', 'p-reminder'];
   each(sections, function(id, index){
     var section = byId(id);
     if (!section) return;
@@ -27,10 +27,11 @@ function goPage(i){
     ledgerSettings.classList.remove('on');
     ledgerSettings.setAttribute('aria-hidden', 'true');
   }
-  if (page === 3 && !S.quitDate && !sheetRequired) firstRunSheet();
+  if (page === 4 && !S.quitDate && !sheetRequired) firstRunSheet();
   if (page === 1) ensureWorkoutTicker();
-  if (page === 5) renderLedgerPage();
-  if (page === 6 && reminderData) renderReminderPage();
+  if (page === 3) renderMealPage();
+  if (page === 6) renderLedgerPage();
+  if (page === 7 && reminderData) renderReminderPage();
   if (page === 0) renderDashboard();
 }
 
@@ -73,7 +74,7 @@ function openLedgerSettingsPage(){
 
 function closeLedgerSettingsPage(){
   ledgerSettingsOpen = false;
-  goPage(5);
+  goPage(6);
 }
 
 function handleBackNavigation(){
@@ -101,8 +102,8 @@ function moveByHorizontalSwipe(dx){
   if (page === 0 || settingsOpen || ledgerSettingsOpen) {
     return;
   }
-  if (dx < 0) goPage(page === 6 ? 1 : page + 1);
-  else goPage(page === 1 ? 6 : page - 1);
+  if (dx < 0) goPage(page === 7 ? 1 : page + 1);
+  else goPage(page === 1 ? 7 : page - 1);
 }
 
 function targetOwnsHorizontalGesture(target){
@@ -136,10 +137,10 @@ document.addEventListener('keydown', function(e){
   if (settingsOpen || ledgerSettingsOpen) return;
   if (e.key === 'ArrowRight') {
     if (page === 0) goPage(1);
-    else goPage(page === 6 ? 1 : page + 1);
+    else goPage(page === 7 ? 1 : page + 1);
   }
   if (e.key === 'ArrowLeft' && page > 0) {
-    goPage(page === 1 ? 6 : page - 1);
+    goPage(page === 1 ? 7 : page - 1);
   }
 });
 document.addEventListener('visibilitychange', function(){

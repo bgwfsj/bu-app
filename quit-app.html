@@ -296,7 +296,8 @@ body[data-page="home"]::before{
 .home-card::after{content:'';position:absolute;right:-24px;bottom:-30px;width:92px;height:92px;border-radius:50%;background:rgba(10,168,122,.045)}
 .home-card:nth-child(2)::after{background:rgba(11,142,214,.05)}
 .home-card:nth-child(3)::after{background:rgba(232,141,58,.05)}
-.home-card:nth-child(4)::after{background:rgba(82,101,112,.045)}
+.home-card:nth-child(4)::after{background:rgba(232,141,58,.05)}
+.home-card:nth-child(5)::after{background:rgba(82,101,112,.045)}
 .home-card.ledger-card::after{background:rgba(11,142,214,.05)}
 .home-card.reminder-card::after{background:rgba(230,146,63,.05)}
 .home-icon{
@@ -305,7 +306,8 @@ body[data-page="home"]::before{
 }
 .home-card:nth-child(2) .home-icon{background:rgba(11,142,214,.08);color:#0b83c3}
 .home-card:nth-child(3) .home-icon{background:rgba(232,141,58,.09);color:#b36b28}
-.home-card:nth-child(4) .home-icon{background:rgba(83,103,111,.07);color:#5d747d}
+.home-card:nth-child(4) .home-icon{background:rgba(232,141,58,.09);color:#b36b28}
+.home-card:nth-child(5) .home-icon{background:rgba(83,103,111,.07);color:#5d747d}
 .home-card.ledger-card .home-icon{background:rgba(11,142,214,.08);color:#0b83c3}
 .home-card.reminder-card .home-icon{background:rgba(232,141,58,.09);color:#b36b28}
 .home-card b{display:block;font-size:16px;font-weight:500;color:#173029;letter-spacing:.04em}
@@ -670,6 +672,185 @@ body[data-page="ledger-settings"] #page-pager{opacity:0;pointer-events:none}
 .ledger-tag-input{height:34px;border-radius:9px;border:1px solid var(--line);background:#f8faf9;padding:0 10px;font-size:11px;color:#485b54;outline:none;width:100%;margin-top:6px}
 .ledger-current-time{font-size:9.5px;color:#9f9185;margin:-3px 0 12px}
 .ledger-delete{color:var(--danger)}
+
+/* 35-meals.css */
+/* ---------- 三餐 ---------- */
+body[data-page="meals"]::before{
+  background:
+    radial-gradient(72% 43% at 28% -5%,rgba(205,151,87,.14),transparent 68%),
+    radial-gradient(54% 38% at 94% 102%,rgba(10,168,122,.08),transparent 70%);
+}
+.home-card.meal-card::after{background:rgba(205,151,87,.07)}
+.home-card.meal-card .home-icon{background:rgba(205,151,87,.11);color:#ad713a}
+.meal-top-date{
+  font-family:var(--font-mono);font-size:10px;color:#9aa6a6;letter-spacing:.03em
+}
+.meal-hero{margin-bottom:17px}
+.meal-record-btn{
+  flex:0 0 auto;width:100%;min-height:70px;display:flex;align-items:center;gap:12px;
+  padding:12px 15px;border:1px solid rgba(60,88,72,.16);border-radius:17px;
+  background:linear-gradient(135deg,#385b4e,#557563);color:#fff;text-align:left;cursor:pointer;
+  box-shadow:0 18px 36px -30px rgba(31,73,58,.62)
+}
+.meal-record-plus{
+  width:37px;height:37px;flex:0 0 37px;display:grid;place-items:center;border-radius:12px;
+  background:rgba(255,255,255,.14);font-size:22px;font-weight:300
+}
+.meal-record-copy{flex:1;min-width:0}
+.meal-record-copy b{display:block;font-size:15px;font-weight:500;letter-spacing:.08em}
+.meal-record-copy small{display:block;margin-top:5px;font-size:10px;color:rgba(255,255,255,.67);letter-spacing:.03em}
+.meal-record-btn em{font-style:normal;font-size:10px;letter-spacing:.13em;color:rgba(255,255,255,.72)}
+.meal-record-btn:active{transform:translateY(1px);filter:brightness(.98)}
+.meal-backfill-btn{
+  flex:0 0 auto;align-self:flex-end;margin-top:8px;padding:5px 2px;border:0;background:transparent;
+  color:#8b9b96;font-size:10px;letter-spacing:.08em;cursor:pointer
+}
+.meal-next-card{
+  flex:0 0 auto;margin:14px 0 18px;padding:15px;border-radius:17px;
+  border:1px solid rgba(171,126,77,.13);
+  background:
+    radial-gradient(80% 110% at 100% 0,rgba(217,177,118,.15),transparent 65%),
+    rgba(255,255,255,.84)
+}
+.meal-next-head{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#7d9089;font-size:11px;letter-spacing:.08em}
+.meal-next-head b{font-size:12px;font-weight:500;color:#8e6845;letter-spacing:.08em}
+.meal-next-timer{
+  margin-top:9px;font:300 38px/1.05 var(--font-mono);letter-spacing:-.04em;color:#2e463e;
+  font-variant-numeric:tabular-nums
+}
+.meal-next-meta{display:flex;justify-content:space-between;gap:12px;margin-top:9px;font-size:10px;color:#9b8c7d}
+.meal-next-meta span:last-child{text-align:right}
+.meal-next-card p{margin:12px 0 0;padding-top:10px;border-top:1px solid var(--line2);font-size:11px;line-height:1.65;color:#87978f}
+.meal-today{flex:0 0 auto;margin-bottom:17px}
+.meal-section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px}
+.meal-section-head h3{margin:0;font-size:13px;font-weight:500;letter-spacing:.09em;color:#596e67}
+.meal-section-head small{font-size:10px;color:#9ba7a3}
+.meal-type-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}
+.meal-type-chip{
+  min-width:0;padding:8px 3px 7px;border-radius:10px;border:1px solid var(--line2);
+  background:rgba(255,255,255,.64);text-align:center;color:#9ca9a5
+}
+.meal-type-chip b{display:block;font-size:11px;font-weight:500;color:#7f908a}
+.meal-type-chip small{display:block;margin-top:4px;font:500 9px var(--font-mono);color:#aab3b0}
+.meal-type-chip.has-record{background:rgba(207,157,98,.09);border-color:rgba(177,121,64,.12)}
+.meal-type-chip.has-record b{color:#9b6f48}
+.meal-type-chip.has-record small{color:#a9784f}
+.meal-type-chip.regular{background:rgba(10,168,122,.08);border-color:rgba(10,168,122,.14)}
+.meal-type-chip.regular b,.meal-type-chip.regular small{color:#278468}
+.meal-list{display:flex;flex-direction:column;gap:6px}
+.meal-entry{
+  display:grid;grid-template-columns:42px 8px minmax(0,1fr) auto;align-items:center;gap:9px;
+  min-height:53px;padding:9px 11px;border:1px solid var(--line2);border-radius:12px;
+  background:rgba(255,255,255,.82)
+}
+.meal-entry-time{font:500 11px var(--font-mono);color:#8d9994}
+.meal-entry-dot{width:6px;height:6px;border-radius:50%;background:#c79662;box-shadow:0 0 0 3px rgba(199,150,98,.09)}
+.meal-entry[data-type="breakfast"] .meal-entry-dot{background:#d5a05e}
+.meal-entry[data-type="lunch"] .meal-entry-dot{background:#79a078}
+.meal-entry[data-type="tea"] .meal-entry-dot{background:#8aa2b5}
+.meal-entry[data-type="dinner"] .meal-entry-dot{background:#809b85}
+.meal-entry[data-type="late"] .meal-entry-dot{background:#7e8799}
+.meal-entry-main{min-width:0}
+.meal-entry-main b{display:block;font-size:12.5px;font-weight:500;color:#435851}
+.meal-entry-main b i{
+  display:inline-block;margin-left:5px;padding:1px 4px;border-radius:4px;background:rgba(91,142,185,.09);
+  color:#6586a0;font-style:normal;font-size:8.5px;vertical-align:1px
+}
+.meal-entry-main small{display:block;margin-top:3px;font-size:10px;color:#9a8d82}
+.meal-entry button{
+  padding:4px 2px;border:0;background:transparent;color:#b39b9b;font-size:9.5px;cursor:pointer
+}
+.meal-empty{
+  padding:24px 12px;border:1px dashed rgba(13,32,45,.08);border-radius:12px;
+  text-align:center;font-size:11.5px;line-height:1.7;color:#8f9f9a
+}
+.meal-empty span{font-size:10px;color:#abb4b1}
+.meal-extra-box{
+  margin-top:8px;border:1px solid var(--line2);border-radius:11px;background:rgba(255,255,255,.56);overflow:hidden
+}
+.meal-extra-box[hidden]{display:none}
+.meal-extra-box>summary{
+  display:flex;align-items:center;justify-content:space-between;padding:9px 10px;
+  list-style:none;cursor:pointer;color:#8a9994;font-size:10.5px
+}
+.meal-extra-box>summary::-webkit-details-marker{display:none}
+.meal-extra-box>summary::marker{content:''}
+.meal-extra-box>summary small{font-size:9.5px;color:#a3aeaa}
+.meal-extra-list{display:flex;flex-direction:column;gap:6px;padding:0 6px 7px}
+.meal-history-box{
+  flex:0 0 auto;margin:2px 0 8px;border:1px solid var(--line2);border-radius:13px;
+  background:rgba(255,255,255,.66);overflow:hidden
+}
+.meal-history-box>summary{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 12px;
+  list-style:none;cursor:pointer;color:#6d817a;font-size:12px;letter-spacing:.06em
+}
+.meal-history-box>summary::-webkit-details-marker{display:none}
+.meal-history-box>summary::marker{content:''}
+.meal-history-box>summary small{font-size:10px;color:#9ba6a3}
+.meal-week-list{border-top:1px solid var(--line2);padding:4px 6px 7px}
+.meal-week-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 6px;border-bottom:1px solid var(--line2)}
+.meal-week-row:last-child{border-bottom:0}
+.meal-week-row b{display:block;font-size:11.5px;font-weight:500;color:#596c65}
+.meal-week-row small{display:block;margin-top:3px;font-size:9.5px;color:#9da8a4}
+.meal-week-row strong{font:500 10.5px var(--font-mono);color:#9b7654}
+.meal-week-empty{padding:18px 8px;text-align:center;color:#a0aaa7;font-size:10.5px}
+.meal-calendar-card{
+  flex:0 0 auto;margin:2px 0 10px;padding:11px 10px 12px;border:1px solid var(--line2);
+  border-radius:13px;background:rgba(255,255,255,.72)
+}
+.meal-calendar-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px}
+.meal-calendar-head b{font-size:11.5px;font-weight:500;color:#5e726b;letter-spacing:.06em}
+.meal-calendar-head button{
+  width:28px;height:27px;border:1px solid var(--line2);border-radius:8px;background:rgba(255,255,255,.7);
+  color:#8c9b96;font-size:16px;line-height:1;cursor:pointer
+}
+.meal-calendar-head button:disabled{cursor:default}
+.meal-calendar-week,.meal-calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.meal-calendar-week{margin-bottom:5px;text-align:center;font-size:9px;color:#a4afab}
+.meal-cal-blank,.meal-cal-day{min-height:35px}
+.meal-cal-day{
+  position:relative;display:flex;align-items:center;justify-content:center;border-radius:8px;
+  color:#71827c;font-size:10px;border:1px solid transparent
+}
+.meal-cal-day.today{border-color:rgba(13,32,45,.13)}
+.meal-cal-day b{font-weight:400}
+.meal-cal-status{position:absolute;left:50%;bottom:3px;transform:translateX(-50%);font-style:normal}
+.meal-cal-status.green{width:5px;height:5px;border-radius:50%;background:#48ac7c;box-shadow:0 0 0 3px rgba(72,172,124,.1)}
+.meal-cal-status.yellow{width:5px;height:5px;border-radius:50%;background:#d2a744;box-shadow:0 0 0 3px rgba(210,167,68,.1)}
+.meal-cal-status.red{width:5px;height:5px;border-radius:50%;background:#d47d72;box-shadow:0 0 0 3px rgba(212,125,114,.1)}
+.meal-cal-status.none{
+  bottom:2px;width:auto;height:auto;color:#9ba7a3;font-size:9px;line-height:1;
+  background:transparent;box-shadow:none
+}
+.meal-cal-late{
+  position:absolute;right:4px;top:4px;width:3px;height:3px;border-radius:50%;
+  background:#7189b0;box-shadow:0 0 0 2px rgba(113,137,176,.08)
+}
+.meal-calendar-legend{
+  display:flex;flex-wrap:wrap;align-items:center;gap:6px 9px;margin-top:10px;
+  padding-top:8px;border-top:1px solid var(--line2);font-size:8.5px;color:#98a4a0
+}
+.meal-calendar-legend span{display:inline-flex;align-items:center;gap:4px}
+.meal-calendar-legend i{width:5px;height:5px;border-radius:50%;font-style:normal}
+.meal-calendar-legend i.green{background:#48ac7c}
+.meal-calendar-legend i.yellow{background:#d2a744}
+.meal-calendar-legend i.red{background:#d47d72}
+.meal-calendar-legend i.none{width:auto;height:auto;color:#9ba7a3;font-size:9px}
+.meal-calendar-legend i.late{background:#7189b0}
+.meal-feedback-state{
+  display:inline-block;margin:1px 0 4px;padding:4px 8px;border-radius:999px;
+  background:rgba(10,168,122,.09);color:#218c6c;font-size:10.5px;letter-spacing:.06em
+}
+.meal-feedback-state.warn{background:rgba(194,131,84,.1);color:#a36f45}
+.meal-feedback-detail{margin:7px 0 12px!important;line-height:1.72}
+.meal-tip-card{
+  display:flex;flex-direction:column;gap:7px;padding:13px 14px;border-radius:12px;
+  background:#f5f8f6;border:1px solid var(--line2)
+}
+.meal-tip-card b{font-size:10px;letter-spacing:.12em;color:#789088}
+.meal-tip-card span{font-size:12px;line-height:1.7;color:#53685f}
+.meal-feedback-note{margin:10px 0 14px!important;font-size:9.5px!important;color:#9ca7a3!important;line-height:1.6!important}
 
 /* 40-fitness.css */
 /* ---------- 训练首页 ---------- */
@@ -1099,7 +1280,7 @@ body[data-page="fitness"]::before{
         <p class="home-sub">人生难求圆满，日日可补。把训练、喝水、戒烟和每一件小事，一点点补回来。</p>
       </div>
       <div class="home-notice" id="home-notice" hidden>
-        <button class="home-notice-main" data-action="goPage" data-args="[6]">
+        <button class="home-notice-main" data-action="goPage" data-args="[7]">
           <span class="home-notice-dot"></span>
           <span><b id="home-notice-title">今天的提醒</b><small id="home-notice-copy"></small></span>
           <em>查看</em>
@@ -1115,19 +1296,23 @@ body[data-page="fitness"]::before{
           <span class="home-icon">水</span><b>喝水</b>
           <small id="home-water-copy">今天 0 / 2000 ml</small>
         </button>
-        <button class="home-card" data-action="goPage" data-args="[3]">
+        <button class="home-card meal-card" data-action="goPage" data-args="[3]">
+          <span class="home-icon">饭</span><b>三餐</b>
+          <small id="home-meal-copy">记录今天吃了什么</small>
+        </button>
+        <button class="home-card" data-action="goPage" data-args="[4]">
           <span class="home-icon">戒</span><b>戒烟</b>
           <small id="home-quit-copy">看看身体恢复进度</small>
         </button>
-        <button class="home-card" data-action="goPage" data-args="[4]">
+        <button class="home-card" data-action="goPage" data-args="[5]">
           <span class="home-icon">记</span><b>待办</b>
           <small id="home-todo-copy">今天没有待办</small>
         </button>
-        <button class="home-card compact ledger-card" data-action="goPage" data-args="[5]">
+        <button class="home-card ledger-card" data-action="goPage" data-args="[6]">
           <span class="home-icon">账</span><b>记账</b>
           <small id="home-ledger-copy">本月还没有记录</small>
         </button>
-        <button class="home-card compact reminder-card" data-action="goPage" data-args="[6]">
+        <button class="home-card reminder-card" data-action="goPage" data-args="[7]">
           <span class="home-icon">醒</span><b>提醒</b>
           <small id="home-reminder-copy">没有独立提醒</small>
         </button>
@@ -1349,6 +1534,63 @@ body[data-page="fitness"]::before{
           <button id="w-hist-clear">清空历史</button>
         </div>
       </details>
+    </section>
+
+    <!-- ================= 三餐 ================= -->
+    <section class="page" id="p-meals">
+      <div class="top">
+        <div class="brand"><span class="led"></span>三餐</div>
+        <span class="meal-top-date" id="meal-top-date"></span>
+      </div>
+      <div class="section-hero meal-hero">
+        <div class="section-kicker">今日饮食</div>
+        <h1 class="section-title">好好吃饭</h1>
+        <p class="section-sub">不用每一顿都完美，只要大多数时候，认真照顾身体。</p>
+      </div>
+      <button class="meal-record-btn" type="button" data-action="recordMealNow">
+        <span class="meal-record-plus">＋</span>
+        <span class="meal-record-copy"><b>吃饭啦！</b><small id="meal-record-hint">现在 · 自动识别餐次</small></span>
+        <em>记录</em>
+      </button>
+      <button class="meal-backfill-btn" type="button" data-action="openMealBackfill">补记一顿</button>
+      <section class="meal-next-card">
+        <div class="meal-next-head"><span>距离下一顿最佳时间</span><b id="meal-next-name">午餐</b></div>
+        <div class="meal-next-timer" id="meal-next-timer">00:00:00</div>
+        <div class="meal-next-meta">
+          <span id="meal-next-time">今天 12:00</span>
+          <span id="meal-next-window">建议 11:30–13:00</span>
+        </div>
+        <p id="meal-next-hint">给一顿饭留出二十多分钟，也给自己留一点停顿。</p>
+      </section>
+      <section class="meal-today">
+        <div class="meal-section-head"><h3>今天吃了什么</h3><small id="meal-today-summary">还没有记录</small></div>
+        <div class="meal-type-strip" id="meal-type-strip"></div>
+        <div class="meal-list" id="meal-list"></div>
+        <details class="meal-extra-box" id="meal-extra-box" hidden>
+          <summary><span>下午茶与夜宵</span><small id="meal-extra-count">0 笔</small></summary>
+          <div class="meal-extra-list" id="meal-extra-list"></div>
+        </details>
+      </section>
+      <details class="meal-history-box">
+        <summary><span>过去 7 天</span><small id="meal-week-summary">0 顿</small></summary>
+        <div class="meal-week-list" id="meal-week-list"></div>
+      </details>
+      <section class="meal-calendar-card">
+        <div class="meal-calendar-head">
+          <button type="button" data-action="changeMealCalendarMonth" data-args="[-1]" aria-label="上个月">‹</button>
+          <b id="meal-calendar-title"></b>
+          <button type="button" data-action="changeMealCalendarMonth" data-args="[1]" aria-label="下个月">›</button>
+        </div>
+        <div class="meal-calendar-week"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div>
+        <div class="meal-calendar-grid" id="meal-calendar-grid"></div>
+        <div class="meal-calendar-legend">
+          <span><i class="green"></i>三顿规律</span>
+          <span><i class="yellow"></i>两顿规律</span>
+          <span><i class="red"></i>一顿规律</span>
+          <span><i class="none">×</i>都不规律</span>
+          <span><i class="late"></i>夜宵</span>
+        </div>
+      </section>
     </section>
 
     <!-- ================= 训练首页 ================= -->
@@ -1583,10 +1825,11 @@ body[data-page="fitness"]::before{
   <nav class="page-pager" id="page-pager" aria-label="页面切换">
     <button data-page-index="1" data-action="goPage" data-args="[1]" aria-label="训练"><span>练</span></button>
     <button data-page-index="2" data-action="goPage" data-args="[2]" aria-label="喝水"><span>水</span></button>
-    <button data-page-index="3" data-action="goPage" data-args="[3]" aria-label="戒烟"><span>戒</span></button>
-    <button data-page-index="4" data-action="goPage" data-args="[4]" aria-label="待办"><span>记</span></button>
-    <button data-page-index="5" data-action="goPage" data-args="[5]" aria-label="记账"><span>账</span></button>
-    <button data-page-index="6" data-action="goPage" data-args="[6]" aria-label="提醒"><span>醒</span></button>
+    <button data-page-index="3" data-action="goPage" data-args="[3]" aria-label="三餐"><span>饭</span></button>
+    <button data-page-index="4" data-action="goPage" data-args="[4]" aria-label="戒烟"><span>戒</span></button>
+    <button data-page-index="5" data-action="goPage" data-args="[5]" aria-label="待办"><span>记</span></button>
+    <button data-page-index="6" data-action="goPage" data-args="[6]" aria-label="记账"><span>账</span></button>
+    <button data-page-index="7" data-action="goPage" data-args="[7]" aria-label="提醒"><span>醒</span></button>
   </nav>
 
 </div>
@@ -1607,6 +1850,7 @@ var FKEY = 'fitness_app_v1';       // 训练动作、计划、训练记录
 var TKEY = 'todo_app_v1';          // 每日待办与提醒设置
 var RKEY = 'reminder_app_v1';      // 独立提醒
 var LKEY = 'ledger_app_v1';        // 多账本收支记录
+var MKEY = 'meals_app_v1';         // 三餐记录
 var LOLDKEY = 'event-ledger-v2';   // 原独立记账 App 的旧存档，只读迁移
 
 // 身体状况阶段（门槛取区间起点）
@@ -1647,6 +1891,8 @@ var ledgerNewParentId = null;
 var ledgerCollapsed = {};
 var ledgerRecordMode = 'preview';
 var ledgerTreeOpen = false;
+var mealData = null;
+var mealCalendarOffset = 0;
 var workoutFrameId = 0;
 var workoutLastPaint = 0;
 var page = 0;
@@ -1727,6 +1973,11 @@ var APP_ACTION_NAMES = {
   saveTodoItem: true,
   enableTodoReminder: true,
   disableTodoReminder: true,
+  recordMealNow: true,
+  openMealBackfill: true,
+  saveMealBackfill: true,
+  changeMealCalendarMonth: true,
+  deleteMealRecord: true,
   openReminderForm: true,
   setReminderMode: true,
   setReminderWeekday: true,
@@ -1911,7 +2162,7 @@ function resolveAppConfirm(confirmed){
 }
 
 var APP_BACKUP_FORMAT = 'bu-app-backup';
-var APP_BACKUP_VERSION = 3;
+var APP_BACKUP_VERSION = 4;
 
 function appBackupPayload(){
   return JSON.parse(JSON.stringify({
@@ -1924,7 +2175,8 @@ function appBackupPayload(){
       fitness: fit || null,
       todo: todoData || null,
       reminders: reminderData || null,
-      ledger: ledgerData || null
+      ledger: ledgerData || null,
+      meals: mealData || null
     }
   }));
 }
@@ -2023,7 +2275,7 @@ function receiveAppBackup(text){
     return;
   }
   appConfirm(
-    '恢复备份会覆盖这台设备现有的训练、喝水、戒烟、待办、提醒和记账数据。建议先导出一份当前备份。',
+    '恢复备份会覆盖这台设备现有的训练、喝水、三餐、戒烟、待办、提醒和记账数据。建议先导出一份当前备份。',
     function(){
       storeSet('bu_pre_restore_v1', appBackupPayload());
       storeSet(AKEY, payload.data.quit || { quitDate: 0 });
@@ -2032,6 +2284,7 @@ function receiveAppBackup(text){
       storeSet(TKEY, payload.data.todo || null);
       storeSet(RKEY, payload.data.reminders || null);
       storeSet(LKEY, payload.data.ledger || null);
+      storeSet(MKEY, payload.data.meals || null);
       location.reload();
     },
     { title: '恢复全部数据', confirmLabel: '覆盖并恢复' }
@@ -2045,6 +2298,7 @@ byId('mask').addEventListener('click', closeSheet);
    应用版本记录
    ============================================================ */
 var APP_CHANGELOG = [
+  { version: '5.9.14', date: '2026-11-09', changes: ['新增三餐模块，可记录早餐、午餐、下午茶、晚餐和夜宵。', '记录时结合当前时间、理想用餐窗口和与上一顿的间隔给出评价。', '下一顿倒计时以理想用餐窗口的起点为准；新增过去 7 天摘要和三餐规律月历。', '规律正餐按 3 绿、2 黄、1 红、0 叉显示，夜宵显示小点。', '支持选择日期和时间补记；首页与底部导航加入三餐入口。', '完整备份升级为 v4，包含三餐数据。'] },
   { version: '5.9.13', date: '2026-11-09', changes: ['记账最近记录移到“记一笔”上方，默认显示最新 3 笔，并可依次展开全部、完全折叠和恢复 3 笔。', '搜索框移到“记一笔”下方。', '记账设置页修复内容被挤压和无法上下滚动的问题；新建子事件入口移入设置页。', '记账事件区域和事件树节点默认折叠。'] },
   { version: '5.9.12', date: '2026-11-09', changes: ['访问统计下方新增数字文案。', '今日 1–20 次各配置 5 条文案；特殊累计次数优先显示并使用强调色。', '同一日期与计数组稳定匹配，不会频繁跳换文案。'] },
   { version: '5.9.11', date: '2026-11-09', changes: ['完整备份默认只保留最近 2 份，自动清理和手动清理规则同步调整。'] },
@@ -2847,10 +3101,10 @@ function setQuitFromInput(){
 function goPage(i){
   settingsOpen = false;
   ledgerSettingsOpen = false;
-  page = i < 0 ? 0 : (i > 6 ? 6 : i);
-  var pages = ['home', 'fitness', 'water', 'quit', 'todo', 'ledger', 'reminder'];
+  page = i < 0 ? 0 : (i > 7 ? 7 : i);
+  var pages = ['home', 'fitness', 'water', 'meals', 'quit', 'todo', 'ledger', 'reminder'];
   document.body.dataset.page = pages[page];
-  var sections = ['p-home', 'p-fitness', 'p-water', 'p-quit', 'p-todo', 'p-ledger', 'p-reminder'];
+  var sections = ['p-home', 'p-fitness', 'p-water', 'p-meals', 'p-quit', 'p-todo', 'p-ledger', 'p-reminder'];
   each(sections, function(id, index){
     var section = byId(id);
     if (!section) return;
@@ -2870,10 +3124,11 @@ function goPage(i){
     ledgerSettings.classList.remove('on');
     ledgerSettings.setAttribute('aria-hidden', 'true');
   }
-  if (page === 3 && !S.quitDate && !sheetRequired) firstRunSheet();
+  if (page === 4 && !S.quitDate && !sheetRequired) firstRunSheet();
   if (page === 1) ensureWorkoutTicker();
-  if (page === 5) renderLedgerPage();
-  if (page === 6 && reminderData) renderReminderPage();
+  if (page === 3) renderMealPage();
+  if (page === 6) renderLedgerPage();
+  if (page === 7 && reminderData) renderReminderPage();
   if (page === 0) renderDashboard();
 }
 
@@ -2916,7 +3171,7 @@ function openLedgerSettingsPage(){
 
 function closeLedgerSettingsPage(){
   ledgerSettingsOpen = false;
-  goPage(5);
+  goPage(6);
 }
 
 function handleBackNavigation(){
@@ -2944,8 +3199,8 @@ function moveByHorizontalSwipe(dx){
   if (page === 0 || settingsOpen || ledgerSettingsOpen) {
     return;
   }
-  if (dx < 0) goPage(page === 6 ? 1 : page + 1);
-  else goPage(page === 1 ? 6 : page - 1);
+  if (dx < 0) goPage(page === 7 ? 1 : page + 1);
+  else goPage(page === 1 ? 7 : page - 1);
 }
 
 function targetOwnsHorizontalGesture(target){
@@ -2979,10 +3234,10 @@ document.addEventListener('keydown', function(e){
   if (settingsOpen || ledgerSettingsOpen) return;
   if (e.key === 'ArrowRight') {
     if (page === 0) goPage(1);
-    else goPage(page === 6 ? 1 : page + 1);
+    else goPage(page === 7 ? 1 : page + 1);
   }
   if (e.key === 'ArrowLeft' && page > 0) {
-    goPage(page === 1 ? 6 : page - 1);
+    goPage(page === 1 ? 7 : page - 1);
   }
 });
 document.addEventListener('visibilitychange', function(){
@@ -3296,6 +3551,488 @@ function saveWaterSettings(){
   closeSheet();
   renderWater();
   toast('设置已保存');
+}
+
+/* 52-meals.js */
+/* ============================================================
+   5.2 三餐
+   ============================================================ */
+var MEAL_TYPES = [
+  { id: 'breakfast', name: '早餐', short: '早', primary: true, idealStart: 390, idealEnd: 540, idealLabel: '06:30–09:00' },
+  { id: 'lunch', name: '午餐', short: '午', primary: true, idealStart: 690, idealEnd: 780, idealLabel: '11:30–13:00' },
+  { id: 'tea', name: '下午茶', short: '茶', primary: false },
+  { id: 'dinner', name: '晚餐', short: '晚', primary: true, idealStart: 1050, idealEnd: 1170, idealLabel: '17:30–19:30' },
+  { id: 'late', name: '夜宵', short: '夜', primary: false }
+];
+
+var MEAL_SLOTS = [
+  { id: 'breakfast', name: '早餐', hour: 6, minute: 30 },
+  { id: 'lunch', name: '午餐', hour: 11, minute: 30 },
+  { id: 'dinner', name: '晚餐', hour: 17, minute: 30 }
+];
+
+var MEAL_TIPS = {
+  breakfast: [
+    '早餐同时安排主食和蛋白质，通常比只吃甜食更耐饿。',
+    '刚起床先喝几口水，再慢慢吃早餐，不必急着把胃填满。',
+    '早餐加一份水果或蔬菜，会比只有精细主食更有层次。',
+    '如果早上胃口小，可以少量吃一点，中午再认真补上。'
+  ],
+  lunch: [
+    '吃饭可以先吃几口蔬菜，再吃蛋白质和主食，更容易放慢速度。',
+    '午餐不用追求完全清淡，关键是别在一顿饭里装得太满。',
+    '细嚼慢咽会给饱腹感一点时间，也能让吃完后的状态更舒服。',
+    '午后容易困，午餐里搭配一些蛋白质和蔬菜通常更稳妥。'
+  ],
+  tea: [
+    '下午茶更适合补充一小份，不必把它吃成第二顿午餐。',
+    '水果、无糖酸奶或一小把坚果，通常比甜饮料更适合当下午的停顿。',
+    '如果只是嘴巴馋，先喝几口水，等几分钟再决定要不要吃。',
+    '下午加餐后，晚餐可以相应清淡一点，给一天留出平衡。'
+  ],
+  dinner: [
+    '晚餐吃到七八分饱即可，不必把一天欠下的都留到晚上。',
+    '晚上活动量通常更少，主食适量、蔬菜充足会更轻松。',
+    '睡前大约三小时尽量不再大量进食，让身体有消化的时间。',
+    '晚饭后慢慢走一会儿，比立刻躺下更舒服。'
+  ],
+  late: [
+    '夜里如果确实饿，选择少量、清淡、容易消化的食物更合适。',
+    '夜宵吃完不要马上躺下，给身体留一点消化的时间。',
+    '有时渴也会被误认成饿，先喝几口水再判断要不要吃。',
+    '偶尔一顿夜宵不用自责，第二天照常吃饭就能慢慢回到节奏。'
+  ]
+};
+
+function mealDefaultState(){
+  return { schemaVersion: 1, records: [] };
+}
+
+function mealTypeMeta(type){
+  for (var i = 0; i < MEAL_TYPES.length; i++) {
+    if (MEAL_TYPES[i].id === type) return MEAL_TYPES[i];
+  }
+  return MEAL_TYPES[0];
+}
+
+function mealTypeForDate(date){
+  var minutes = date.getHours() * 60 + date.getMinutes();
+  if (minutes >= 300 && minutes < 630) return 'breakfast';
+  if (minutes >= 630 && minutes < 870) return 'lunch';
+  if (minutes >= 870 && minutes < 1050) return 'tea';
+  if (minutes >= 1050 && minutes < 1260) return 'dinner';
+  return 'late';
+}
+
+function mealDateKey(date){
+  return date.getFullYear() + '-' + pad2(date.getMonth() + 1) + '-' + pad2(date.getDate());
+}
+
+function mealClock(date){
+  return pad2(date.getHours()) + ':' + pad2(date.getMinutes());
+}
+
+function mealRecordDate(record){
+  var created = record && record.createdAt ? new Date(record.createdAt) : null;
+  if (created && !isNaN(created.getTime())) return created;
+  var parts = String(record && record.date || '').split('-');
+  var clock = String(record && record.time || '').split(':');
+  if (parts.length === 3) {
+    return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]),
+      Number(clock[0]) || 0, Number(clock[1]) || 0, 0);
+  }
+  return new Date();
+}
+
+function mealIsRegular(type, date){
+  var meta = mealTypeMeta(type);
+  if (!meta.primary) return false;
+  var minutes = date.getHours() * 60 + date.getMinutes();
+  return minutes >= meta.idealStart && minutes <= meta.idealEnd;
+}
+
+function mealDurationLabel(minutes){
+  minutes = Math.max(0, Math.round(minutes));
+  if (minutes < 60) return minutes + ' 分钟';
+  var hours = Math.floor(minutes / 60);
+  var rest = minutes % 60;
+  return hours + ' 小时' + (rest ? ' ' + rest + ' 分钟' : '');
+}
+
+function mealGapMinutes(previous, current){
+  if (!previous) return null;
+  var before = mealRecordDate(previous);
+  return Math.max(0, Math.round((current.getTime() - before.getTime()) / 60000));
+}
+
+function mealPreviousRecord(when, records){
+  var result = null, resultTime = -Infinity;
+  each(records || (mealData ? mealData.records : []), function(record){
+    var at = mealRecordDate(record).getTime();
+    if (at < when.getTime() && at > resultTime) {
+      result = record;
+      resultTime = at;
+    }
+  });
+  return result;
+}
+
+function mealMomentReview(type, date, previous){
+  var meta = mealTypeMeta(type);
+  var regular = mealIsRegular(type, date);
+  var gap = mealGapMinutes(previous, date);
+  var detail = '';
+  if (meta.primary) {
+    detail = meta.name + '理想时间是 ' + meta.idealLabel + '，这次在 ' + mealClock(date) +
+      (regular ? '，时间在范围内。' : '，不在理想时段。');
+  } else if (type === 'tea') {
+    detail = '这是一顿下午茶，不计入三顿正餐的规律统计。';
+  } else {
+    detail = '21:00 之后的记录归为夜宵，不计入三顿正餐的规律统计。';
+  }
+  if (gap == null) {
+    detail += ' 目前还没有更早的用餐记录。';
+  } else {
+    var gapText = gap < 120 ? '间隔偏短，下一顿可以按饥饿感适量调整。' :
+      gap > 330 ? '距上一顿有些久，慢一点吃，别一次吃得太急。' :
+      '与上一顿的间隔比较从容。';
+    detail += ' 距上一顿约 ' + mealDurationLabel(gap) + '，' + gapText;
+  }
+  var title;
+  if (type === 'late') title = '夜宵时间';
+  else if (type === 'tea') title = '下午加个餐';
+  else if (regular && gap != null && gap < 120) title = '时间刚好，间隔略近';
+  else if (regular) title = '吃得规律';
+  else if (gap != null && gap > 330) title = '间隔有些长';
+  else title = '这次不在理想时段';
+  return { tone: regular ? 'good' : 'warn', title: title, detail: detail, regular: regular, gapMinutes: gap };
+}
+
+function mealTipFor(type, date){
+  var tips = MEAL_TIPS[type] || MEAL_TIPS.late;
+  var index = (date.getDate() + date.getHours() + date.getMinutes() + type.length) % tips.length;
+  return tips[index];
+}
+
+function normalizeMealState(data){
+  var parsed = [], seen = {};
+  each(Array.isArray(data && data.records) ? data.records : [], function(record){
+    if (!record || !record.type) return;
+    var meta = mealTypeMeta(record.type);
+    if (meta.id !== record.type) return;
+    var when = mealRecordDate(record);
+    if (isNaN(when.getTime())) return;
+    var id = String(record.id || ('meal_' + when.getTime()));
+    if (seen[id]) id += '_' + Math.random().toString(36).slice(2, 6);
+    seen[id] = true;
+    parsed.push({ id: id, type: record.type, when: when, backfill: !!record.backfill });
+  });
+  parsed.sort(function(a, b){ return a.when.getTime() - b.when.getTime(); });
+  var out = mealDefaultState();
+  each(parsed, function(item){
+    var previous = out.records.length ? out.records[out.records.length - 1] : null;
+    var review = mealMomentReview(item.type, item.when, previous);
+    out.records.push({
+      id: item.id,
+      type: item.type,
+      date: mealDateKey(item.when),
+      time: mealClock(item.when),
+      createdAt: item.when.toISOString(),
+      regular: review.regular,
+      gapMinutes: review.gapMinutes,
+      reviewTitle: review.title,
+      tip: mealTipFor(item.type, item.when),
+      backfill: item.backfill
+    });
+  });
+  return out;
+}
+
+function loadMealState(){
+  mealData = normalizeMealState(storeGet(MKEY, null));
+  saveMealState();
+}
+
+function saveMealState(){
+  if (!mealData) mealData = mealDefaultState();
+  mealData.schemaVersion = 1;
+  mealData.records.sort(function(a, b){
+    return String(a.createdAt).localeCompare(String(b.createdAt));
+  });
+  storeSet(MKEY, mealData);
+}
+
+function mealRecordsForDate(date){
+  var key = mealDateKey(date);
+  return (mealData ? mealData.records : []).filter(function(record){
+    return record.date === key;
+  });
+}
+
+function mealNextTargetAt(when, sourceRecords){
+  when = when instanceof Date ? when : new Date(when || Date.now());
+  var today = mealDateKey(when);
+  var eaten = {};
+  each(sourceRecords || (mealData ? mealData.records : []), function(record){
+    if (record.date === today) eaten[record.type] = true;
+  });
+  for (var i = 0; i < MEAL_SLOTS.length; i++) {
+    var slot = MEAL_SLOTS[i];
+    var target = new Date(when.getFullYear(), when.getMonth(), when.getDate(), slot.hour, slot.minute, 0, 0);
+    if (target.getTime() > when.getTime() && !eaten[slot.id]) {
+      var meta = mealTypeMeta(slot.id);
+      return {
+        type: slot.id,
+        name: slot.name,
+        target: target,
+        window: '理想 ' + meta.idealLabel,
+        hint: slot.id === 'breakfast' ? '给一顿饭留出二十多分钟，也给自己留一点停顿。' :
+          slot.id === 'lunch' ? '吃到七八分饱，下午会更从容一些。' :
+          '晚餐清淡一点、少吃一点，夜里会更舒服。',
+        tomorrow: false
+      };
+    }
+  }
+  var tomorrowTarget = new Date(when.getFullYear(), when.getMonth(), when.getDate() + 1, 6, 30, 0, 0);
+  return {
+    type: 'breakfast',
+    name: '早餐',
+    target: tomorrowTarget,
+    window: '理想 06:30–09:00',
+    hint: '今晚给身体留一点空腹的时间，明早再慢慢补回来。',
+    tomorrow: true
+  };
+}
+
+function mealCountdownText(ms){
+  var total = Math.max(0, Math.ceil(ms / 1000));
+  var hours = Math.floor(total / 3600);
+  var minutes = Math.floor(total % 3600 / 60);
+  var seconds = total % 60;
+  return pad2(hours) + ':' + pad2(minutes) + ':' + pad2(seconds);
+}
+
+function paintMealCountdown(){
+  if (!byId('meal-next-timer') || !mealData) return;
+  var now = new Date();
+  var current = mealTypeMeta(mealTypeForDate(now));
+  var next = mealNextTargetAt(now);
+  setTxt('meal-top-date', (now.getMonth() + 1) + '月' + now.getDate() + '日 · 周' + ['日', '一', '二', '三', '四', '五', '六'][now.getDay()]);
+  setTxt('meal-record-hint', '现在 · 将记为' + current.name);
+  setTxt('meal-next-name', next.name);
+  setTxt('meal-next-timer', mealCountdownText(next.target.getTime() - now.getTime()));
+  setTxt('meal-next-time', (next.tomorrow ? '明天 ' : '今天 ') + mealClock(next.target));
+  setTxt('meal-next-window', next.window);
+  setTxt('meal-next-hint', next.hint);
+}
+
+function mealEntryHtml(record){
+  var meta = mealTypeMeta(record.type);
+  return '<div class="meal-entry" data-type="' + meta.id + '">' +
+    '<span class="meal-entry-time">' + escHtml(record.time) + '</span>' +
+    '<span class="meal-entry-dot"></span>' +
+    '<span class="meal-entry-main"><b>' + escHtml(meta.name) +
+    (record.backfill ? '<i>补记</i>' : '') + '</b><small>' +
+    escHtml(record.reviewTitle) + '</small></span>' +
+    '<button type="button"' + actionAttrs('deleteMealRecord', [record.id]) + '>删除</button></div>';
+}
+
+function renderMealTypeStrip(){
+  var box = byId('meal-type-strip');
+  if (!box) return;
+  var today = mealRecordsForDate(new Date());
+  box.innerHTML = MEAL_TYPES.filter(function(type){ return type.primary; }).map(function(type){
+    var rows = today.filter(function(record){ return record.type === type.id; });
+    var regular = rows.some(function(record){ return record.regular; });
+    return '<span class="meal-type-chip' + (rows.length ? ' has-record' : '') +
+      (regular ? ' regular' : '') + '" data-type="' + type.id + '">' +
+      '<b>' + type.short + '</b><small>' + (rows.length ? (regular ? '规律' : '已记') : '·') + '</small></span>';
+  }).join('');
+}
+
+function renderMealList(){
+  var box = byId('meal-list');
+  if (!box) return;
+  var today = mealRecordsForDate(new Date()).slice().sort(function(a, b){
+    return String(b.createdAt).localeCompare(String(a.createdAt));
+  });
+  var primary = today.filter(function(record){ return mealTypeMeta(record.type).primary; });
+  var extras = today.filter(function(record){ return !mealTypeMeta(record.type).primary; });
+  var regularCount = primary.filter(function(record){ return record.regular; }).length;
+  setTxt('meal-today-summary', primary.length ?
+    '正餐 ' + primary.length + '/3 · 规律 ' + regularCount : '还没有正餐记录');
+  box.innerHTML = primary.length ? primary.map(mealEntryHtml).join('') :
+    '<div class="meal-empty">今天还没有正餐记录<br><span>准备吃饭时，点一下上方的“吃饭啦！”。</span></div>';
+  var extraBox = byId('meal-extra-box');
+  var extraList = byId('meal-extra-list');
+  if (extraBox) extraBox.hidden = !extras.length;
+  if (extraList) extraList.innerHTML = extras.map(mealEntryHtml).join('');
+  setTxt('meal-extra-count', extras.length + ' 笔');
+}
+
+function renderMealWeek(){
+  var box = byId('meal-week-list');
+  if (!box) return;
+  var today = new Date(), rows = [], total = 0, activeDays = 0;
+  for (var offset = 0; offset < 7; offset++) {
+    var day = new Date(today.getFullYear(), today.getMonth(), today.getDate() - offset);
+    var records = mealRecordsForDate(day);
+    total += records.length;
+    if (records.length) activeDays++;
+    if (!records.length) continue;
+    var labels = MEAL_TYPES.filter(function(type){
+      return records.some(function(record){ return record.type === type.id; });
+    }).map(function(type){
+      return type.name;
+    }).join(' · ');
+    rows.push('<div class="meal-week-row"><span><b>' + (offset === 0 ? '今天' : (day.getMonth() + 1) + '/' + day.getDate()) +
+      '</b><small>' + escHtml(labels) + '</small></span><strong>' + records.length + ' 顿</strong></div>');
+  }
+  setTxt('meal-week-summary', total + ' 顿 · ' + activeDays + ' 天');
+  box.innerHTML = rows.length ? rows.join('') : '<div class="meal-week-empty">过去 7 天还没有记录</div>';
+}
+
+function mealDayGrade(date){
+  var records = mealRecordsForDate(date);
+  var regularTypes = {};
+  each(records, function(record){
+    if (record.regular && mealTypeMeta(record.type).primary) regularTypes[record.type] = true;
+  });
+  var count = Object.keys(regularTypes).length;
+  return {
+    records: records,
+    regularCount: count,
+    late: records.some(function(record){ return record.type === 'late'; }),
+    grade: count >= 3 ? 'green' : count === 2 ? 'yellow' : count === 1 ? 'red' : records.length ? 'none' : ''
+  };
+}
+
+function renderMealCalendar(){
+  var grid = byId('meal-calendar-grid');
+  if (!grid) return;
+  var today = new Date();
+  var month = new Date(today.getFullYear(), today.getMonth() + mealCalendarOffset, 1);
+  var year = month.getFullYear(), monthIndex = month.getMonth();
+  var firstOffset = (month.getDay() + 6) % 7;
+  var days = new Date(year, monthIndex + 1, 0).getDate();
+  setTxt('meal-calendar-title', year + '年' + (monthIndex + 1) + '月');
+  var next = document.querySelector('[data-action="changeMealCalendarMonth"][data-args="[1]"]');
+  if (next) {
+    next.disabled = mealCalendarOffset >= 0;
+    next.style.opacity = mealCalendarOffset >= 0 ? '.28' : '';
+  }
+  var html = '';
+  for (var blank = 0; blank < firstOffset; blank++) html += '<span class="meal-cal-blank"></span>';
+  for (var dayNum = 1; dayNum <= days; dayNum++) {
+    var day = new Date(year, monthIndex, dayNum);
+    var info = mealDayGrade(day);
+    var isToday = mealDateKey(day) === wTodayStr();
+    html += '<span class="meal-cal-day' + (isToday ? ' today' : '') + '">' +
+      '<b>' + dayNum + '</b>' +
+      (info.grade ? '<i class="meal-cal-status ' + info.grade + '">' + (info.grade === 'none' ? '×' : '') + '</i>' : '') +
+      (info.late ? '<i class="meal-cal-late" title="夜宵"></i>' : '') + '</span>';
+  }
+  grid.innerHTML = html;
+}
+
+function changeMealCalendarMonth(delta){
+  mealCalendarOffset = Math.min(0, mealCalendarOffset + (Number(delta) || 0));
+  renderMealCalendar();
+}
+
+function renderMealPage(){
+  if (!mealData) return;
+  paintMealCountdown();
+  renderMealTypeStrip();
+  renderMealList();
+  renderMealWeek();
+  renderMealCalendar();
+}
+
+function recordMealNow(){
+  recordMealAt(new Date());
+}
+
+function recordMealAt(when, options){
+  if (!mealData) loadMealState();
+  options = options || {};
+  when = when instanceof Date ? new Date(when.getTime()) : new Date(when || Date.now());
+  if (isNaN(when.getTime())) when = new Date();
+  var type = mealTypeForDate(when);
+  var meta = mealTypeMeta(type);
+  var previous = mealPreviousRecord(when);
+  var review = mealMomentReview(type, when, previous);
+  var record = {
+    id: 'meal_' + when.getTime() + '_' + Math.random().toString(36).slice(2, 6),
+    type: type,
+    date: mealDateKey(when),
+    time: mealClock(when),
+    createdAt: when.toISOString(),
+    regular: review.regular,
+    gapMinutes: review.gapMinutes,
+    reviewTitle: review.title,
+    tip: mealTipFor(type, when),
+    backfill: !!options.backfill
+  };
+  mealData.records.push(record);
+  saveMealState();
+  renderMealPage();
+  renderDashboard();
+  openSheet(
+    '<h3>' + (record.backfill ? '补记 · ' : '') + escHtml(meta.name) + ' · ' + escHtml(record.time) + '</h3>' +
+    '<div class="meal-feedback-state ' + escHtml(review.tone) + '">' + escHtml(review.title) + '</div>' +
+    '<p class="meal-feedback-detail">' + escHtml(review.detail) + '</p>' +
+    '<div class="meal-tip-card"><b>饮食小知识</b><span>' + escHtml(record.tip) + '</span></div>' +
+    '<p class="meal-feedback-note">这些只是一般作息提示，按自己的饥饿感和身体状况调整。</p>' +
+    '<div class="row"><button class="primary" style="flex:1"' + actionAttrs('closeSheet') + '>知道了</button></div>'
+  );
+  toast(record.backfill ? '已补记' + meta.name : '已记录' + meta.name);
+}
+
+function openMealBackfill(){
+  var now = new Date();
+  openSheet(
+    '<h3>补记一顿</h3>' +
+    '<p>选择当时的日期和时间，系统仍会自动判断餐次与是否规律。</p>' +
+    '<label class="todo-form-label">日期</label><input class="todo-form-input" type="date" id="meal-backfill-date" value="' + wTodayStr() + '" max="' + wTodayStr() + '">' +
+    '<label class="todo-form-label">时间</label><input class="todo-form-input" type="time" id="meal-backfill-time" value="' + mealClock(now) + '">' +
+    '<div class="row"><button class="ghost"' + actionAttrs('closeSheet') + '>取消</button>' +
+    '<button class="primary"' + actionAttrs('saveMealBackfill') + '>补记</button></div>'
+  );
+}
+
+function saveMealBackfill(){
+  var dateValue = byId('meal-backfill-date').value;
+  var timeValue = byId('meal-backfill-time').value;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateValue) || !/^\d{2}:\d{2}$/.test(timeValue)) {
+    toast('请选择补记日期和时间');
+    return;
+  }
+  var dateParts = dateValue.split('-'), timeParts = timeValue.split(':');
+  var when = new Date(Number(dateParts[0]), Number(dateParts[1]) - 1, Number(dateParts[2]),
+    Number(timeParts[0]), Number(timeParts[1]), 0, 0);
+  if (when.getTime() > Date.now() + 60000) {
+    toast('不能补记未来的时间');
+    return;
+  }
+  recordMealAt(when, { backfill: true });
+}
+
+function deleteMealRecord(id){
+  var record = (mealData && mealData.records || []).filter(function(item){ return item.id === id; })[0];
+  if (!record) return;
+  appConfirm('删除这条' + mealTypeMeta(record.type).name + '记录？', function(){
+    mealData.records = mealData.records.filter(function(item){ return item.id !== id; });
+    saveMealState();
+    renderMealPage();
+    renderDashboard();
+    toast('记录已删除');
+  }, { title: '删除三餐记录', confirmLabel: '删除' });
+}
+
+function initMeals(){
+  loadMealState();
+  renderMealPage();
 }
 
 /* 60-fitness.js */
@@ -3692,7 +4429,7 @@ function paintLiveWorkout(){
 
 function paintLiveTimers(){
   paintLiveWorkout();
-  if (page === 3) renderQuit();
+  if (page === 4) renderQuit();
 }
 
 function workoutAnimationFrame(timestamp){
@@ -5133,6 +5870,15 @@ function renderDashboard(){
     setTxt('home-fitness-copy', active ? '训练进行中 · ' + formatWorkoutDuration(Date.now() - active.startAt) : (todayCount ? '今天已训练 ' + todayCount + ' 次' : '记录今天的训练'));
   }
   if (wd) setTxt('home-water-copy', '今天 ' + wTotal() + ' / ' + (wd.dailyGoal || 2000) + ' ml');
+  if (mealData) {
+    var todayMeals = mealRecordsForDate(new Date());
+    var lastMeal = todayMeals.slice().sort(function(a, b){
+      return String(b.createdAt).localeCompare(String(a.createdAt));
+    })[0];
+    setTxt('home-meal-copy', todayMeals.length ?
+      '今天 ' + todayMeals.length + ' 顿 · 最近 ' + mealTypeMeta(lastMeal.type).name :
+      '记录今天吃了什么');
+  }
   if (S && S.quitDate) setTxt('home-quit-copy', '已经坚持 ' + Math.floor((Date.now() - S.quitDate) / 86400000) + ' 天');
   if (todoData) {
     var pending = pendingTodoCount();
@@ -7314,6 +8060,7 @@ function boot(){
   initFitness();
   renderQuit();
   initWater();
+  initMeals();
   initTodo();
   initReminder();
   initLedger();
@@ -7322,6 +8069,7 @@ function boot(){
 
   setInterval(function(){
     paintLiveTimers();
+    paintMealCountdown();
   }, 1000);
   // 跨天检查（喝水）
   setInterval(function(){
@@ -7330,8 +8078,9 @@ function boot(){
       saveWorkout();
       renderWorkoutHome();
     }
-    if (todoData && page === 4) renderTodoPage();
-    if (reminderData && page === 6) renderReminderPage();
+    if (todoData && page === 5) renderTodoPage();
+    if (mealData && page === 3) renderMealPage();
+    if (reminderData && page === 7) renderReminderPage();
     checkTodoReminder();
   }, 30000);
 }

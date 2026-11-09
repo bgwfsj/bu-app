@@ -179,7 +179,7 @@ async function run() {
     await delay(300);
 
     if (process.env.BU_TEST_DEBUG) {
-      const dom = await evaluate(cdp, `['p-home','p-fitness','p-water','p-quit','p-todo','p-reminder','p-ledger'].map(function(id){
+      const dom = await evaluate(cdp, `['p-home','p-fitness','p-water','p-meals','p-quit','p-todo','p-reminder','p-ledger'].map(function(id){
         var el = document.getElementById(id);
         return { id: id, found: !!el, tag: el && el.tagName, classList: !!(el && el.classList), className: el && el.className };
       })`);
@@ -205,18 +205,18 @@ async function run() {
       goPage(0);
       moveByHorizontalSwipe(-1);
       var homeLocked = page === 0;
-      goPage(6);
+      goPage(7);
       moveByHorizontalSwipe(-1);
       var wrappedForward = page === 1;
       goPage(1);
       moveByHorizontalSwipe(1);
-      var wrappedBackward = page === 6;
-      goPage(4);
+      var wrappedBackward = page === 7;
+      goPage(5);
       moveByHorizontalSwipe(-1);
-      var todoNext = page === 5 &&
+      var todoNext = page === 6 &&
         byId('page-pager').querySelector('button.on').textContent.trim() === '账';
       moveByHorizontalSwipe(-1);
-      var ledgerNext = page === 6 &&
+      var ledgerNext = page === 7 &&
         byId('page-pager').querySelector('button.on').textContent.trim() === '醒';
       var pagerLabels = Array.prototype.map.call(
         byId('page-pager').querySelectorAll('button'),
@@ -225,7 +225,7 @@ async function run() {
       S.quitDate = Date.now() - 3600000;
       saveS();
       renderQuit();
-      goPage(3);
+      goPage(4);
       var breakRect = byId('btn-break').getBoundingClientRect();
       var quitRecordRect = byId('quit-record').getBoundingClientRect();
       var pagerRect = byId('page-pager').getBoundingClientRect();
@@ -240,7 +240,7 @@ async function run() {
       dragRow.setAttribute('data-drag-state', 'active');
       dragRow.setAttribute('data-drag-id', 'gesture-test');
       dragRow.appendChild(dragTarget);
-      goPage(4);
+      goPage(5);
       var handledBack = handleBackNavigation() && page === 0;
       return {
         homeLocked: homeLocked,
@@ -265,7 +265,7 @@ async function run() {
       todoNext: true,
       ledgerNext: true,
       handledBack: true,
-      pagerLabels: ['练', '水', '戒', '记', '账', '醒'],
+      pagerLabels: ['练', '水', '饭', '戒', '记', '账', '醒'],
       controlsSeparate: true,
       quitRecordBesideBreak: true,
       activeQuickLabel: '戒',
@@ -273,6 +273,177 @@ async function run() {
       dragOwnsHorizontalGesture: true,
       plainOwnsHorizontalGesture: false
     });
+
+    const meals = await evaluate(cdp, `(function(){
+      goPage(3);
+      var active = byId('p-meals').classList.contains('on') &&
+        document.body.dataset.page === 'meals';
+      var pagerLabel = byId('page-pager').querySelector('button.on').textContent.trim();
+      var classifications = {
+        breakfast: mealTypeForDate(new Date(2026, 10, 9, 6, 30)),
+        lunch: mealTypeForDate(new Date(2026, 10, 9, 11, 30)),
+        tea: mealTypeForDate(new Date(2026, 10, 9, 15, 10)),
+        dinner: mealTypeForDate(new Date(2026, 10, 9, 19, 0)),
+        late: mealTypeForDate(new Date(2026, 10, 9, 23, 10))
+      };
+      var regularWindows = {
+        breakfastStart: mealIsRegular('breakfast', new Date(2026, 10, 9, 6, 30)),
+        breakfastEnd: mealIsRegular('breakfast', new Date(2026, 10, 9, 9, 0)),
+        breakfastLate: mealIsRegular('breakfast', new Date(2026, 10, 9, 9, 30)),
+        lunchStart: mealIsRegular('lunch', new Date(2026, 10, 9, 11, 30)),
+        lunchEnd: mealIsRegular('lunch', new Date(2026, 10, 9, 13, 0)),
+        lunchLate: mealIsRegular('lunch', new Date(2026, 10, 9, 13, 10)),
+        dinnerStart: mealIsRegular('dinner', new Date(2026, 10, 9, 17, 30)),
+        dinnerEnd: mealIsRegular('dinner', new Date(2026, 10, 9, 19, 30)),
+        dinnerLate: mealIsRegular('dinner', new Date(2026, 10, 9, 20, 0))
+      };
+      var nextLunch = mealNextTargetAt(new Date(2026, 10, 9, 10, 0), []);
+      var nextBreakfast = mealNextTargetAt(new Date(2026, 10, 9, 19, 0), [{
+        date: '2026-11-09', type: 'dinner'
+      }]);
+      var now = new Date();
+      var todayAt = function(hour, minute){
+        return new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, minute);
+      };
+      recordMealAt(todayAt(12, 5));
+      var sheetTitle = byId('sheet').querySelector('h3').textContent.trim();
+      var hasEvaluation = byId('sheet').querySelectorAll('.meal-feedback-state').length === 1;
+      var hasTip = byId('sheet').querySelectorAll('.meal-tip-card').length === 1;
+      var gapMentioned = byId('sheet').querySelector('.meal-feedback-detail').textContent.indexOf('更早的用餐记录') >= 0;
+      closeSheet();
+      recordMealAt(todayAt(15, 10));
+      closeSheet();
+      recordMealAt(todayAt(23, 10));
+      closeSheet();
+      var intervalGood = mealMomentReview('lunch', todayAt(11, 30), {
+        createdAt: todayAt(8, 0).toISOString()
+      });
+      var intervalShort = mealMomentReview('lunch', todayAt(11, 30), {
+        createdAt: todayAt(10, 45).toISOString()
+      });
+      var backfillDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+      openMealBackfill();
+      byId('meal-backfill-date').value = mealDateKey(backfillDay);
+      byId('meal-backfill-time').value = '18:00';
+      saveMealBackfill();
+      var backfillTitle = byId('sheet').querySelector('h3').textContent.trim();
+      closeSheet();
+      var stored = JSON.parse(localStorage.getItem('meals_app_v1'));
+      var rowCount = byId('meal-list').querySelectorAll('.meal-entry').length;
+      var typeStripCount = byId('meal-type-strip').querySelectorAll('.meal-type-chip').length;
+      var extraBox = byId('meal-extra-box');
+      var extraCount = byId('meal-extra-list').querySelectorAll('.meal-entry').length;
+      var deleteButton = !!byId('meal-list').querySelector('[data-action="deleteMealRecord"]');
+      var homeCopy = byId('home-meal-copy').textContent.trim();
+      var timerText = byId('meal-next-timer').textContent.trim();
+      var todayGrade = mealDayGrade(todayAt(12, 0));
+      mealCalendarOffset = 0;
+      renderMealCalendar();
+      var todayCell = byId('meal-calendar-grid').querySelector('.meal-cal-day.today');
+      var calendarRedX = !!todayCell.querySelector('.meal-cal-status.red') &&
+        !todayCell.querySelector('.meal-cal-status.none');
+      var calendarLateDot = !!todayCell.querySelector('.meal-cal-late');
+      var savedRecords = mealData.records.slice();
+      var fake = function(type, regular, date){
+        return { type: type, regular: regular, date: date, createdAt: date + 'T12:00:00.000Z' };
+      };
+      mealData.records = [fake('breakfast', true, '2026-11-01'), fake('lunch', true, '2026-11-01'), fake('dinner', true, '2026-11-01')];
+      var gradeGreen = mealDayGrade(new Date(2026, 10, 1)).grade;
+      mealData.records = [fake('breakfast', true, '2026-11-02'), fake('lunch', true, '2026-11-02'), fake('dinner', false, '2026-11-02')];
+      var gradeYellow = mealDayGrade(new Date(2026, 10, 2)).grade;
+      mealData.records = [fake('breakfast', false, '2026-11-03'), fake('tea', false, '2026-11-03')];
+      var gradeNone = mealDayGrade(new Date(2026, 10, 3)).grade;
+      mealData.records = savedRecords;
+      goPage(0);
+      var homeCards = Array.prototype.map.call(document.querySelector('.home-grid').querySelectorAll('.home-card'), function(card){
+        return Math.round(card.getBoundingClientRect().height);
+      });
+      var allHomeCardsEqual = new Set(homeCards).size === 1;
+      return {
+        active: active,
+        pagerLabel: pagerLabel,
+        classifications: classifications,
+        regularWindows: regularWindows,
+        nextLunchType: nextLunch.type,
+        nextLunchRemain: nextLunch.target.getTime() - new Date(2026, 10, 9, 10, 0).getTime(),
+        nextBreakfastTomorrow: nextBreakfast.tomorrow && nextBreakfast.type === 'breakfast',
+        sheetTitle: sheetTitle,
+        hasEvaluation: hasEvaluation,
+        hasTip: hasTip,
+        gapMentioned: gapMentioned,
+        intervalGoodGap: intervalGood.gapMinutes,
+        intervalGoodTitle: intervalGood.title,
+        intervalShortGap: intervalShort.gapMinutes,
+        intervalShortTitle: intervalShort.title,
+        backfillTitle: backfillTitle,
+        storedRecords: stored.records.length,
+        rowCount: rowCount,
+        typeStripCount: typeStripCount,
+        extraBoxHidden: extraBox.hidden,
+        extraBoxOpen: extraBox.open,
+        extraCount: extraCount,
+        deleteButton: deleteButton,
+        homeCopy: homeCopy,
+        timerText: timerText,
+        todayGrade: todayGrade.grade,
+        todayLate: todayGrade.late,
+        calendarRedX: calendarRedX,
+        calendarLateDot: calendarLateDot,
+        gradeGreen: gradeGreen,
+        gradeYellow: gradeYellow,
+        gradeNone: gradeNone,
+        allHomeCardsEqual: allHomeCardsEqual
+      };
+    })()`);
+    assert.equal(meals.active, true);
+    assert.equal(meals.pagerLabel, '饭');
+    assert.deepEqual(meals.classifications, {
+      breakfast: 'breakfast',
+      lunch: 'lunch',
+      tea: 'tea',
+      dinner: 'dinner',
+      late: 'late'
+    });
+    assert.deepEqual(meals.regularWindows, {
+      breakfastStart: true,
+      breakfastEnd: true,
+      breakfastLate: false,
+      lunchStart: true,
+      lunchEnd: true,
+      lunchLate: false,
+      dinnerStart: true,
+      dinnerEnd: true,
+      dinnerLate: false
+    });
+    assert.equal(meals.nextLunchType, 'lunch');
+    assert.equal(meals.nextLunchRemain, 1.5 * 3600000);
+    assert.equal(meals.nextBreakfastTomorrow, true);
+    assert.equal(meals.sheetTitle, '午餐 · 12:05');
+    assert.equal(meals.hasEvaluation, true);
+    assert.equal(meals.hasTip, true);
+    assert.equal(meals.gapMentioned, true);
+    assert.equal(meals.intervalGoodGap, 210);
+    assert.equal(meals.intervalGoodTitle, '吃得规律');
+    assert.equal(meals.intervalShortGap, 45);
+    assert.equal(meals.intervalShortTitle, '时间刚好，间隔略近');
+    assert.equal(meals.backfillTitle, '补记 · 晚餐 · 18:00');
+    assert.equal(meals.storedRecords, 4);
+    assert.equal(meals.rowCount, 1);
+    assert.equal(meals.typeStripCount, 3);
+    assert.equal(meals.extraBoxHidden, false);
+    assert.equal(meals.extraBoxOpen, false);
+    assert.equal(meals.extraCount, 2);
+    assert.equal(meals.deleteButton, true);
+    assert.equal(meals.homeCopy, '今天 3 顿 · 最近 夜宵');
+    assert.match(meals.timerText, /^\d{2}:\d{2}:\d{2}$/);
+    assert.equal(meals.todayGrade, 'red');
+    assert.equal(meals.todayLate, true);
+    assert.equal(meals.calendarRedX, true);
+    assert.equal(meals.calendarLateDot, true);
+    assert.equal(meals.gradeGreen, 'green');
+    assert.equal(meals.gradeYellow, 'yellow');
+    assert.equal(meals.gradeNone, 'none');
+    assert.equal(meals.allHomeCardsEqual, true);
 
     const settingsPage = await evaluate(cdp, `(function(){
       var originalNative = window.AppNative;
@@ -322,8 +493,8 @@ async function run() {
       cleanupConfirmOpened: true,
       cleanupCalls: 1,
       aboutOpened: true,
-      changelogCount: 52,
-      aboutVersion: '5.9.13',
+      changelogCount: 53,
+      aboutVersion: '5.9.14',
       updateBackupExposed: true,
       updateCalls: 1,
       handledBack: true,
@@ -762,7 +933,7 @@ async function run() {
     assert.equal(reminders.returnedNextCycle, true);
     assert.equal(reminders.homeNoticeHidden, true);
     assert.equal(reminders.savedOff, true);
-    assert.equal(reminders.compactCards, 2);
+    assert.equal(reminders.compactCards, 0);
     assert.equal(reminders.autoArchived, true);
     assert.equal(reminders.manuallyArchived, true);
     assert.equal(reminders.restored, true);
@@ -1237,6 +1408,7 @@ async function run() {
       saveTodoState();
       saveReminderState();
       saveLedgerState();
+      saveMealState();
       var backup = appBackupPayload();
       backup.data.water.dailyGoal = 2600;
       receiveAppBackup(JSON.stringify(backup));
@@ -1251,6 +1423,7 @@ async function run() {
       var todo = JSON.parse(localStorage.getItem('todo_app_v1'));
       var reminders = JSON.parse(localStorage.getItem('reminder_app_v1'));
       var ledger = JSON.parse(localStorage.getItem('ledger_app_v1'));
+      var meals = JSON.parse(localStorage.getItem('meals_app_v1'));
       var quit = JSON.parse(localStorage.getItem('quit_app_v1'));
       var previous = JSON.parse(localStorage.getItem('bu_pre_restore_v1'));
       return {
@@ -1261,9 +1434,11 @@ async function run() {
         reminderItems: reminders.items.length,
         reminderArchived: reminders.archived.length,
         ledgerRecords: ledger.books.reduce(function(sum, book){ return sum + book.records.length; }, 0),
+        mealRecords: meals.records.length,
         quitDate: quit.quitDate,
         previousGoal: previous.data.water.dailyGoal,
         previousReminders: previous.data.reminders.items.length,
+        previousMeals: previous.data.meals.records.length,
         previousReminderArchived: previous.data.reminders.archived.length,
         previousTodoArchived: previous.data.todo.archived.length
       };
@@ -1275,9 +1450,11 @@ async function run() {
     assert.equal(restored.reminderItems, 5);
     assert.equal(restored.reminderArchived, 1);
     assert.equal(restored.ledgerRecords, 118);
+    assert.equal(restored.mealRecords, 4);
     assert.ok(restored.quitDate > 0);
     assert.equal(restored.previousGoal, 2345);
     assert.equal(restored.previousReminders, 5);
+    assert.equal(restored.previousMeals, 4);
     assert.equal(restored.previousReminderArchived, 1);
     assert.equal(restored.previousTodoArchived, 2);
 
@@ -1317,7 +1494,7 @@ async function run() {
     assert.equal(migrations.oldQuitPreserved, true);
 
     console.log('APP TESTS OK');
-    console.log('navigation, workout, todo, reminders, ledger CSV, backup restore, legacy migration');
+    console.log('navigation, meals, workout, todo, reminders, ledger CSV, backup restore, legacy migration');
   } finally {
     if (cdp) cdp.close();
     if (process.platform === 'win32') {

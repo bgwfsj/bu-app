@@ -35,7 +35,8 @@ body[data-page="home"]::before{
 .home-card::after{content:'';position:absolute;right:-24px;bottom:-30px;width:92px;height:92px;border-radius:50%;background:rgba(10,168,122,.045)}
 .home-card:nth-child(2)::after{background:rgba(11,142,214,.05)}
 .home-card:nth-child(3)::after{background:rgba(232,141,58,.05)}
-.home-card:nth-child(4)::after{background:rgba(82,101,112,.045)}
+.home-card:nth-child(4)::after{background:rgba(232,141,58,.05)}
+.home-card:nth-child(5)::after{background:rgba(82,101,112,.045)}
 .home-card.ledger-card::after{background:rgba(11,142,214,.05)}
 .home-card.reminder-card::after{background:rgba(230,146,63,.05)}
 .home-icon{
@@ -44,7 +45,8 @@ body[data-page="home"]::before{
 }
 .home-card:nth-child(2) .home-icon{background:rgba(11,142,214,.08);color:#0b83c3}
 .home-card:nth-child(3) .home-icon{background:rgba(232,141,58,.09);color:#b36b28}
-.home-card:nth-child(4) .home-icon{background:rgba(83,103,111,.07);color:#5d747d}
+.home-card:nth-child(4) .home-icon{background:rgba(232,141,58,.09);color:#b36b28}
+.home-card:nth-child(5) .home-icon{background:rgba(83,103,111,.07);color:#5d747d}
 .home-card.ledger-card .home-icon{background:rgba(11,142,214,.08);color:#0b83c3}
 .home-card.reminder-card .home-icon{background:rgba(232,141,58,.09);color:#b36b28}
 .home-card b{display:block;font-size:16px;font-weight:500;color:#173029;letter-spacing:.04em}
