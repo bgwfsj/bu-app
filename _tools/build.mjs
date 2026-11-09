@@ -19,6 +19,7 @@ const styleNames = [
 const scriptNames = [
   '00-core.js',
   '05-app-info.js',
+  '07-visit-copy.js',
   '10-quit-state.js',
   '20-clocks.js',
   '30-quit-settings.js',

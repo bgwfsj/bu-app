@@ -57,3 +57,5 @@ body[data-page="home"]::before{
   margin-top:auto;padding:14px 0 2px;text-align:center;
   font-size:10px;line-height:1.5;letter-spacing:.07em;color:#98a6aa
 }
+.home-visit-copy{margin-top:3px;color:#a4afb2;font-size:9.5px;letter-spacing:.045em}
+.home-visit-copy.special{color:#b58945;font-weight:500;letter-spacing:.07em}

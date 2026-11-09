@@ -6,7 +6,7 @@
 
 - 应用名：补
 - 包名：`com.quitsmoke.app`
-- 当前版本：5.9.10
+- 当前版本：5.9.12
 - 最低 Android：API 24
 - Target SDK：34
 - 仓库：`bgwfsj/bu-app`（公开）
@@ -122,6 +122,8 @@ bu_pre_restore_v1    完整恢复前的安全副本
 访问统计不属于 localStorage，使用 Android SharedPreferences 文件 `app_visit_stats`，字段为 `total_count`、`today_date`、`today_count`。不计入完整备份。
 
 访问计数规则由 `MainActivity` 管理：首次前台和离开 App 后重新前台各计一次；`onStop` 时如果屏幕关闭或处于锁屏则设置 `ignoreNextResume`，避免息屏恢复计数。App 内页面切换不触发 Activity 生命周期，因此不会增加；BootReceiver 不启动 Activity，因此自启动也不会增加。
+
+首页数字文案位于 `src/js/07-visit-copy.js`：`VISIT_X_SPECIAL` 优先匹配特殊累计次数并使用 `.special` 暖金色；否则从 `VISIT_Y_COPY[1..20]` 各 5 条中按“日期 + x + y”的稳定哈希选择。今日次数大于 20 或没有匹配时使用通用备用文案。相同数字与日期下不得随机跳句。
 
 完整备份格式：`bu-app-backup` v3。备份数据库必须包含：
 

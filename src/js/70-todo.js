@@ -650,8 +650,14 @@ function renderVisitStats(){
     total = Math.max(0, Number(stats.total) || 0);
     today = Math.max(0, Number(stats.today) || 0);
   }
-  box.textContent = '此间相逢 ' + total.toLocaleString('zh-CN') +
-    ' 次 · 今日 ' + today.toLocaleString('zh-CN') + ' 次';
+  setTxt('home-visit-count', '此间相逢 ' + total.toLocaleString('zh-CN') +
+    ' 次 · 今日 ' + today.toLocaleString('zh-CN') + ' 次');
+  var copy = visitCopyFor(total, today);
+  var copyBox = byId('home-visit-copy');
+  if (copyBox) {
+    copyBox.textContent = copy.text;
+    copyBox.classList.toggle('special', !!copy.special);
+  }
   box.hidden = false;
 }
 

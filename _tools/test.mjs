@@ -322,8 +322,8 @@ async function run() {
       cleanupConfirmOpened: true,
       cleanupCalls: 1,
       aboutOpened: true,
-      changelogCount: 50,
-      aboutVersion: '5.9.11',
+      changelogCount: 51,
+      aboutVersion: '5.9.12',
       updateBackupExposed: true,
       updateCalls: 1,
       handledBack: true,
@@ -336,18 +336,40 @@ async function run() {
         getAppVisitStats: function(){ return '{"total":128,"today":3}'; }
       };
       renderVisitStats();
-      var text = byId('home-visit-stats').textContent.trim();
+      var text = byId('home-visit-count').textContent.trim();
+      var copyText = byId('home-visit-copy').textContent.trim();
+      var copySpecial = byId('home-visit-copy').classList.contains('special');
       var visible = !byId('home-visit-stats').hidden;
+      window.AppNative = {
+        getAppVisitStats: function(){ return '{"total":1000,"today":3}'; }
+      };
+      renderVisitStats();
+      var specialText = byId('home-visit-copy').textContent.trim();
+      var specialClass = byId('home-visit-copy').classList.contains('special');
       window.AppNative = originalNative;
       renderVisitStats();
       return {
         text: text,
+        copyText: copyText,
+        copySpecial: copySpecial,
+        specialText: specialText,
+        specialClass: specialClass,
+        yBankSize: Object.keys(VISIT_Y_COPY).length,
+        yAllFive: Object.keys(VISIT_Y_COPY).every(function(key){
+          return VISIT_Y_COPY[key].length === 5;
+        }),
         visible: visible,
         previewVisible: !byId('home-visit-stats').hidden,
-        previewHasText: byId('home-visit-stats').textContent.indexOf('此间相逢 ') === 0
+        previewHasText: byId('home-visit-count').textContent.indexOf('此间相逢 ') === 0
       };
     })()`);
     assert.equal(visitStats.text, '此间相逢 128 次 · 今日 3 次');
+    assert.ok(visitStats.copyText.length > 0);
+    assert.equal(visitStats.copySpecial, false);
+    assert.ok(visitStats.specialText.indexOf('一千不是尽头') >= 0);
+    assert.equal(visitStats.specialClass, true);
+    assert.equal(visitStats.yBankSize, 20);
+    assert.equal(visitStats.yAllFive, true);
     assert.equal(visitStats.visible, true);
     assert.equal(visitStats.previewVisible, true);
     assert.equal(visitStats.previewHasText, true);
