@@ -322,8 +322,8 @@ async function run() {
       cleanupConfirmOpened: true,
       cleanupCalls: 1,
       aboutOpened: true,
-      changelogCount: 51,
-      aboutVersion: '5.9.12',
+      changelogCount: 52,
+      aboutVersion: '5.9.13',
       updateBackupExposed: true,
       updateCalls: 1,
       handledBack: true,
@@ -1040,6 +1040,22 @@ async function run() {
       }).map(function(book){ return book.id; });
       var rootCount = ledgerData.books.filter(function(book){ return !book.parentId; }).length;
       var visibleRows = byId('ledger-tree').querySelectorAll('.ledger-tree-row').length;
+      var initialRecordRows = byId('ledger-list').querySelectorAll('.ledger-record').length;
+      var recentAboveAdd = !!(byId('ledger-record-box').compareDocumentPosition(document.querySelector('.ledger-actions')) & Node.DOCUMENT_POSITION_FOLLOWING);
+      var searchBelowAdd = !!(document.querySelector('.ledger-actions').compareDocumentPosition(document.querySelector('.ledger-search-box')) & Node.DOCUMENT_POSITION_FOLLOWING);
+      var eventTreeDefaultCollapsed = byId('ledger-tree').hidden &&
+        byId('ledger-tree-head').getAttribute('aria-expanded') === 'false';
+      byId('ledger-tree-head').click();
+      var eventTreeCanOpen = !byId('ledger-tree').hidden;
+      byId('ledger-tree-head').click();
+      var eventTreeCanClose = byId('ledger-tree').hidden;
+      var recordHead = byId('ledger-record-box').querySelector('.ledger-record-head');
+      recordHead.click();
+      var expandedRecordRows = byId('ledger-list').querySelectorAll('.ledger-record').length;
+      recordHead.click();
+      var hiddenRecordRows = byId('ledger-list').querySelectorAll('.ledger-record').length;
+      recordHead.click();
+      var previewRecordRowsAgain = byId('ledger-list').querySelectorAll('.ledger-record').length;
       var eventFont = getComputedStyle(byId('ledger-tree').querySelector('.ledger-tree-select')).fontSize;
       var monthFont = getComputedStyle(byId('ledger-month-list').querySelector('.ledger-month-row b')).fontSize;
       var pieSegments = Math.max(0, byId('ledger-category-pie').querySelectorAll('circle').length - 1);
@@ -1076,6 +1092,14 @@ async function run() {
       openLedgerSettingsPage();
       var settingsOpened = byId('p-ledger-settings').classList.contains('on') &&
         document.body.dataset.page === 'ledger-settings';
+      var settingsPage = byId('p-ledger-settings');
+      var settingsGroupFlex = getComputedStyle(settingsPage.querySelector('.settings-group')).flexShrink;
+      var settingsOverflow = getComputedStyle(settingsPage).overflowY;
+      var settingsChildButton = !!settingsPage.querySelector('[data-action="openLedgerChildBookSheet"]');
+      var settingsScrollable = settingsPage.scrollHeight > settingsPage.clientHeight;
+      settingsPage.scrollTop = 60;
+      var settingsScrollWorks = settingsPage.scrollTop > 0;
+      settingsPage.scrollTop = 0;
       renameCurrentLedgerEvent();
       byId('ledger-event-name-edit').value = '旅行';
       saveLedgerEventName();
@@ -1109,6 +1133,15 @@ async function run() {
         allCollapsed: parentIds.every(function(id){ return ledgerCollapsed[id] === true; }),
         visibleRows: visibleRows,
         rootCount: rootCount,
+        initialRecordRows: initialRecordRows,
+        recentAboveAdd: recentAboveAdd,
+        searchBelowAdd: searchBelowAdd,
+        eventTreeDefaultCollapsed: eventTreeDefaultCollapsed,
+        eventTreeCanOpen: eventTreeCanOpen,
+        eventTreeCanClose: eventTreeCanClose,
+        expandedRecordRows: expandedRecordRows,
+        hiddenRecordRows: hiddenRecordRows,
+        previewRecordRowsAgain: previewRecordRowsAgain,
         eventFont: eventFont,
         monthFont: monthFont,
         pieSegments: pieSegments,
@@ -1126,6 +1159,11 @@ async function run() {
         searchCounts: searchCounts,
         searchCountText: searchCountText,
         settingsOpened: settingsOpened,
+        settingsGroupFlex: settingsGroupFlex,
+        settingsOverflow: settingsOverflow,
+        settingsChildButton: settingsChildButton,
+        settingsScrollable: settingsScrollable,
+        settingsScrollWorks: settingsScrollWorks,
         renamedRoot: renamedRoot,
         archivedEvent: archivedEvent,
         archiveButtonShown: archiveButtonShown,
@@ -1145,6 +1183,15 @@ async function run() {
     assert.equal(ledger.childCount, 10);
     assert.equal(ledger.allCollapsed, true);
     assert.equal(ledger.visibleRows, ledger.rootCount);
+    assert.equal(ledger.initialRecordRows, 3);
+    assert.equal(ledger.recentAboveAdd, true);
+    assert.equal(ledger.searchBelowAdd, true);
+    assert.equal(ledger.eventTreeDefaultCollapsed, true);
+    assert.equal(ledger.eventTreeCanOpen, true);
+    assert.equal(ledger.eventTreeCanClose, true);
+    assert.ok(ledger.expandedRecordRows > 3);
+    assert.equal(ledger.hiddenRecordRows, 0);
+    assert.equal(ledger.previewRecordRowsAgain, 3);
     assert.equal(ledger.eventFont, '13px');
     assert.equal(ledger.monthFont, '13px');
     assert.ok(ledger.pieSegments > 0);
@@ -1166,6 +1213,11 @@ async function run() {
     assert.ok(ledger.searchCounts['305.00'] > 0);
     assert.ok(ledger.searchCountText.indexOf('/ 118') >= 0);
     assert.equal(ledger.settingsOpened, true);
+    assert.equal(ledger.settingsGroupFlex, '0');
+    assert.equal(ledger.settingsOverflow, 'auto');
+    assert.equal(ledger.settingsChildButton, true);
+    assert.equal(ledger.settingsScrollable, true);
+    assert.equal(ledger.settingsScrollWorks, true);
     assert.equal(ledger.renamedRoot, true);
     assert.equal(ledger.archivedEvent, true);
     assert.equal(ledger.archiveButtonShown, true);

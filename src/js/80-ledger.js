@@ -357,6 +357,19 @@ function toggleLedgerNode(id){
   renderLedgerPage();
 }
 
+function syncLedgerEventTree(){
+  var tree = byId('ledger-tree');
+  var head = byId('ledger-tree-head');
+  if (tree) tree.hidden = !ledgerTreeOpen;
+  if (head) head.setAttribute('aria-expanded', ledgerTreeOpen ? 'true' : 'false');
+  setTxt('ledger-tree-toggle', ledgerTreeOpen ? '收起' : '展开');
+}
+
+function toggleLedgerEventTree(){
+  ledgerTreeOpen = !ledgerTreeOpen;
+  syncLedgerEventTree();
+}
+
 function ledgerMoney(value){
   return '¥' + (Number(value) || 0).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
@@ -455,13 +468,13 @@ function renderLedgerPage(){
     (subtree.length > 1 ? '（含 ' + (subtree.length - 1) + ' 个子事件）' : ''));
   setTxt('ledger-today-total', ledgerMoney(todayTotal));
   setTxt('ledger-book-total', ledgerMoney(bookTotal));
-  setTxt('ledger-branch-path', ledgerBookPath(book));
   renderLedgerAnalysis(entries, bookTotal, monthTotal, monthPrefix);
   renderLedgerMonths();
 
   var activeBookCount = ledgerData.books.filter(function(item){ return !ledgerIsArchived(item); }).length;
   byId('ledger-tree-summary').textContent = ledgerBookPath(book) + ' · ' + activeBookCount + ' 个事件';
   byId('ledger-tree').innerHTML = ledgerTreeHtml(null, 0);
+  syncLedgerEventTree();
 
   var records = entries.slice().sort(function(a, b){
     var at = a.record.createdAt ? new Date(a.record.createdAt).getTime() : 0;
@@ -480,8 +493,22 @@ function renderLedgerPage(){
     ].join(' ').toLocaleLowerCase();
     return haystack.indexOf(query) >= 0;
   }) : records;
+  var displayedRecords = visibleRecords;
+  if (!query) {
+    if (ledgerRecordMode === 'preview') displayedRecords = visibleRecords.slice(0, 3);
+    if (ledgerRecordMode === 'hidden') displayedRecords = [];
+  }
   setTxt('ledger-record-count', visibleRecords.length + (query ? ' / ' + records.length : '') + ' 笔');
-  byId('ledger-list').innerHTML = visibleRecords.length ? visibleRecords.map(function(entry){
+  setTxt('ledger-record-toggle', query ? '搜索结果' :
+    ledgerRecordMode === 'all' ? '全部 ' + visibleRecords.length + ' 笔' :
+    ledgerRecordMode === 'hidden' ? '已完全折叠' : '最近 3 笔');
+  var recordBox = byId('ledger-record-box');
+  if (recordBox) {
+    recordBox.setAttribute('data-state', query ? 'preview' : ledgerRecordMode);
+    var recordHead = recordBox.querySelector('.ledger-record-head');
+    if (recordHead) recordHead.setAttribute('aria-expanded', query || ledgerRecordMode === 'all' ? 'true' : 'false');
+  }
+  byId('ledger-list').innerHTML = displayedRecords.length ? displayedRecords.map(function(entry){
     var r = entry.record;
     var owner = entry.owner.id !== book.id ? ' · ' + escHtml(entry.owner.name) : '';
     return '<div class="ledger-record"' + actionAttrs('editLedgerRecord', [r.id]) + '>' +
@@ -490,14 +517,21 @@ function renderLedgerPage(){
       workoutDateLabel(r.date) + ' · ' + ledgerRecordTime(r) + owner + '</span></span>' +
       '<span class="ledger-amount"><b>' + ledgerMoney(r.amount) + '</b>' +
       '<span><button' + actionAttrs('deleteLedgerRecord', [r.id]) + '>删除</button></span></span></div>';
-  }).join('') : '<div class="ledger-empty">' +
-    (query ? '没有匹配的记录' : '这个事件还没有记录<br>点击“记一笔”开始') + '</div>';
+  }).join('') : (!query && ledgerRecordMode === 'hidden' ? '' : '<div class="ledger-empty">' +
+    (query ? '没有匹配的记录' : '这个事件还没有记录<br>点击“记一笔”开始') + '</div>');
   renderDashboard();
+}
+
+function cycleLedgerRecords(){
+  ledgerRecordMode = ledgerRecordMode === 'preview' ? 'all' :
+    ledgerRecordMode === 'all' ? 'hidden' : 'preview';
+  renderLedgerPage();
 }
 
 function selectLedgerBook(id){
   ledgerData.selectedId = id;
   ledgerSearchQuery = '';
+  ledgerRecordMode = 'preview';
   if (byId('ledger-search')) byId('ledger-search').value = '';
   saveLedgerState();
   renderLedgerPage();
@@ -513,6 +547,12 @@ function openLedgerBookSheet(parentId){
     '<div class="row"><button class="ghost"' + actionAttrs('closeSheet') + '>取消</button>' +
     '<button class="primary"' + actionAttrs('saveLedgerBook') + '>创建</button></div>'
   );
+}
+
+function openLedgerChildBookSheet(){
+  var book = currentLedgerBook();
+  if (!book) { toast('当前没有可用事件'); return; }
+  openLedgerBookSheet(book.id);
 }
 
 function saveLedgerBook(){
@@ -1080,7 +1120,6 @@ function deleteCurrentLedgerEvent(){
 function initLedger(){
   loadLedgerState();
   byId('btn-ledger-add').addEventListener('click', function(){ openLedgerRecord(); });
-  byId('btn-ledger-add-child').addEventListener('click', function(){ openLedgerBookSheet(currentLedgerBook().id); });
   byId('ledger-search').addEventListener('input', function(){
     ledgerSearchQuery = this.value || '';
     renderLedgerPage();

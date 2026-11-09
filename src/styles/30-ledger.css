@@ -13,8 +13,8 @@
   border-radius:13px;overflow:hidden
 }
 .ledger-tree-head{
-  display:flex;align-items:center;gap:8px;list-style:none;cursor:pointer;padding:10px 12px;
-  color:#6c7e7e;font-size:13px;letter-spacing:.05em
+  display:flex;align-items:center;gap:8px;width:100%;list-style:none;cursor:pointer;padding:10px 12px;
+  border:0;background:transparent;text-align:left;color:#6c7e7e;font-size:13px;letter-spacing:.05em
 }
 .ledger-tree-head span{font-weight:600;color:#526861}
 .ledger-tree-head b{flex:1;font-size:12px;color:#8a785f;font-weight:500;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -74,9 +74,6 @@
 .ledger-report-record .path{flex:1;min-width:0;font-size:13px;color:#576c65;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ledger-report-record .date{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:11px;color:#9ba5a3}
 .ledger-report-record .money{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:13px;color:#7d6551}
-.ledger-branch-actions{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;margin:-4px 0 13px;gap:8px}
-.ledger-branch-path{font-size:12px;color:#9a8c81;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ledger-add-child{height:28px;flex:0 0 auto;padding:0 9px;border-radius:8px;border:1px solid rgba(92,75,61,.18);background:rgba(92,75,61,.05);color:#79614e;font-size:9.5px;cursor:pointer}
 .ledger-actions{flex:0 0 auto;display:flex;gap:8px;margin:2px 0 17px}
 .ledger-entry-btn{
   flex:1;height:48px;border-radius:13px;border:1px solid #5c4b3d;background:#5c4b3d;color:#fff;
@@ -124,6 +121,10 @@
 .ledger-search-box input{display:block;width:100%;height:39px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.82);padding:0 11px;color:#425a51;font-size:12px;outline:none}
 .ledger-search-box input:focus{border-color:rgba(92,75,61,.3);box-shadow:0 0 0 3px rgba(92,75,61,.06)}
 body[data-page="ledger-settings"] #page-pager{opacity:0;pointer-events:none}
+#p-ledger-settings{
+  overflow-y:auto;overscroll-behavior-y:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch
+}
+#p-ledger-settings>*{flex:0 0 auto}
 .ledger-settings-archive{display:flex;flex-direction:column}
 .ledger-archive-settings-row{display:flex;align-items:center;gap:10px;padding:12px 14px;border-top:1px solid var(--line2)}
 .settings-group .ledger-archive-settings-row:first-child{border-top:0}
@@ -133,14 +134,18 @@ body[data-page="ledger-settings"] #page-pager{opacity:0;pointer-events:none}
 .ledger-archive-settings-row button{border:0;background:transparent;color:#648d7c;font-size:11px;padding:3px;cursor:pointer}
 .ledger-archive-settings-row button.danger{color:#bd7777}
 .ledger-archive-settings-empty{padding:15px 14px;text-align:center;color:#9aa8a4;font-size:11.5px}
-.ledger-record-box{flex:0 0 auto;margin-top:4px}
-.ledger-record-box>summary{
-  display:flex;align-items:center;justify-content:space-between;list-style:none;cursor:pointer;
+.ledger-record-box{flex:0 0 auto;margin:0 0 16px}
+.ledger-record-head{
+  display:flex;align-items:center;justify-content:space-between;width:100%;min-height:30px;
+  padding:0;border:0;background:transparent;cursor:pointer;text-align:left;
   font-size:13px;letter-spacing:.1em;color:#61777f;font-weight:500;margin-bottom:9px
 }
-.ledger-record-box>summary::-webkit-details-marker{display:none}
-.ledger-record-box>summary::marker{content:''}
-.ledger-record-box>summary i{font-style:normal;color:#9aaaa9;letter-spacing:.03em}
+.ledger-record-head>span{flex:1}
+.ledger-record-head small{display:flex;align-items:center;gap:8px}
+.ledger-record-head i,.ledger-record-head em{font-style:normal;letter-spacing:.03em;font-weight:400}
+.ledger-record-head i{color:#9aaaa9}
+.ledger-record-head em{color:#7e918b;font-size:10.5px}
+.ledger-record-box[data-state="hidden"] .ledger-record-head{margin-bottom:0}
 .ledger-list{display:flex;flex-direction:column;gap:6px}
 .ledger-record{
   display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:10px;align-items:center;

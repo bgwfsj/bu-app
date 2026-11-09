@@ -46,6 +46,8 @@ var editingLedgerRecordId = null;
 var editingLedgerBookId = null;
 var ledgerNewParentId = null;
 var ledgerCollapsed = {};
+var ledgerRecordMode = 'preview';
+var ledgerTreeOpen = false;
 var workoutFrameId = 0;
 var workoutLastPaint = 0;
 var page = 0;
@@ -149,14 +151,17 @@ var APP_ACTION_NAMES = {
   closeSettingsPage: true,
   openAboutSheet: true,
   openLedgerMonthReport: true,
+  toggleLedgerEventTree: true,
   toggleLedgerNode: true,
   selectLedgerBook: true,
+  cycleLedgerRecords: true,
   editLedgerRecord: true,
   deleteLedgerRecord: true,
   saveLedgerBook: true,
   pickLedgerTag: true,
   saveLedgerRecord: true,
   openLedgerBookSheet: true,
+  openLedgerChildBookSheet: true,
   chooseLedgerCsv: true,
   exportLedgerCsv: true,
   deleteCurrentLedgerEvent: true,

@@ -408,20 +408,29 @@
         <div class="ledger-sub" id="ledger-summary">0 笔记录</div>
       </div>
       <div class="ledger-tree-box" id="ledger-tree-box">
-        <div class="ledger-tree-head"><span>事件</span><b id="ledger-tree-summary"></b><small>点击切换</small></div>
+        <button class="ledger-tree-head" id="ledger-tree-head" type="button" data-action="toggleLedgerEventTree" aria-controls="ledger-tree" aria-expanded="false">
+          <span>事件</span><b id="ledger-tree-summary"></b><small id="ledger-tree-toggle">展开</small>
+        </button>
         <div class="ledger-tree" id="ledger-tree"></div>
       </div>
       <details class="ledger-months-box" open>
         <summary><span>月度总览 · 全部事件</span><b id="ledger-months-total"></b></summary>
         <div class="ledger-month-list" id="ledger-month-list"></div>
       </details>
-      <div class="ledger-branch-actions">
-        <span class="ledger-branch-path" id="ledger-branch-path"></span>
-        <button class="ledger-add-child" id="btn-ledger-add-child">＋ 当前事件的子事件</button>
-      </div>
+      <section class="ledger-record-box" id="ledger-record-box" data-state="preview">
+        <button class="ledger-record-head" type="button" data-action="cycleLedgerRecords" aria-controls="ledger-list" aria-expanded="false">
+          <span>最近记录</span>
+          <small><i id="ledger-record-count">0 笔</i><em id="ledger-record-toggle">最近 3 笔</em></small>
+        </button>
+        <div class="ledger-list" id="ledger-list"></div>
+      </section>
       <div class="ledger-actions">
         <button class="ledger-entry-btn" id="btn-ledger-add">＋ 记一笔</button>
       </div>
+      <label class="ledger-search-box">
+        <span>搜索当前事件</span>
+        <input id="ledger-search" type="search" autocomplete="off" placeholder="时间、分类、备注或金额">
+      </label>
       <div class="ledger-stats">
         <div class="ledger-stat"><span>今日</span><b id="ledger-today-total">¥0.00</b></div>
         <div class="ledger-stat"><span>当前事件累计</span><b id="ledger-book-total">¥0.00</b></div>
@@ -442,14 +451,6 @@
           <div class="ledger-event-month-list" id="ledger-event-month-list"></div>
         </details>
       </section>
-      <label class="ledger-search-box">
-        <span>搜索当前事件</span>
-        <input id="ledger-search" type="search" autocomplete="off" placeholder="时间、分类、备注或金额">
-      </label>
-      <details class="ledger-record-box">
-        <summary><span>最近记录</span><i id="ledger-record-count">0 笔</i></summary>
-        <div class="ledger-list" id="ledger-list"></div>
-      </details>
     </section>
 
     <!-- ================= 记账设置 ================= -->
@@ -468,6 +469,9 @@
         <div class="settings-group-title">当前事件</div>
         <button class="settings-row" data-action="openLedgerBookSheet">
           <span><b>新建根事件</b><small>创建一个新的事件账本</small></span><em>新建 ›</em>
+        </button>
+        <button class="settings-row" data-action="openLedgerChildBookSheet">
+          <span><b>新建子事件</b><small>在当前选中的事件下创建子事件</small></span><em>新建 ›</em>
         </button>
         <button class="settings-row" data-action="renameCurrentLedgerEvent">
           <span><b>修改事件名称</b><small>重命名当前选中的事件</small></span><em>修改 ›</em>

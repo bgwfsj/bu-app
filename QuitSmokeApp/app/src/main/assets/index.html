@@ -511,8 +511,8 @@ body[data-page="settings"] #page-pager{opacity:0;pointer-events:none}
   border-radius:13px;overflow:hidden
 }
 .ledger-tree-head{
-  display:flex;align-items:center;gap:8px;list-style:none;cursor:pointer;padding:10px 12px;
-  color:#6c7e7e;font-size:13px;letter-spacing:.05em
+  display:flex;align-items:center;gap:8px;width:100%;list-style:none;cursor:pointer;padding:10px 12px;
+  border:0;background:transparent;text-align:left;color:#6c7e7e;font-size:13px;letter-spacing:.05em
 }
 .ledger-tree-head span{font-weight:600;color:#526861}
 .ledger-tree-head b{flex:1;font-size:12px;color:#8a785f;font-weight:500;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -572,9 +572,6 @@ body[data-page="settings"] #page-pager{opacity:0;pointer-events:none}
 .ledger-report-record .path{flex:1;min-width:0;font-size:13px;color:#576c65;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ledger-report-record .date{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:11px;color:#9ba5a3}
 .ledger-report-record .money{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:13px;color:#7d6551}
-.ledger-branch-actions{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;margin:-4px 0 13px;gap:8px}
-.ledger-branch-path{font-size:12px;color:#9a8c81;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ledger-add-child{height:28px;flex:0 0 auto;padding:0 9px;border-radius:8px;border:1px solid rgba(92,75,61,.18);background:rgba(92,75,61,.05);color:#79614e;font-size:9.5px;cursor:pointer}
 .ledger-actions{flex:0 0 auto;display:flex;gap:8px;margin:2px 0 17px}
 .ledger-entry-btn{
   flex:1;height:48px;border-radius:13px;border:1px solid #5c4b3d;background:#5c4b3d;color:#fff;
@@ -622,6 +619,10 @@ body[data-page="settings"] #page-pager{opacity:0;pointer-events:none}
 .ledger-search-box input{display:block;width:100%;height:39px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.82);padding:0 11px;color:#425a51;font-size:12px;outline:none}
 .ledger-search-box input:focus{border-color:rgba(92,75,61,.3);box-shadow:0 0 0 3px rgba(92,75,61,.06)}
 body[data-page="ledger-settings"] #page-pager{opacity:0;pointer-events:none}
+#p-ledger-settings{
+  overflow-y:auto;overscroll-behavior-y:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch
+}
+#p-ledger-settings>*{flex:0 0 auto}
 .ledger-settings-archive{display:flex;flex-direction:column}
 .ledger-archive-settings-row{display:flex;align-items:center;gap:10px;padding:12px 14px;border-top:1px solid var(--line2)}
 .settings-group .ledger-archive-settings-row:first-child{border-top:0}
@@ -631,14 +632,18 @@ body[data-page="ledger-settings"] #page-pager{opacity:0;pointer-events:none}
 .ledger-archive-settings-row button{border:0;background:transparent;color:#648d7c;font-size:11px;padding:3px;cursor:pointer}
 .ledger-archive-settings-row button.danger{color:#bd7777}
 .ledger-archive-settings-empty{padding:15px 14px;text-align:center;color:#9aa8a4;font-size:11.5px}
-.ledger-record-box{flex:0 0 auto;margin-top:4px}
-.ledger-record-box>summary{
-  display:flex;align-items:center;justify-content:space-between;list-style:none;cursor:pointer;
+.ledger-record-box{flex:0 0 auto;margin:0 0 16px}
+.ledger-record-head{
+  display:flex;align-items:center;justify-content:space-between;width:100%;min-height:30px;
+  padding:0;border:0;background:transparent;cursor:pointer;text-align:left;
   font-size:13px;letter-spacing:.1em;color:#61777f;font-weight:500;margin-bottom:9px
 }
-.ledger-record-box>summary::-webkit-details-marker{display:none}
-.ledger-record-box>summary::marker{content:''}
-.ledger-record-box>summary i{font-style:normal;color:#9aaaa9;letter-spacing:.03em}
+.ledger-record-head>span{flex:1}
+.ledger-record-head small{display:flex;align-items:center;gap:8px}
+.ledger-record-head i,.ledger-record-head em{font-style:normal;letter-spacing:.03em;font-weight:400}
+.ledger-record-head i{color:#9aaaa9}
+.ledger-record-head em{color:#7e918b;font-size:10.5px}
+.ledger-record-box[data-state="hidden"] .ledger-record-head{margin-bottom:0}
 .ledger-list{display:flex;flex-direction:column;gap:6px}
 .ledger-record{
   display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:10px;align-items:center;
@@ -1474,20 +1479,29 @@ body[data-page="fitness"]::before{
         <div class="ledger-sub" id="ledger-summary">0 笔记录</div>
       </div>
       <div class="ledger-tree-box" id="ledger-tree-box">
-        <div class="ledger-tree-head"><span>事件</span><b id="ledger-tree-summary"></b><small>点击切换</small></div>
+        <button class="ledger-tree-head" id="ledger-tree-head" type="button" data-action="toggleLedgerEventTree" aria-controls="ledger-tree" aria-expanded="false">
+          <span>事件</span><b id="ledger-tree-summary"></b><small id="ledger-tree-toggle">展开</small>
+        </button>
         <div class="ledger-tree" id="ledger-tree"></div>
       </div>
       <details class="ledger-months-box" open>
         <summary><span>月度总览 · 全部事件</span><b id="ledger-months-total"></b></summary>
         <div class="ledger-month-list" id="ledger-month-list"></div>
       </details>
-      <div class="ledger-branch-actions">
-        <span class="ledger-branch-path" id="ledger-branch-path"></span>
-        <button class="ledger-add-child" id="btn-ledger-add-child">＋ 当前事件的子事件</button>
-      </div>
+      <section class="ledger-record-box" id="ledger-record-box" data-state="preview">
+        <button class="ledger-record-head" type="button" data-action="cycleLedgerRecords" aria-controls="ledger-list" aria-expanded="false">
+          <span>最近记录</span>
+          <small><i id="ledger-record-count">0 笔</i><em id="ledger-record-toggle">最近 3 笔</em></small>
+        </button>
+        <div class="ledger-list" id="ledger-list"></div>
+      </section>
       <div class="ledger-actions">
         <button class="ledger-entry-btn" id="btn-ledger-add">＋ 记一笔</button>
       </div>
+      <label class="ledger-search-box">
+        <span>搜索当前事件</span>
+        <input id="ledger-search" type="search" autocomplete="off" placeholder="时间、分类、备注或金额">
+      </label>
       <div class="ledger-stats">
         <div class="ledger-stat"><span>今日</span><b id="ledger-today-total">¥0.00</b></div>
         <div class="ledger-stat"><span>当前事件累计</span><b id="ledger-book-total">¥0.00</b></div>
@@ -1508,14 +1522,6 @@ body[data-page="fitness"]::before{
           <div class="ledger-event-month-list" id="ledger-event-month-list"></div>
         </details>
       </section>
-      <label class="ledger-search-box">
-        <span>搜索当前事件</span>
-        <input id="ledger-search" type="search" autocomplete="off" placeholder="时间、分类、备注或金额">
-      </label>
-      <details class="ledger-record-box">
-        <summary><span>最近记录</span><i id="ledger-record-count">0 笔</i></summary>
-        <div class="ledger-list" id="ledger-list"></div>
-      </details>
     </section>
 
     <!-- ================= 记账设置 ================= -->
@@ -1534,6 +1540,9 @@ body[data-page="fitness"]::before{
         <div class="settings-group-title">当前事件</div>
         <button class="settings-row" data-action="openLedgerBookSheet">
           <span><b>新建根事件</b><small>创建一个新的事件账本</small></span><em>新建 ›</em>
+        </button>
+        <button class="settings-row" data-action="openLedgerChildBookSheet">
+          <span><b>新建子事件</b><small>在当前选中的事件下创建子事件</small></span><em>新建 ›</em>
         </button>
         <button class="settings-row" data-action="renameCurrentLedgerEvent">
           <span><b>修改事件名称</b><small>重命名当前选中的事件</small></span><em>修改 ›</em>
@@ -1636,6 +1645,8 @@ var editingLedgerRecordId = null;
 var editingLedgerBookId = null;
 var ledgerNewParentId = null;
 var ledgerCollapsed = {};
+var ledgerRecordMode = 'preview';
+var ledgerTreeOpen = false;
 var workoutFrameId = 0;
 var workoutLastPaint = 0;
 var page = 0;
@@ -1739,14 +1750,17 @@ var APP_ACTION_NAMES = {
   closeSettingsPage: true,
   openAboutSheet: true,
   openLedgerMonthReport: true,
+  toggleLedgerEventTree: true,
   toggleLedgerNode: true,
   selectLedgerBook: true,
+  cycleLedgerRecords: true,
   editLedgerRecord: true,
   deleteLedgerRecord: true,
   saveLedgerBook: true,
   pickLedgerTag: true,
   saveLedgerRecord: true,
   openLedgerBookSheet: true,
+  openLedgerChildBookSheet: true,
   chooseLedgerCsv: true,
   exportLedgerCsv: true,
   deleteCurrentLedgerEvent: true,
@@ -2031,6 +2045,7 @@ byId('mask').addEventListener('click', closeSheet);
    应用版本记录
    ============================================================ */
 var APP_CHANGELOG = [
+  { version: '5.9.13', date: '2026-11-09', changes: ['记账最近记录移到“记一笔”上方，默认显示最新 3 笔，并可依次展开全部、完全折叠和恢复 3 笔。', '搜索框移到“记一笔”下方。', '记账设置页修复内容被挤压和无法上下滚动的问题；新建子事件入口移入设置页。', '记账事件区域和事件树节点默认折叠。'] },
   { version: '5.9.12', date: '2026-11-09', changes: ['访问统计下方新增数字文案。', '今日 1–20 次各配置 5 条文案；特殊累计次数优先显示并使用强调色。', '同一日期与计数组稳定匹配，不会频繁跳换文案。'] },
   { version: '5.9.11', date: '2026-11-09', changes: ['完整备份默认只保留最近 2 份，自动清理和手动清理规则同步调整。'] },
   { version: '5.9.10', date: '2026-11-09', changes: ['修复从系统通知正文进入 App 后没有弹出确认/稍后处理框的问题。', '通知入口固定复用主页面，并在页面脚本未就绪时自动重试。'] },
@@ -6232,6 +6247,19 @@ function toggleLedgerNode(id){
   renderLedgerPage();
 }
 
+function syncLedgerEventTree(){
+  var tree = byId('ledger-tree');
+  var head = byId('ledger-tree-head');
+  if (tree) tree.hidden = !ledgerTreeOpen;
+  if (head) head.setAttribute('aria-expanded', ledgerTreeOpen ? 'true' : 'false');
+  setTxt('ledger-tree-toggle', ledgerTreeOpen ? '收起' : '展开');
+}
+
+function toggleLedgerEventTree(){
+  ledgerTreeOpen = !ledgerTreeOpen;
+  syncLedgerEventTree();
+}
+
 function ledgerMoney(value){
   return '¥' + (Number(value) || 0).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
@@ -6330,13 +6358,13 @@ function renderLedgerPage(){
     (subtree.length > 1 ? '（含 ' + (subtree.length - 1) + ' 个子事件）' : ''));
   setTxt('ledger-today-total', ledgerMoney(todayTotal));
   setTxt('ledger-book-total', ledgerMoney(bookTotal));
-  setTxt('ledger-branch-path', ledgerBookPath(book));
   renderLedgerAnalysis(entries, bookTotal, monthTotal, monthPrefix);
   renderLedgerMonths();
 
   var activeBookCount = ledgerData.books.filter(function(item){ return !ledgerIsArchived(item); }).length;
   byId('ledger-tree-summary').textContent = ledgerBookPath(book) + ' · ' + activeBookCount + ' 个事件';
   byId('ledger-tree').innerHTML = ledgerTreeHtml(null, 0);
+  syncLedgerEventTree();
 
   var records = entries.slice().sort(function(a, b){
     var at = a.record.createdAt ? new Date(a.record.createdAt).getTime() : 0;
@@ -6355,8 +6383,22 @@ function renderLedgerPage(){
     ].join(' ').toLocaleLowerCase();
     return haystack.indexOf(query) >= 0;
   }) : records;
+  var displayedRecords = visibleRecords;
+  if (!query) {
+    if (ledgerRecordMode === 'preview') displayedRecords = visibleRecords.slice(0, 3);
+    if (ledgerRecordMode === 'hidden') displayedRecords = [];
+  }
   setTxt('ledger-record-count', visibleRecords.length + (query ? ' / ' + records.length : '') + ' 笔');
-  byId('ledger-list').innerHTML = visibleRecords.length ? visibleRecords.map(function(entry){
+  setTxt('ledger-record-toggle', query ? '搜索结果' :
+    ledgerRecordMode === 'all' ? '全部 ' + visibleRecords.length + ' 笔' :
+    ledgerRecordMode === 'hidden' ? '已完全折叠' : '最近 3 笔');
+  var recordBox = byId('ledger-record-box');
+  if (recordBox) {
+    recordBox.setAttribute('data-state', query ? 'preview' : ledgerRecordMode);
+    var recordHead = recordBox.querySelector('.ledger-record-head');
+    if (recordHead) recordHead.setAttribute('aria-expanded', query || ledgerRecordMode === 'all' ? 'true' : 'false');
+  }
+  byId('ledger-list').innerHTML = displayedRecords.length ? displayedRecords.map(function(entry){
     var r = entry.record;
     var owner = entry.owner.id !== book.id ? ' · ' + escHtml(entry.owner.name) : '';
     return '<div class="ledger-record"' + actionAttrs('editLedgerRecord', [r.id]) + '>' +
@@ -6365,14 +6407,21 @@ function renderLedgerPage(){
       workoutDateLabel(r.date) + ' · ' + ledgerRecordTime(r) + owner + '</span></span>' +
       '<span class="ledger-amount"><b>' + ledgerMoney(r.amount) + '</b>' +
       '<span><button' + actionAttrs('deleteLedgerRecord', [r.id]) + '>删除</button></span></span></div>';
-  }).join('') : '<div class="ledger-empty">' +
-    (query ? '没有匹配的记录' : '这个事件还没有记录<br>点击“记一笔”开始') + '</div>';
+  }).join('') : (!query && ledgerRecordMode === 'hidden' ? '' : '<div class="ledger-empty">' +
+    (query ? '没有匹配的记录' : '这个事件还没有记录<br>点击“记一笔”开始') + '</div>');
   renderDashboard();
+}
+
+function cycleLedgerRecords(){
+  ledgerRecordMode = ledgerRecordMode === 'preview' ? 'all' :
+    ledgerRecordMode === 'all' ? 'hidden' : 'preview';
+  renderLedgerPage();
 }
 
 function selectLedgerBook(id){
   ledgerData.selectedId = id;
   ledgerSearchQuery = '';
+  ledgerRecordMode = 'preview';
   if (byId('ledger-search')) byId('ledger-search').value = '';
   saveLedgerState();
   renderLedgerPage();
@@ -6388,6 +6437,12 @@ function openLedgerBookSheet(parentId){
     '<div class="row"><button class="ghost"' + actionAttrs('closeSheet') + '>取消</button>' +
     '<button class="primary"' + actionAttrs('saveLedgerBook') + '>创建</button></div>'
   );
+}
+
+function openLedgerChildBookSheet(){
+  var book = currentLedgerBook();
+  if (!book) { toast('当前没有可用事件'); return; }
+  openLedgerBookSheet(book.id);
 }
 
 function saveLedgerBook(){
@@ -6955,7 +7010,6 @@ function deleteCurrentLedgerEvent(){
 function initLedger(){
   loadLedgerState();
   byId('btn-ledger-add').addEventListener('click', function(){ openLedgerRecord(); });
-  byId('btn-ledger-add-child').addEventListener('click', function(){ openLedgerBookSheet(currentLedgerBook().id); });
   byId('ledger-search').addEventListener('input', function(){
     ledgerSearchQuery = this.value || '';
     renderLedgerPage();
