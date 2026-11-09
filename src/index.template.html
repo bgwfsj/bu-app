@@ -288,7 +288,10 @@
     <section class="page" id="p-meals">
       <div class="top">
         <div class="brand"><span class="led"></span>三餐</div>
-        <span class="meal-top-date" id="meal-top-date"></span>
+        <div class="meal-top-actions">
+          <span class="meal-top-date" id="meal-top-date"></span>
+          <button class="iconbtn" id="btn-meal-menu" type="button" data-action="openMealMenu" title="三餐菜单" aria-label="三餐菜单">⋯</button>
+        </div>
       </div>
       <div class="section-hero meal-hero">
         <div class="section-kicker">今日饮食</div>
@@ -299,25 +302,24 @@
         <b>吃饭啦！</b>
         <small id="meal-record-hint">将记为午餐</small>
       </button>
-      <button class="meal-backfill-btn" type="button" data-action="openMealBackfill">补记一顿</button>
       <section class="meal-next-card">
         <div class="meal-next-head"><span>距离下一顿最佳时间</span><b id="meal-next-name">午餐</b></div>
         <div class="meal-next-timer" id="meal-next-timer">00:00:00</div>
+        <div class="meal-next-progress"><i id="meal-next-progress"></i></div>
         <div class="meal-next-meta">
-          <span id="meal-next-time">今天 12:00</span>
-          <span id="meal-next-window">建议 11:30–13:00</span>
+          <span id="meal-next-window">理想 11:30–13:00</span>
         </div>
         <p id="meal-next-hint">给一顿饭留出二十多分钟，也给自己留一点停顿。</p>
       </section>
-      <section class="meal-today">
-        <div class="meal-section-head"><h3>今天吃了什么</h3><small id="meal-today-summary">还没有记录</small></div>
+      <details class="meal-today" open>
+        <summary class="meal-section-head"><h3>今天吃了什么</h3><small id="meal-today-summary">还没有记录</small></summary>
         <div class="meal-type-strip" id="meal-type-strip"></div>
         <div class="meal-list" id="meal-list"></div>
         <details class="meal-extra-box" id="meal-extra-box" hidden>
           <summary><span>下午茶与夜宵</span><small id="meal-extra-count">0 笔</small></summary>
           <div class="meal-extra-list" id="meal-extra-list"></div>
         </details>
-      </section>
+      </details>
       <details class="meal-history-box">
         <summary><span>过去 7 天</span><small id="meal-week-summary">0 顿</small></summary>
         <div class="meal-week-list" id="meal-week-list"></div>

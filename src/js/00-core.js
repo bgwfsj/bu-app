@@ -132,6 +132,7 @@ var APP_ACTION_NAMES = {
   enableTodoReminder: true,
   disableTodoReminder: true,
   recordMealNow: true,
+  openMealMenu: true,
   openMealBackfill: true,
   saveMealBackfill: true,
   changeMealCalendarMonth: true,

@@ -225,10 +225,14 @@ function mealNextTargetAt(when, sourceRecords){
     var target = new Date(when.getFullYear(), when.getMonth(), when.getDate(), slot.hour, slot.minute, 0, 0);
     if (target.getTime() > when.getTime() && !eaten[slot.id]) {
       var meta = mealTypeMeta(slot.id);
+      var previousSlot = i === 0 ?
+        new Date(when.getFullYear(), when.getMonth(), when.getDate() - 1, 17, 30, 0, 0) :
+        new Date(when.getFullYear(), when.getMonth(), when.getDate(), MEAL_SLOTS[i - 1].hour, MEAL_SLOTS[i - 1].minute, 0, 0);
       return {
         type: slot.id,
         name: slot.name,
         target: target,
+        from: previousSlot,
         window: '理想 ' + meta.idealLabel,
         hint: slot.id === 'breakfast' ? '给一顿饭留出二十多分钟，也给自己留一点停顿。' :
           slot.id === 'lunch' ? '吃到七八分饱，下午会更从容一些。' :
@@ -238,10 +242,12 @@ function mealNextTargetAt(when, sourceRecords){
     }
   }
   var tomorrowTarget = new Date(when.getFullYear(), when.getMonth(), when.getDate() + 1, 6, 30, 0, 0);
+  var tomorrowFrom = new Date(when.getFullYear(), when.getMonth(), when.getDate(), 17, 30, 0, 0);
   return {
     type: 'breakfast',
     name: '早餐',
     target: tomorrowTarget,
+    from: tomorrowFrom,
     window: '理想 06:30–09:00',
     hint: '今晚给身体留一点空腹的时间，明早再慢慢补回来。',
     tomorrow: true
@@ -265,9 +271,12 @@ function paintMealCountdown(){
   setTxt('meal-record-hint', '将记为' + current.name);
   setTxt('meal-next-name', next.name);
   setTxt('meal-next-timer', mealCountdownText(next.target.getTime() - now.getTime()));
-  setTxt('meal-next-time', (next.tomorrow ? '明天 ' : '今天 ') + mealClock(next.target));
   setTxt('meal-next-window', next.window);
   setTxt('meal-next-hint', next.hint);
+  var span = Math.max(1, next.target.getTime() - next.from.getTime());
+  var elapsed = Math.max(0, Math.min(span, now.getTime() - next.from.getTime()));
+  var progress = byId('meal-next-progress');
+  if (progress) progress.style.width = (elapsed / span * 100).toFixed(2) + '%';
 }
 
 function mealEntryHtml(record){
@@ -395,6 +404,16 @@ function renderMealPage(){
 
 function recordMealNow(){
   recordMealAt(new Date());
+}
+
+function openMealMenu(){
+  openSheet(
+    '<h3>三餐</h3>' +
+    '<div class="settings-group meal-menu-group">' +
+    '<button class="settings-row" data-action="openMealBackfill"><span><b>补记一顿</b><small>选择过去的日期和时间补记</small></span><em>补记 ›</em></button>' +
+    '</div>' +
+    '<div class="row"><button class="ghost" style="flex:1"' + actionAttrs('closeSheet') + '>取消</button></div>'
+  );
 }
 
 function recordMealAt(when, options){

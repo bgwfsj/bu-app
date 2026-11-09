@@ -279,6 +279,10 @@ async function run() {
       var active = byId('p-meals').classList.contains('on') &&
         document.body.dataset.page === 'meals';
       var pagerLabel = byId('page-pager').querySelector('button.on').textContent.trim();
+      var inlineBackfillRemoved = !document.querySelector('.meal-backfill-btn');
+      byId('btn-meal-menu').click();
+      var menuHasBackfill = !!byId('sheet').querySelector('[data-action="openMealBackfill"]');
+      closeSheet();
       var classifications = {
         breakfast: mealTypeForDate(new Date(2026, 10, 9, 6, 30)),
         lunch: mealTypeForDate(new Date(2026, 10, 9, 11, 30)),
@@ -336,6 +340,14 @@ async function run() {
       var deleteButton = !!byId('meal-list').querySelector('[data-action="deleteMealRecord"]');
       var homeCopy = byId('home-meal-copy').textContent.trim();
       var timerText = byId('meal-next-timer').textContent.trim();
+      var nextWindowText = byId('meal-next-window').textContent.trim();
+      var noTomorrowPrompt = !byId('meal-next-time');
+      var progressWidth = byId('meal-next-progress').style.width;
+      var mealTodayBox = document.querySelector('.meal-today');
+      var recordsOpenByDefault = mealTodayBox.open;
+      mealTodayBox.querySelector('summary').click();
+      var recordsCanCollapse = !mealTodayBox.open;
+      mealTodayBox.querySelector('summary').click();
       var todayGrade = mealDayGrade(todayAt(12, 0));
       mealCalendarOffset = 0;
       renderMealCalendar();
@@ -362,6 +374,8 @@ async function run() {
       return {
         active: active,
         pagerLabel: pagerLabel,
+        inlineBackfillRemoved: inlineBackfillRemoved,
+        menuHasBackfill: menuHasBackfill,
         classifications: classifications,
         regularWindows: regularWindows,
         nextLunchType: nextLunch.type,
@@ -385,6 +399,11 @@ async function run() {
         deleteButton: deleteButton,
         homeCopy: homeCopy,
         timerText: timerText,
+        nextWindowText: nextWindowText,
+        noTomorrowPrompt: noTomorrowPrompt,
+        progressWidth: progressWidth,
+        recordsOpenByDefault: recordsOpenByDefault,
+        recordsCanCollapse: recordsCanCollapse,
         todayGrade: todayGrade.grade,
         todayLate: todayGrade.late,
         calendarRedX: calendarRedX,
@@ -397,6 +416,8 @@ async function run() {
     })()`);
     assert.equal(meals.active, true);
     assert.equal(meals.pagerLabel, '饭');
+    assert.equal(meals.inlineBackfillRemoved, true);
+    assert.equal(meals.menuHasBackfill, true);
     assert.deepEqual(meals.classifications, {
       breakfast: 'breakfast',
       lunch: 'lunch',
@@ -436,6 +457,11 @@ async function run() {
     assert.equal(meals.deleteButton, true);
     assert.equal(meals.homeCopy, '今天 3 顿 · 最近 夜宵');
     assert.match(meals.timerText, /^\d{2}:\d{2}:\d{2}$/);
+    assert.match(meals.nextWindowText, /^理想 \d{2}:\d{2}–\d{2}:\d{2}$/);
+    assert.equal(meals.noTomorrowPrompt, true);
+    assert.match(meals.progressWidth, /^\d+(?:\.\d+)?%$/);
+    assert.equal(meals.recordsOpenByDefault, true);
+    assert.equal(meals.recordsCanCollapse, true);
     assert.equal(meals.todayGrade, 'red');
     assert.equal(meals.todayLate, true);
     assert.equal(meals.calendarRedX, true);

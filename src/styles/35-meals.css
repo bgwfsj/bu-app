@@ -6,6 +6,7 @@ body[data-page="meals"]::before{
 }
 .home-card.meal-card::after{background:rgba(205,151,87,.07)}
 .home-card.meal-card .home-icon{background:rgba(205,151,87,.11);color:#ad713a}
+.meal-top-actions{display:flex;align-items:center;gap:5px}
 .meal-top-date{
   font-family:var(--font-mono);font-size:10px;color:#9aa6a6;letter-spacing:.03em
 }
@@ -19,10 +20,8 @@ body[data-page="meals"]::before{
 .meal-record-btn b{font-size:16px;font-weight:500;letter-spacing:.12em;text-indent:.12em}
 .meal-record-btn small{font-size:9.5px;color:rgba(255,255,255,.64);letter-spacing:.06em}
 .meal-record-btn:active{transform:translateY(1px);filter:brightness(.98)}
-.meal-backfill-btn{
-  flex:0 0 auto;align-self:center;margin-top:5px;padding:5px 2px;border:0;background:transparent;
-  color:#8b9b96;font-size:10px;letter-spacing:.08em;cursor:pointer
-}
+.meal-menu-group{margin:10px 0 15px}
+.meal-menu-group .settings-row{border-top:0}
 .meal-next-card{
   flex:0 0 auto;margin:14px 0 18px;padding:15px;border-radius:17px;
   border:1px solid rgba(171,126,77,.13);
@@ -36,10 +35,18 @@ body[data-page="meals"]::before{
   margin-top:9px;font:300 38px/1.05 var(--font-mono);letter-spacing:-.04em;color:#2e463e;
   font-variant-numeric:tabular-nums
 }
-.meal-next-meta{display:flex;justify-content:space-between;gap:12px;margin-top:9px;font-size:10px;color:#9b8c7d}
-.meal-next-meta span:last-child{text-align:right}
+.meal-next-progress{height:3px;margin-top:11px;border-radius:999px;background:rgba(89,116,102,.08);overflow:hidden}
+.meal-next-progress i{
+  display:block;width:0;height:100%;border-radius:inherit;
+  background:linear-gradient(90deg,#75b89b,#4c8e77);transition:width .5s linear
+}
+.meal-next-meta{display:flex;justify-content:center;margin-top:9px;font-size:10px;color:#9b8c7d;text-align:center}
 .meal-next-card p{margin:12px 0 0;padding-top:10px;border-top:1px solid var(--line2);font-size:11px;line-height:1.65;color:#87978f}
 .meal-today{flex:0 0 auto;margin-bottom:17px}
+.meal-today>summary{list-style:none;cursor:pointer}
+.meal-today>summary::-webkit-details-marker{display:none}
+.meal-today>summary::marker{content:''}
+.meal-today:not([open])>summary{margin-bottom:0}
 .meal-section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px}
 .meal-section-head h3{margin:0;font-size:13px;font-weight:500;letter-spacing:.09em;color:#596e67}
 .meal-section-head small{font-size:10px;color:#9ba7a3}
