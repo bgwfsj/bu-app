@@ -318,13 +318,9 @@ body[data-page="home"]::before{
 .home-card.compact b{font-size:14px}
 .home-card.compact small{font-size:9px}
 .home-brand-card{
-  min-height:137px;padding:15px;border-radius:17px;border:1px solid var(--line2);
-  background:rgba(255,255,255,.42);color:#a1afaa;position:relative;overflow:hidden
+  cursor:default;background:rgba(255,255,255,.68)
 }
-.home-brand-card span{
-  display:block;font-size:17px;font-weight:500;letter-spacing:.22em;color:#7f938c
-}
-.home-grid:not([data-layout="classic"]) .home-brand-card{display:none}
+.home-grid:not([data-layout="classic"]) .home-brand-card{display:none!important}
 }
 
 /* ---------- 首页拼图布局 ---------- */
@@ -1467,7 +1463,10 @@ body[data-page="fitness"]::before{
           <span class="home-icon">账</span><b>记账</b>
           <small id="home-ledger-copy">本月还没有记录</small>
         </button>
-        <div class="home-brand-card" aria-hidden="true"><span>补</span></div>
+        <div class="home-card home-brand-card" aria-hidden="true">
+          <span class="home-icon">补</span><b>补充</b>
+          <small>给今天留一点空白</small>
+        </div>
         <button class="home-card reminder-card" data-action="goPage" data-args="[7]">
           <span class="home-icon">醒</span><b>提醒</b>
           <small id="home-reminder-copy">没有独立提醒</small>
@@ -2476,6 +2475,7 @@ byId('mask').addEventListener('click', closeSheet);
    应用版本记录
    ============================================================ */
 var APP_CHANGELOG = [
+  { version: '5.9.19', date: '2026-11-10', changes: ['经典首页的“补充”卡片改为与普通功能卡片一致的尺寸、圆角、内边距和字体层级。', '“补充”卡片使用“补”图标与“补充”标题，仅在经典布局中显示。'] },
   { version: '5.9.18', date: '2026-11-10', changes: ['新增中心折面首页：整块屏幕比例画布由直线划分为七个不规则区域。', '蜂巢布局改为按屏幕可用宽度自适应放大，整体高度和字号同步调整。', '经典布局中提醒恢复普通卡片，左侧新增写有“补”的空白卡片；首页恢复左上角标记和相逢数字下方的诗性文案。', 'App 启动后静默检查一次新版本，只有发现新版本时弹窗；无更新或网络失败不打扰。'] },
   { version: '5.9.17', date: '2026-11-10', changes: ['删除首页左上角“补 / 每天补一点”，相逢次数和对应文案直接占据左上角。', '三餐“吃饭啦！”按钮恢复为整行方形，按钮内两行文字继续居中。'] },
   { version: '5.9.16', date: '2026-11-10', changes: ['训练计划支持上下调整动作顺序、复制和单独移除，同一动作可以重复添加并独立记录完成情况。', '当前时间处于理想就餐时段时，三餐倒计时改为显示该时段还剩多久。', '“吃饭啦！”改为圆形按钮；首页访问次数和对应文案移到左上角。', '新增七格蜂巢拼图首页，可在设置页与经典首页之间切换，布局选择纳入完整备份。'] },

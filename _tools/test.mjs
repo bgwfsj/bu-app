@@ -519,7 +519,11 @@ async function run() {
       var brandBesideReminder = brandCard.nextElementSibling === reminderCard &&
         brandCard.getBoundingClientRect().left < reminderCard.getBoundingClientRect().left &&
         Math.abs(brandCard.getBoundingClientRect().top - reminderCard.getBoundingClientRect().top) < 1 &&
-        brandCard.textContent.trim() === '补';
+        brandCard.classList.contains('home-card') &&
+        brandCard.querySelector('.home-icon').textContent.trim() === '补' &&
+        brandCard.querySelector('b').textContent.trim() === '补充' &&
+        Math.abs(brandCard.getBoundingClientRect().width - reminderCard.getBoundingClientRect().width) < 1 &&
+        Math.abs(brandCard.getBoundingClientRect().height - reminderCard.getBoundingClientRect().height) < 1;
       var dataActions = byId('p-settings').querySelectorAll('[data-action="exportAppBackup"], [data-action="chooseAppBackup"]').length;
       var cleanupButton = byId('p-settings').querySelector('[data-action="requestCleanupOldBackups"]');
       cleanupButton.click();
@@ -579,8 +583,8 @@ async function run() {
       cleanupConfirmOpened: true,
       cleanupCalls: 1,
       aboutOpened: true,
-      changelogCount: 57,
-      aboutVersion: '5.9.18',
+      changelogCount: 58,
+      aboutVersion: '5.9.19',
       updateBackupExposed: true,
       updateCalls: 1,
       handledBack: true,

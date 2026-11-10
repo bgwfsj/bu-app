@@ -57,13 +57,9 @@ body[data-page="home"]::before{
 .home-card.compact b{font-size:14px}
 .home-card.compact small{font-size:9px}
 .home-brand-card{
-  min-height:137px;padding:15px;border-radius:17px;border:1px solid var(--line2);
-  background:rgba(255,255,255,.42);color:#a1afaa;position:relative;overflow:hidden
+  cursor:default;background:rgba(255,255,255,.68)
 }
-.home-brand-card span{
-  display:block;font-size:17px;font-weight:500;letter-spacing:.22em;color:#7f938c
-}
-.home-grid:not([data-layout="classic"]) .home-brand-card{display:none}
+.home-grid:not([data-layout="classic"]) .home-brand-card{display:none!important}
 }
 
 /* ---------- 首页拼图布局 ---------- */
