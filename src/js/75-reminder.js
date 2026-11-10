@@ -213,7 +213,7 @@ function renderHomeNotice(){
   var box = byId('home-notice');
   if (!box || !reminderData) return;
   if (reminderData.homeNoticeEnabled === false || !reminderData.items.length) {
-    box.hidden = true;
+    hideHomeNoticeBox(box);
     return;
   }
   var now = new Date();
@@ -226,7 +226,7 @@ function renderHomeNotice(){
       !reminderData.handledOccurrences[reminderOccurrenceKey(item, now)];
   });
   if (!dueItems.length) {
-    box.hidden = true;
+    hideHomeNoticeBox(box);
     return;
   }
   box.hidden = false;
@@ -240,6 +240,12 @@ function renderHomeNotice(){
         actionAttrs('completeHomeReminder', [item.id, key]) +
         ' aria-label="标记今天完成">×</button></div>';
     }).join('');
+}
+
+function hideHomeNoticeBox(box){
+  if (!box) return;
+  box.hidden = true;
+  box.innerHTML = '';
 }
 
 function completeHomeReminder(id, occurrenceKey){

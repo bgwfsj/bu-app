@@ -19,7 +19,8 @@ body[data-page="home"]::before{
   border-radius:14px;border:1px solid rgba(229,72,77,.28);background:#fff1f1;
   color:#8f2025;box-shadow:0 14px 30px -25px rgba(229,72,77,.65)
 }
-.home-notice[hidden]{display:none}
+.home-notice[hidden],
+.home-notice:empty{display:none!important;height:0;margin:0;border:0;padding:0}
 .home-notice-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px 6px;font-size:10px;letter-spacing:.06em;color:#aa5458}
 .home-notice-head small{font-size:9px;color:#bd7377}
 .home-notice-row{display:flex;align-items:stretch;min-height:49px;border-top:1px solid rgba(229,72,77,.1)}

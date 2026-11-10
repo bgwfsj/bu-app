@@ -619,8 +619,8 @@ async function run() {
       cleanupConfirmOpened: true,
       cleanupCalls: 1,
       aboutOpened: true,
-      changelogCount: 62,
-      aboutVersion: '6.0.3',
+      changelogCount: 63,
+      aboutVersion: '6.0.4',
       updateBackupExposed: true,
       updateCalls: 1,
       handledBack: true,
@@ -953,6 +953,9 @@ async function run() {
       }];
       renderHomeNotice();
       var futureNoticeHidden = byId('home-notice').hidden;
+      var futureNoticeCleared = byId('home-notice').innerHTML === '' &&
+        getComputedStyle(byId('home-notice')).display === 'none' &&
+        byId('home-notice').getBoundingClientRect().height === 0;
       reminderData.items = [
         { id: 'due_notice', title: '已到点提醒', mode: 'daily', time: '00:00', createdAt: new Date().toISOString() },
         { id: 'due_notice_2', title: '另一条到点提醒', mode: 'daily', time: '00:01', createdAt: new Date().toISOString() }
@@ -1074,6 +1077,7 @@ async function run() {
         }),
         stored: JSON.parse(localStorage.getItem(RKEY)).items.length,
         futureNoticeHidden: futureNoticeHidden,
+        futureNoticeCleared: futureNoticeCleared,
         homeNoticeVisible: homeNoticeVisible,
         allNoticeRows: allNoticeRows,
         partialHandledRows: partialHandledRows,
@@ -1118,6 +1122,7 @@ async function run() {
     assert.equal(reminders.orderValid, true);
     assert.equal(reminders.stored, 5);
     assert.equal(reminders.futureNoticeHidden, true);
+    assert.equal(reminders.futureNoticeCleared, true);
     assert.equal(reminders.homeNoticeVisible, true);
     assert.equal(reminders.allNoticeRows, 2);
     assert.equal(reminders.partialHandledRows, 1);

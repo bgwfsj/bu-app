@@ -280,7 +280,8 @@ body[data-page="home"]::before{
   border-radius:14px;border:1px solid rgba(229,72,77,.28);background:#fff1f1;
   color:#8f2025;box-shadow:0 14px 30px -25px rgba(229,72,77,.65)
 }
-.home-notice[hidden]{display:none}
+.home-notice[hidden],
+.home-notice:empty{display:none!important;height:0;margin:0;border:0;padding:0}
 .home-notice-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px 6px;font-size:10px;letter-spacing:.06em;color:#aa5458}
 .home-notice-head small{font-size:9px;color:#bd7377}
 .home-notice-row{display:flex;align-items:stretch;min-height:49px;border-top:1px solid rgba(229,72,77,.1)}
@@ -2477,6 +2478,7 @@ byId('mask').addEventListener('click', closeSheet);
    应用版本记录
    ============================================================ */
 var APP_CHANGELOG = [
+  { version: '6.0.4', date: '2026-11-10', changes: ['修复首页无提醒或提醒全部处理后，功能块上方残留红色边框线的问题。', '空提醒容器现在会清空内容，并同时移除高度、边距、内边距和边框。'] },
   { version: '6.0.3', date: '2026-11-10', changes: ['修复独立提醒的通知内容 Intent 被下一轮 AlarmManager 点击 Intent 覆盖，导致从通知栏进入后不弹确认与稍后页面的问题。', '首页提醒改为列出所有已经到点、尚未处理的提醒，每条拥有独立 ×。', '首页 × 与通知确认共用今日完成状态：从首页移除并在提醒列表当天划线；稍后不划线。'] },
   { version: '6.0.2', date: '2026-11-10', changes: ['修复从系统通知栏正文点击进入 App 后只跳转提醒页、不弹出确认与稍后页面的问题。', '通知 Intent 现在会等待页面加载完成且 Activity 恢复后再处理，兼容冷启动、后台恢复和 App 已在前台三种情况。'] },
   { version: '6.0.1', date: '2026-11-10', changes: ['重复提醒确认完成当天会保留在提醒列表中并划线，次日自动恢复正常显示。', '“稍后提醒”不会触发划线；系统通知栏的“确认”与 App 内确认都会同步当天完成状态。'] },
@@ -6561,7 +6563,7 @@ function renderHomeNotice(){
   var box = byId('home-notice');
   if (!box || !reminderData) return;
   if (reminderData.homeNoticeEnabled === false || !reminderData.items.length) {
-    box.hidden = true;
+    hideHomeNoticeBox(box);
     return;
   }
   var now = new Date();
@@ -6574,7 +6576,7 @@ function renderHomeNotice(){
       !reminderData.handledOccurrences[reminderOccurrenceKey(item, now)];
   });
   if (!dueItems.length) {
-    box.hidden = true;
+    hideHomeNoticeBox(box);
     return;
   }
   box.hidden = false;
@@ -6588,6 +6590,12 @@ function renderHomeNotice(){
         actionAttrs('completeHomeReminder', [item.id, key]) +
         ' aria-label="标记今天完成">×</button></div>';
     }).join('');
+}
+
+function hideHomeNoticeBox(box){
+  if (!box) return;
+  box.hidden = true;
+  box.innerHTML = '';
 }
 
 function completeHomeReminder(id, occurrenceKey){
