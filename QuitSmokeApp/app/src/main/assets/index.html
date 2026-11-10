@@ -2478,6 +2478,7 @@ byId('mask').addEventListener('click', closeSheet);
    应用版本记录
    ============================================================ */
 var APP_CHANGELOG = [
+  { version: '6.0.6', date: '2026-11-10', changes: ['修复每周、每月、每年提醒在非提醒日仍显示当天划线的问题。', '完成记录现在只保留当天；渲染提醒列表时会清除非今天的完成键，仅在规则命中今天且当天已确认时划线。'] },
   { version: '6.0.5', date: '2026-11-10', changes: ['修复首页提醒卡在纵向 Flex 布局中被压缩到接近零高度、只剩上下边框形成红线的问题。', '首页提醒卡现在禁止收缩，有提醒时保持完整高度，无提醒时继续完全隐藏。'] },
   { version: '6.0.4', date: '2026-11-10', changes: ['修复首页无提醒或提醒全部处理后，功能块上方残留红色边框线的问题。', '空提醒容器现在会清空内容，并同时移除高度、边距、内边距和边框。'] },
   { version: '6.0.3', date: '2026-11-10', changes: ['修复独立提醒的通知内容 Intent 被下一轮 AlarmManager 点击 Intent 覆盖，导致从通知栏进入后不弹确认与稍后页面的问题。', '首页提醒改为列出所有已经到点、尚未处理的提醒，每条拥有独立 ×。', '首页 × 与通知确认共用今日完成状态：从首页移除并在提醒列表当天划线；稍后不划线。'] },
@@ -6427,7 +6428,7 @@ function loadReminderState(){
     d.completedOccurrences = {};
   }
   pruneHandledReminderOccurrences(d.handledOccurrences);
-  pruneHandledReminderOccurrences(d.completedOccurrences);
+  pruneCompletedReminderOccurrences(d.completedOccurrences);
   if (typeof d.homeNoticeEnabled !== 'boolean') d.homeNoticeEnabled = true;
   delete d.homeNoticeDismissedDate;
   if (!d.groupCollapsed || typeof d.groupCollapsed !== 'object') {
@@ -6553,6 +6554,14 @@ function pruneHandledReminderOccurrences(handled){
   });
 }
 
+function pruneCompletedReminderOccurrences(completed){
+  var today = wTodayStr();
+  Object.keys(completed).forEach(function(key){
+    var parts = key.split('|');
+    if (!parts[1] || parts[1] !== today) delete completed[key];
+  });
+}
+
 function reminderCompletedForDate(item, date){
   if (!item || item.mode === 'once') return false;
   var day = date || new Date();
@@ -6635,6 +6644,7 @@ function reminderSortedItems(){
 
 function renderReminderPage(){
   if (!reminderData) return;
+  pruneCompletedReminderOccurrences(reminderData.completedOccurrences);
   if (archiveCompletedReminders()) saveReminderState(false);
   var ordered = reminderSortedItems();
   setTxt('reminder-count', String(reminderData.items.length));
@@ -6744,7 +6754,7 @@ function applyConfirmedReminders(){
   if (!changed) return;
   reminderData.items = keep;
   pruneHandledReminderOccurrences(reminderData.handledOccurrences);
-  pruneHandledReminderOccurrences(reminderData.completedOccurrences);
+  pruneCompletedReminderOccurrences(reminderData.completedOccurrences);
   saveReminderState(false);
   renderReminderPage();
   renderHomeNotice();

@@ -76,7 +76,7 @@ function loadReminderState(){
     d.completedOccurrences = {};
   }
   pruneHandledReminderOccurrences(d.handledOccurrences);
-  pruneHandledReminderOccurrences(d.completedOccurrences);
+  pruneCompletedReminderOccurrences(d.completedOccurrences);
   if (typeof d.homeNoticeEnabled !== 'boolean') d.homeNoticeEnabled = true;
   delete d.homeNoticeDismissedDate;
   if (!d.groupCollapsed || typeof d.groupCollapsed !== 'object') {
@@ -202,6 +202,14 @@ function pruneHandledReminderOccurrences(handled){
   });
 }
 
+function pruneCompletedReminderOccurrences(completed){
+  var today = wTodayStr();
+  Object.keys(completed).forEach(function(key){
+    var parts = key.split('|');
+    if (!parts[1] || parts[1] !== today) delete completed[key];
+  });
+}
+
 function reminderCompletedForDate(item, date){
   if (!item || item.mode === 'once') return false;
   var day = date || new Date();
@@ -284,6 +292,7 @@ function reminderSortedItems(){
 
 function renderReminderPage(){
   if (!reminderData) return;
+  pruneCompletedReminderOccurrences(reminderData.completedOccurrences);
   if (archiveCompletedReminders()) saveReminderState(false);
   var ordered = reminderSortedItems();
   setTxt('reminder-count', String(reminderData.items.length));
@@ -393,7 +402,7 @@ function applyConfirmedReminders(){
   if (!changed) return;
   reminderData.items = keep;
   pruneHandledReminderOccurrences(reminderData.handledOccurrences);
-  pruneHandledReminderOccurrences(reminderData.completedOccurrences);
+  pruneCompletedReminderOccurrences(reminderData.completedOccurrences);
   saveReminderState(false);
   renderReminderPage();
   renderHomeNotice();

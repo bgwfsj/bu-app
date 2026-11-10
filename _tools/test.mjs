@@ -619,8 +619,8 @@ async function run() {
       cleanupConfirmOpened: true,
       cleanupCalls: 1,
       aboutOpened: true,
-      changelogCount: 64,
-      aboutVersion: '6.0.5',
+      changelogCount: 65,
+      aboutVersion: '6.0.6',
       updateBackupExposed: true,
       updateCalls: 1,
       handledBack: true,
@@ -923,6 +923,22 @@ async function run() {
       saveReminder();
       var edited = reminderItemById(weekly.id);
       var dailyItem = reminderData.items.filter(function(item){ return item.mode === 'daily'; })[0];
+      var yearlyItem = reminderData.items.filter(function(item){ return item.mode === 'yearly'; })[0];
+      var yearlyKey = reminderOccurrenceKey(yearlyItem, new Date());
+      reminderData.completedOccurrences[yearlyKey] = true;
+      renderReminderPage();
+      var yearlyRow = byId('reminder-list').querySelector('[data-drag-id="' + yearlyItem.id + '"]');
+      var nonReminderDayNotStruck = !reminderOccursOnDate(yearlyItem, new Date()) &&
+        !!yearlyRow && !yearlyRow.classList.contains('done-today');
+      delete reminderData.completedOccurrences[yearlyKey];
+      var staleDate = new Date();
+      staleDate.setDate(staleDate.getDate() - 1);
+      var staleKey = weekly.id + '|' + staleDate.getFullYear() + '-' +
+        pad2(staleDate.getMonth() + 1) + '-' + pad2(staleDate.getDate()) + '|' + weekly.time;
+      reminderData.completedOccurrences[staleKey] = true;
+      pruneCompletedReminderOccurrences(reminderData.completedOccurrences);
+      var staleCompletionRemoved = !reminderData.completedOccurrences[staleKey];
+      renderReminderPage();
       var dailyKey = reminderOccurrenceKey(dailyItem, new Date());
       reminderData.handledOccurrences[dailyKey] = true;
       renderReminderPage();
@@ -1072,6 +1088,8 @@ async function run() {
         snoozedRowStillNormal: snoozedRowStillNormal,
         completedTodayStruck: completedTodayStruck,
         restoredTomorrow: restoredTomorrow,
+        nonReminderDayNotStruck: nonReminderDayNotStruck,
+        staleCompletionRemoved: staleCompletionRemoved,
         allHaveNext: rows.every(function(row){ return !!row.next; }),
         orderValid: rows.every(function(row, index){
           return index === 0 || rows[index - 1].ts <= row.ts;
@@ -1120,6 +1138,8 @@ async function run() {
     assert.equal(reminders.snoozedRowStillNormal, true);
     assert.equal(reminders.completedTodayStruck, true);
     assert.equal(reminders.restoredTomorrow, true);
+    assert.equal(reminders.nonReminderDayNotStruck, true);
+    assert.equal(reminders.staleCompletionRemoved, true);
     assert.equal(reminders.allHaveNext, true);
     assert.equal(reminders.orderValid, true);
     assert.equal(reminders.stored, 5);
