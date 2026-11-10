@@ -6,7 +6,7 @@
 
 - 应用名：补
 - 包名：`com.quitsmoke.app`
-- 当前版本：6.0.6
+- 当前版本：6.0.7
 - 最低 Android：API 24
 - Target SDK：34
 - 仓库：`bgwfsj/bu-app`（公开）
@@ -170,7 +170,7 @@ bu_pre_restore_v1    完整恢复前的安全副本
 - 模式：once、daily、weekly、monthly、yearly。
 - 一次性提醒到期后自动进入归档。
 - 重复提醒不会因一次触发而停止。
-- 重复提醒的完成状态记录在 `completedOccurrences`，与仅用于隐藏首页通知/稍后的 `handledOccurrences` 分开。渲染提醒页及同步通知结果时会调用 `pruneCompletedReminderOccurrences()`，删除所有日期不是今天的完成键。当前 occurrence key 存在且规则确实命中今天时，提醒行才显示 `.done-today`；周/月/年提醒在非提醒日即使存在旧完成记录也不得划线。
+- 重复提醒的完成状态记录在 `completedOccurrences`，与仅用于隐藏首页通知/稍后的 `handledOccurrences` 分开。渲染提醒页及同步通知结果时会调用 `pruneCompletedReminderOccurrences()`，删除所有日期不是今天的完成键。当前 occurrence key 存在且规则确实命中今天时显示 `.done-today`；周/月/年提醒在非提醒日由 `reminderOffCycleToday()` 添加 `.inactive-today`，默认划线，到提醒日恢复普通状态，完成后再显示 `.done-today`。
 - 手动删除先进入归档。
 - 归档可移回或彻底删除。
 - 移回已过期的一次性提醒时，会安排最近的未来同名时间。

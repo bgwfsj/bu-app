@@ -217,6 +217,11 @@ function reminderCompletedForDate(item, date){
     !!reminderData.completedOccurrences[reminderOccurrenceKey(item, day)];
 }
 
+function reminderOffCycleToday(item, date){
+  if (!item || item.mode === 'once' || item.mode === 'daily') return false;
+  return !reminderOccursOnDate(item, date || new Date());
+}
+
 function renderHomeNotice(){
   var box = byId('home-notice');
   if (!box || !reminderData) return;
@@ -309,7 +314,9 @@ function renderReminderPage(){
       '<div class="reminder-group-list">' + rows.map(function(row){
         var item = row.item;
         var doneToday = reminderCompletedForDate(item, new Date());
+        var offCycleToday = reminderOffCycleToday(item, new Date());
         return '<div class="reminder-item' + (doneToday ? ' done-today' : '') +
+          (offCycleToday ? ' inactive-today' : '') +
           '" data-drag-kind="reminder" data-drag-state="active" data-drag-id="' +
           escHtml(item.id) + '"' + actionAttrs('editReminder', [item.id]) + '>' +
           '<span class="reminder-time-chip">' + escHtml(item.time) + '</span>' +

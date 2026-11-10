@@ -573,10 +573,14 @@ body[data-page="settings"] #page-pager{opacity:0;pointer-events:none}
 .reminder-item.drag-left,.reminder-archive-item.drag-left{border-color:rgba(229,72,77,.26);background:#fff5f5}
 .reminder-item.drag-right,.reminder-archive-item.drag-right{border-color:rgba(10,168,122,.24);background:#f3fbf8}
 .reminder-item.past{opacity:.58}
-.reminder-item.done-today{opacity:.7;background:#f8faf9}
+.reminder-item.done-today,
+.reminder-item.inactive-today{opacity:.7;background:#f8faf9}
 .reminder-item.done-today .reminder-time-chip,
-.reminder-item.done-today .reminder-copy b{text-decoration:line-through;text-decoration-thickness:1px}
-.reminder-item.done-today .reminder-copy b{color:#71847d}
+.reminder-item.done-today .reminder-copy b,
+.reminder-item.inactive-today .reminder-time-chip,
+.reminder-item.inactive-today .reminder-copy b{text-decoration:line-through;text-decoration-thickness:1px}
+.reminder-item.done-today .reminder-copy b,
+.reminder-item.inactive-today .reminder-copy b{color:#71847d}
 .reminder-time-chip{flex:0 0 43px;height:43px;border-radius:12px;background:rgba(10,168,122,.07);color:#087d5c;display:grid;place-items:center;font:11px ui-monospace,"SF Mono",Menlo,Consolas,monospace;letter-spacing:-.02em}
 .reminder-copy{flex:1;min-width:0}
 .reminder-copy b{display:block;font-size:var(--fs-card);font-weight:500;color:#334b42;line-height:1.4;overflow-wrap:anywhere}
@@ -2478,6 +2482,7 @@ byId('mask').addEventListener('click', closeSheet);
    应用版本记录
    ============================================================ */
 var APP_CHANGELOG = [
+  { version: '6.0.7', date: '2026-11-10', changes: ['周、月、年提醒在非提醒日现在默认显示划线状态。', '到提醒日恢复普通显示，当天确认完成后再划线；每天和一次性提醒保持原逻辑。'] },
   { version: '6.0.6', date: '2026-11-10', changes: ['修复每周、每月、每年提醒在非提醒日仍显示当天划线的问题。', '完成记录现在只保留当天；渲染提醒列表时会清除非今天的完成键，仅在规则命中今天且当天已确认时划线。'] },
   { version: '6.0.5', date: '2026-11-10', changes: ['修复首页提醒卡在纵向 Flex 布局中被压缩到接近零高度、只剩上下边框形成红线的问题。', '首页提醒卡现在禁止收缩，有提醒时保持完整高度，无提醒时继续完全隐藏。'] },
   { version: '6.0.4', date: '2026-11-10', changes: ['修复首页无提醒或提醒全部处理后，功能块上方残留红色边框线的问题。', '空提醒容器现在会清空内容，并同时移除高度、边距、内边距和边框。'] },
@@ -6569,6 +6574,11 @@ function reminderCompletedForDate(item, date){
     !!reminderData.completedOccurrences[reminderOccurrenceKey(item, day)];
 }
 
+function reminderOffCycleToday(item, date){
+  if (!item || item.mode === 'once' || item.mode === 'daily') return false;
+  return !reminderOccursOnDate(item, date || new Date());
+}
+
 function renderHomeNotice(){
   var box = byId('home-notice');
   if (!box || !reminderData) return;
@@ -6661,7 +6671,9 @@ function renderReminderPage(){
       '<div class="reminder-group-list">' + rows.map(function(row){
         var item = row.item;
         var doneToday = reminderCompletedForDate(item, new Date());
+        var offCycleToday = reminderOffCycleToday(item, new Date());
         return '<div class="reminder-item' + (doneToday ? ' done-today' : '') +
+          (offCycleToday ? ' inactive-today' : '') +
           '" data-drag-kind="reminder" data-drag-state="active" data-drag-id="' +
           escHtml(item.id) + '"' + actionAttrs('editReminder', [item.id]) + '>' +
           '<span class="reminder-time-chip">' + escHtml(item.time) + '</span>' +

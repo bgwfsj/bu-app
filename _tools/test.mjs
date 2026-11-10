@@ -619,8 +619,8 @@ async function run() {
       cleanupConfirmOpened: true,
       cleanupCalls: 1,
       aboutOpened: true,
-      changelogCount: 65,
-      aboutVersion: '6.0.6',
+      changelogCount: 66,
+      aboutVersion: '6.0.7',
       updateBackupExposed: true,
       updateCalls: 1,
       handledBack: true,
@@ -928,8 +928,9 @@ async function run() {
       reminderData.completedOccurrences[yearlyKey] = true;
       renderReminderPage();
       var yearlyRow = byId('reminder-list').querySelector('[data-drag-id="' + yearlyItem.id + '"]');
-      var nonReminderDayNotStruck = !reminderOccursOnDate(yearlyItem, new Date()) &&
-        !!yearlyRow && !yearlyRow.classList.contains('done-today');
+      var nonReminderDayDefaultStruck = !reminderOccursOnDate(yearlyItem, new Date()) &&
+        !!yearlyRow && yearlyRow.classList.contains('inactive-today') &&
+        getComputedStyle(yearlyRow.querySelector('.reminder-copy b')).textDecorationLine.indexOf('line-through') >= 0;
       delete reminderData.completedOccurrences[yearlyKey];
       var staleDate = new Date();
       staleDate.setDate(staleDate.getDate() - 1);
@@ -1088,7 +1089,7 @@ async function run() {
         snoozedRowStillNormal: snoozedRowStillNormal,
         completedTodayStruck: completedTodayStruck,
         restoredTomorrow: restoredTomorrow,
-        nonReminderDayNotStruck: nonReminderDayNotStruck,
+        nonReminderDayDefaultStruck: nonReminderDayDefaultStruck,
         staleCompletionRemoved: staleCompletionRemoved,
         allHaveNext: rows.every(function(row){ return !!row.next; }),
         orderValid: rows.every(function(row, index){
@@ -1138,7 +1139,7 @@ async function run() {
     assert.equal(reminders.snoozedRowStillNormal, true);
     assert.equal(reminders.completedTodayStruck, true);
     assert.equal(reminders.restoredTomorrow, true);
-    assert.equal(reminders.nonReminderDayNotStruck, true);
+    assert.equal(reminders.nonReminderDayDefaultStruck, true);
     assert.equal(reminders.staleCompletionRemoved, true);
     assert.equal(reminders.allHaveNext, true);
     assert.equal(reminders.orderValid, true);
