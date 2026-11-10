@@ -63,6 +63,9 @@ public class MainActivity extends AppCompatActivity {
     private boolean firstVisitResume = true;
     private boolean leftAppSinceResume = false;
     private boolean ignoreNextResume = false;
+    private boolean activityResumed = false;
+    private boolean webViewPageReady = false;
+    private boolean pendingPageOpenScheduled = false;
     private boolean startupUpdateCheckScheduled = false;
     private BroadcastReceiver screenStateReceiver;
     private final Handler liveTimerHandler = new Handler(Looper.getMainLooper());
@@ -140,6 +143,12 @@ public class MainActivity extends AppCompatActivity {
 
         webView.setWebViewClient(new WebViewClient() {
             @Override
+            public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
+                super.onPageStarted(view, url, favicon);
+                webViewPageReady = false;
+            }
+
+            @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 String url = request.getUrl().toString();
                 if (url.startsWith("file:///android_asset")) return false;
@@ -157,7 +166,8 @@ public class MainActivity extends AppCompatActivity {
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
                 Log.d(TAG, "Page loaded: " + url);
-                openPendingPage(view);
+                webViewPageReady = true;
+                schedulePendingPageOpen();
                 if (!startupUpdateCheckScheduled) {
                     startupUpdateCheckScheduled = true;
                     liveTimerHandler.postDelayed(() -> {
@@ -458,6 +468,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void openPendingPage(WebView view) {
+        if (!webViewPageReady || view == null) return;
         Intent intent = getIntent();
         if (intent == null) return;
         String page = intent.getStringExtra("open_page");
@@ -518,11 +529,22 @@ public class MainActivity extends AppCompatActivity {
         intent.removeExtra("notification_id");
     }
 
+    private void schedulePendingPageOpen() {
+        if (!activityResumed || !webViewPageReady || webView == null || pendingPageOpenScheduled) return;
+        pendingPageOpenScheduled = true;
+        liveTimerHandler.postDelayed(() -> {
+            pendingPageOpenScheduled = false;
+            if (activityResumed && webViewPageReady && webView != null) {
+                openPendingPage(webView);
+            }
+        }, 120);
+    }
+
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
-        if (webView != null) openPendingPage(webView);
+        schedulePendingPageOpen();
     }
 
     private void handlePickedFile(Intent data) {
@@ -565,6 +587,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
+        activityResumed = false;
         liveTimerHandler.removeCallbacks(liveTimerTick);
         if (webView != null) webView.onPause();
     }
@@ -572,6 +595,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        activityResumed = true;
         boolean interactive = isScreenInteractive();
         boolean locked = isDeviceLocked();
         boolean countVisit = false;
@@ -589,6 +613,7 @@ public class MainActivity extends AppCompatActivity {
         liveTimerHandler.post(liveTimerTick);
         ReminderScheduler.schedule(this);
         StandaloneReminderScheduler.rescheduleAll(this);
+        if (webView != null) webView.onResume();
         if (webView != null) {
             webView.evaluateJavascript(
                 "(window.applyConfirmedReminders && window.applyConfirmedReminders()," +
@@ -596,7 +621,7 @@ public class MainActivity extends AppCompatActivity {
                 null
             );
         }
-        if (webView != null) webView.onResume();
+        schedulePendingPageOpen();
     }
 
     @Override
