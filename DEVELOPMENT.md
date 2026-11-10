@@ -6,7 +6,7 @@
 
 - 应用名：补
 - 包名：`com.quitsmoke.app`
-- 当前版本：5.9.17
+- 当前版本：5.9.18
 - 最低 Android：API 24
 - Target SDK：34
 - 仓库：`bgwfsj/bu-app`（公开）
@@ -116,7 +116,7 @@ todo_app_v1          待办与归档
 reminder_app_v1      提醒与归档
 ledger_app_v1        记账
 meals_app_v1         三餐
-bu_home_layout_v1    首页布局（classic / honeycomb）
+bu_home_layout_v1    首页布局（classic / honeycomb / facet）
 event-ledger-v2      旧记账只读迁移
 bu_pre_restore_v1    完整恢复前的安全副本
 ```
@@ -242,6 +242,8 @@ bu_pre_restore_v1    完整恢复前的安全副本
 4. 跟随 GitHub CDN 302
 5. 校验 GitHub `digest` 中的 SHA-256
 6. 通过 FileProvider 打开系统安装器
+
+`MainActivity.onPageFinished()` 每个 Activity 生命周期只安排一次启动更新检查，约延迟 2 秒后调用 `AppUpdater.checkOnStartup()`。启动模式必须静默：无更新、网络失败或已有检查/下载任务时不弹 Toast 或对话框；只有发现更高版本才显示更新弹窗。设置页手动检查继续使用 `AppUpdater.check()`，保留“正在检查”和“已是最新”反馈。
 
 下载时必须在通知栏显示进度百分比和已下载/总大小。下载完成后同一条通知更新状态。
 

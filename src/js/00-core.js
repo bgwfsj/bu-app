@@ -53,6 +53,7 @@ var ledgerTreeOpen = false;
 var mealData = null;
 var mealCalendarOffset = 0;
 var homeLayoutMode = 'classic';
+var homeLayoutResizeBound = false;
 var workoutFrameId = 0;
 var workoutLastPaint = 0;
 var page = 0;

@@ -632,26 +632,58 @@ function renderDashboard(){
 function renderHomeLayoutSettings(){
   var classic = byId('home-layout-classic-state');
   var honeycomb = byId('home-layout-honeycomb-state');
+  var facet = byId('home-layout-facet-state');
   if (classic) classic.textContent = homeLayoutMode === 'classic' ? '使用中' : '切换 ›';
   if (honeycomb) honeycomb.textContent = homeLayoutMode === 'honeycomb' ? '使用中' : '切换 ›';
+  if (facet) facet.textContent = homeLayoutMode === 'facet' ? '使用中' : '切换 ›';
+}
+
+function syncHomeLayoutGeometry(){
+  var grid = document.querySelector('.home-grid');
+  if (!grid) return;
+  if (homeLayoutMode === 'honeycomb') {
+    var width = grid.clientWidth || grid.getBoundingClientRect().width;
+    if (width > 0) {
+      grid.style.setProperty('--hex-size', (width * .4) + 'px');
+      grid.style.setProperty('--hex-height', (width * .36) + 'px');
+      grid.style.setProperty('--honeycomb-height', (width * 1.134) + 'px');
+      grid.style.height = (width * 1.134) + 'px';
+      width = grid.clientWidth || width;
+      grid.style.setProperty('--hex-size', (width * .4) + 'px');
+      grid.style.setProperty('--hex-height', (width * .36) + 'px');
+      grid.style.setProperty('--honeycomb-height', (width * 1.134) + 'px');
+      grid.style.height = (width * 1.134) + 'px';
+    }
+  } else {
+    grid.style.removeProperty('--hex-size');
+    grid.style.removeProperty('--hex-height');
+    grid.style.removeProperty('--honeycomb-height');
+    grid.style.removeProperty('height');
+  }
 }
 
 function applyHomeLayout(mode){
-  homeLayoutMode = mode === 'honeycomb' ? 'honeycomb' : 'classic';
+  homeLayoutMode = mode === 'honeycomb' || mode === 'facet' ? mode : 'classic';
   var grid = document.querySelector('.home-grid');
   if (grid) grid.setAttribute('data-layout', homeLayoutMode);
+  syncHomeLayoutGeometry();
   renderHomeLayoutSettings();
 }
 
 function setHomeLayout(mode){
   applyHomeLayout(mode);
   storeSet(HOME_LAYOUT_KEY, homeLayoutMode);
-  toast(homeLayoutMode === 'honeycomb' ? '已切换为拼图布局' : '已切换为经典布局');
+  toast(homeLayoutMode === 'honeycomb' ? '已切换为拼图布局' :
+    homeLayoutMode === 'facet' ? '已切换为中心折面布局' : '已切换为经典布局');
 }
 
 function initHomeLayout(){
   var mode = storeGet(HOME_LAYOUT_KEY, 'classic');
   applyHomeLayout(mode);
+  if (!homeLayoutResizeBound) {
+    homeLayoutResizeBound = true;
+    window.addEventListener('resize', syncHomeLayoutGeometry);
+  }
 }
 
 var webVisitPreviewCounted = false;

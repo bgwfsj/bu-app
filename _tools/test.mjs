@@ -498,9 +498,28 @@ async function run() {
       var honeycombApplied = document.querySelector('.home-grid').getAttribute('data-layout') === 'honeycomb' &&
         byId('home-layout-honeycomb-state').textContent.trim() === '使用中';
       var honeycombSaved = JSON.parse(localStorage.getItem(HOME_LAYOUT_KEY)) === 'honeycomb';
+      var brandHiddenInHoneycomb = getComputedStyle(document.querySelector('.home-brand-card')).display === 'none';
       var tileClip = getComputedStyle(document.querySelector('.home-grid .home-card')).clipPath.indexOf('polygon') === 0;
+      var honeyGridRect = document.querySelector('.home-grid').getBoundingClientRect();
+      var honeyCardRect = document.querySelector('.home-grid .home-card').getBoundingClientRect();
+      var honeycombAdaptive = Math.abs(honeyCardRect.width / honeyGridRect.width - .4) < .015 &&
+        Math.abs(honeyGridRect.height / honeyGridRect.width - 1.134) < .03;
+      byId('btn-home-layout-facet').click();
+      var facetApplied = document.querySelector('.home-grid').getAttribute('data-layout') === 'facet' &&
+        byId('home-layout-facet-state').textContent.trim() === '使用中';
+      var facetClip = getComputedStyle(document.querySelector('.home-grid .home-card')).clipPath.indexOf('polygon') === 0;
+      var brandHiddenInFacet = getComputedStyle(document.querySelector('.home-brand-card')).display === 'none';
       byId('btn-home-layout-classic').click();
       var classicRestored = document.querySelector('.home-grid').getAttribute('data-layout') === 'classic';
+      var reminderCard = document.querySelector('.home-grid .reminder-card');
+      var fitnessCard = document.querySelector('.home-grid .fitness-card');
+      var brandCard = document.querySelector('.home-grid .home-brand-card');
+      var reminderNormal = Math.abs(reminderCard.getBoundingClientRect().width - fitnessCard.getBoundingClientRect().width) < 1 &&
+        Math.abs(reminderCard.getBoundingClientRect().height - fitnessCard.getBoundingClientRect().height) < 1;
+      var brandBesideReminder = brandCard.nextElementSibling === reminderCard &&
+        brandCard.getBoundingClientRect().left < reminderCard.getBoundingClientRect().left &&
+        Math.abs(brandCard.getBoundingClientRect().top - reminderCard.getBoundingClientRect().top) < 1 &&
+        brandCard.textContent.trim() === '补';
       var dataActions = byId('p-settings').querySelectorAll('[data-action="exportAppBackup"], [data-action="chooseAppBackup"]').length;
       var cleanupButton = byId('p-settings').querySelector('[data-action="requestCleanupOldBackups"]');
       cleanupButton.click();
@@ -520,8 +539,15 @@ async function run() {
         opened: opened,
         honeycombApplied: honeycombApplied,
         honeycombSaved: honeycombSaved,
+        brandHiddenInHoneycomb: brandHiddenInHoneycomb,
         tileClip: tileClip,
+        honeycombAdaptive: honeycombAdaptive,
+        facetApplied: facetApplied,
+        facetClip: facetClip,
+        brandHiddenInFacet: brandHiddenInFacet,
         classicRestored: classicRestored,
+        reminderNormal: reminderNormal,
+        brandBesideReminder: brandBesideReminder,
         dataActions: dataActions,
         cleanupButton: !!cleanupButton,
         cleanupConfirmOpened: cleanupConfirmOpened,
@@ -539,15 +565,22 @@ async function run() {
       opened: true,
       honeycombApplied: true,
       honeycombSaved: true,
+      brandHiddenInHoneycomb: true,
       tileClip: true,
+      honeycombAdaptive: true,
+      facetApplied: true,
+      facetClip: true,
+      brandHiddenInFacet: true,
       classicRestored: true,
+      reminderNormal: true,
+      brandBesideReminder: true,
       dataActions: 2,
       cleanupButton: true,
       cleanupConfirmOpened: true,
       cleanupCalls: 1,
       aboutOpened: true,
-      changelogCount: 56,
-      aboutVersion: '5.9.17',
+      changelogCount: 57,
+      aboutVersion: '5.9.18',
       updateBackupExposed: true,
       updateCalls: 1,
       handledBack: true,
@@ -562,26 +595,20 @@ async function run() {
       renderVisitStats();
       var text = byId('home-visit-count').textContent.trim();
       var copyText = byId('home-visit-copy').textContent.trim();
-      var copySpecial = byId('home-visit-copy').classList.contains('special');
       var visible = !byId('home-visit-stats').hidden;
-      window.AppNative = {
-        getAppVisitStats: function(){ return '{"total":1000,"today":3}'; }
-      };
-      renderVisitStats();
-      var specialText = byId('home-visit-copy').textContent.trim();
-      var specialClass = byId('home-visit-copy').classList.contains('special');
-      var inTopLeft = !!byId('home-visit-stats').closest('.home-top');
-      var homeMarkRemoved = !document.querySelector('.home-mark');
+      var belowTitle = !!byId('home-visit-stats').closest('.home-hero');
+      var homeMarkRestored = document.querySelector('.home-mark') &&
+        document.querySelector('.home-mark').textContent.indexOf('补') >= 0 &&
+        document.querySelector('.home-mark').textContent.indexOf('人生难求圆满') >= 0;
+      var copyBelowCount = byId('home-visit-count').nextElementSibling === byId('home-visit-copy');
       window.AppNative = originalNative;
       renderVisitStats();
       return {
         text: text,
         copyText: copyText,
-        copySpecial: copySpecial,
-        specialText: specialText,
-        specialClass: specialClass,
-        inTopLeft: inTopLeft,
-        homeMarkRemoved: homeMarkRemoved,
+        belowTitle: belowTitle,
+        homeMarkRestored: homeMarkRestored,
+        copyBelowCount: copyBelowCount,
         yBankSize: Object.keys(VISIT_Y_COPY).length,
         yAllFive: Object.keys(VISIT_Y_COPY).every(function(key){
           return VISIT_Y_COPY[key].length === 5;
@@ -593,11 +620,9 @@ async function run() {
     })()`);
     assert.equal(visitStats.text, '此间相逢 128 次 · 今日 3 次');
     assert.ok(visitStats.copyText.length > 0);
-    assert.equal(visitStats.copySpecial, false);
-    assert.ok(visitStats.specialText.indexOf('一千不是尽头') >= 0);
-    assert.equal(visitStats.specialClass, true);
-    assert.equal(visitStats.inTopLeft, true);
-    assert.equal(visitStats.homeMarkRemoved, true);
+    assert.equal(visitStats.belowTitle, true);
+    assert.equal(visitStats.homeMarkRestored, true);
+    assert.equal(visitStats.copyBelowCount, true);
     assert.equal(visitStats.yBankSize, 20);
     assert.equal(visitStats.yAllFive, true);
     assert.equal(visitStats.visible, true);
@@ -1495,7 +1520,7 @@ async function run() {
       saveReminderState();
       saveLedgerState();
       saveMealState();
-      setHomeLayout('honeycomb');
+      setHomeLayout('facet');
       var backup = appBackupPayload();
       backup.data.water.dailyGoal = 2600;
       receiveAppBackup(JSON.stringify(backup));
@@ -1533,7 +1558,7 @@ async function run() {
       };
     })()`);
     assert.equal(restored.waterGoal, 2600);
-    assert.equal(restored.homeLayout, 'honeycomb');
+    assert.equal(restored.homeLayout, 'facet');
     assert.equal(restored.fitnessSessions, 1);
     assert.equal(restored.todoItems, 2);
     assert.equal(restored.todoArchived, 2);
@@ -1545,7 +1570,7 @@ async function run() {
     assert.equal(restored.previousGoal, 2345);
     assert.equal(restored.previousReminders, 5);
     assert.equal(restored.previousMeals, 4);
-    assert.equal(restored.previousHomeLayout, 'honeycomb');
+    assert.equal(restored.previousHomeLayout, 'facet');
     assert.equal(restored.previousReminderArchived, 1);
     assert.equal(restored.previousTodoArchived, 2);
 

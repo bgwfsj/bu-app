@@ -37,8 +37,16 @@ public final class AppUpdater {
     private AppUpdater() {}
 
     public static void check(MainActivity activity) {
+        check(activity, false);
+    }
+
+    public static void checkOnStartup(MainActivity activity) {
+        check(activity, true);
+    }
+
+    private static void check(MainActivity activity, boolean silent) {
         if (!checking.compareAndSet(false, true)) return;
-        toast(activity, "正在检查更新…");
+        if (!silent) toast(activity, "正在检查更新…");
         new Thread(() -> {
             try {
                 HttpURLConnection connection = openConnection(
@@ -57,7 +65,7 @@ public final class AppUpdater {
                 String version = tag.startsWith("v") ? tag.substring(1) : tag;
                 String current = currentVersion(activity);
                 if (!isNewer(version, current)) {
-                    toast(activity, "当前已是最新版本 " + current);
+                    if (!silent) toast(activity, "当前已是最新版本 " + current);
                     return;
                 }
 
@@ -77,7 +85,7 @@ public final class AppUpdater {
                 JSONObject finalAsset = apkAsset;
                 activity.runOnUiThread(() -> showUpdateDialog(activity, tag, version, finalAsset));
             } catch (Exception error) {
-                toast(activity, "检查更新失败：" + safeMessage(error));
+                if (!silent) toast(activity, "检查更新失败：" + safeMessage(error));
             } finally {
                 checking.set(false);
             }

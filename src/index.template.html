@@ -20,17 +20,17 @@
     <section class="page on" id="p-home">
       <div class="home-top">
         <div class="home-identity">
-          <div class="home-visit-stats" id="home-visit-stats" aria-live="polite">
-            <div id="home-visit-count"></div>
-            <div class="home-visit-copy" id="home-visit-copy"></div>
-          </div>
+          <div class="home-mark">补<span>人生难求圆满</span></div>
         </div>
         <div class="home-meta"><div class="home-date" id="home-date"></div><button class="home-data-btn" id="btn-app-settings" data-action="openSettingsPage" title="设置" aria-label="设置">⋯</button></div>
       </div>
       <div class="home-hero">
         <div class="home-eyebrow">TODAY</div>
         <h1 class="home-title">不圆满处，<br>慢慢补。</h1>
-        <p class="home-sub">人生难求圆满，日日可补。把训练、喝水、戒烟和每一件小事，一点点补回来。</p>
+        <div class="home-visit-stats home-hero-stats" id="home-visit-stats" aria-live="polite">
+          <div id="home-visit-count"></div>
+          <div class="home-visit-copy" id="home-visit-copy"></div>
+        </div>
       </div>
       <div class="home-notice" id="home-notice" hidden>
         <button class="home-notice-main" data-action="goPage" data-args="[7]">
@@ -41,11 +41,11 @@
         <button class="home-notice-close" data-action="dismissHomeNoticeToday" aria-label="今天不再提示">×</button>
       </div>
       <div class="home-grid">
-        <button class="home-card" data-action="goPage" data-args="[1]">
+        <button class="home-card fitness-card" data-action="goPage" data-args="[1]">
           <span class="home-icon">练</span><b>训练</b>
           <small id="home-fitness-copy">记录今天的训练</small>
         </button>
-        <button class="home-card" data-action="goPage" data-args="[2]">
+        <button class="home-card water-card" data-action="goPage" data-args="[2]">
           <span class="home-icon">水</span><b>喝水</b>
           <small id="home-water-copy">今天 0 / 2000 ml</small>
         </button>
@@ -53,11 +53,11 @@
           <span class="home-icon">饭</span><b>三餐</b>
           <small id="home-meal-copy">记录今天吃了什么</small>
         </button>
-        <button class="home-card" data-action="goPage" data-args="[4]">
+        <button class="home-card quit-card" data-action="goPage" data-args="[4]">
           <span class="home-icon">戒</span><b>戒烟</b>
           <small id="home-quit-copy">看看身体恢复进度</small>
         </button>
-        <button class="home-card" data-action="goPage" data-args="[5]">
+        <button class="home-card todo-card" data-action="goPage" data-args="[5]">
           <span class="home-icon">记</span><b>待办</b>
           <small id="home-todo-copy">今天没有待办</small>
         </button>
@@ -65,6 +65,7 @@
           <span class="home-icon">账</span><b>记账</b>
           <small id="home-ledger-copy">本月还没有记录</small>
         </button>
+        <div class="home-brand-card" aria-hidden="true"><span>补</span></div>
         <button class="home-card reminder-card" data-action="goPage" data-args="[7]">
           <span class="home-icon">醒</span><b>提醒</b>
           <small id="home-reminder-copy">没有独立提醒</small>
@@ -103,6 +104,9 @@
         </button>
         <button class="settings-row" id="btn-home-layout-honeycomb" data-action="setHomeLayout" data-args='["honeycomb"]'>
           <span><b>拼图布局</b><small>七个多边形拼成蜂巢结构</small></span><em id="home-layout-honeycomb-state">切换 ›</em>
+        </button>
+        <button class="settings-row" id="btn-home-layout-facet" data-action="setHomeLayout" data-args='["facet"]'>
+          <span><b>中心折面</b><small>直线切分整块长方形，中央五边形为核心</small></span><em id="home-layout-facet-state">切换 ›</em>
         </button>
       </div>
       <div class="settings-group">

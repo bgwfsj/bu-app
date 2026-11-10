@@ -63,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean firstVisitResume = true;
     private boolean leftAppSinceResume = false;
     private boolean ignoreNextResume = false;
+    private boolean startupUpdateCheckScheduled = false;
     private BroadcastReceiver screenStateReceiver;
     private final Handler liveTimerHandler = new Handler(Looper.getMainLooper());
     private final Runnable liveTimerTick = new Runnable() {
@@ -157,6 +158,14 @@ public class MainActivity extends AppCompatActivity {
                 super.onPageFinished(view, url);
                 Log.d(TAG, "Page loaded: " + url);
                 openPendingPage(view);
+                if (!startupUpdateCheckScheduled) {
+                    startupUpdateCheckScheduled = true;
+                    liveTimerHandler.postDelayed(() -> {
+                        if (!isFinishing() && !isDestroyed()) {
+                            AppUpdater.checkOnStartup(MainActivity.this);
+                        }
+                    }, 2000);
+                }
             }
 
             @Override
