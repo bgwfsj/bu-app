@@ -14,7 +14,6 @@ body[data-page="home"]::before{
 .home-hero{flex:0 0 auto;margin-bottom:23px}
 .home-eyebrow{font-size:10px;letter-spacing:.24em;color:var(--acc);font-weight:600;margin-bottom:9px}
 .home-title{font-size:36px;line-height:1.18;letter-spacing:-.045em;font-weight:400;color:#10241d;margin:0}
-.home-sub{font-size:11.5px;color:#7b8e95;margin:11px 0 0;line-height:1.65;letter-spacing:.04em}
 .home-notice{
   display:flex;align-items:center;width:100%;min-height:58px;margin:-5px 0 14px;
   border-radius:14px;border:1px solid rgba(229,72,77,.28);background:#fff1f1;
@@ -30,7 +29,7 @@ body[data-page="home"]::before{
 .home-notice-close{width:35px;align-self:stretch;border:0;border-left:1px solid rgba(229,72,77,.12);background:transparent;color:#bd5c61;font-size:15px;cursor:pointer}
 .home-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;flex:0 0 auto}
 .home-card{
-  min-height:137px;padding:15px;border-radius:17px;border:1px solid var(--line2);background:rgba(255,255,255,.82);
+  min-height:116px;padding:13px 14px;border-radius:17px;border:1px solid var(--line2);background:rgba(255,255,255,.82);
   text-align:left;cursor:pointer;box-shadow:0 18px 42px -38px rgba(13,32,45,.6);position:relative;overflow:hidden
 }
 .home-card::after{content:'';position:absolute;right:-24px;bottom:-30px;width:92px;height:92px;border-radius:50%;background:rgba(10,168,122,.045)}
@@ -41,7 +40,7 @@ body[data-page="home"]::before{
 .home-card.ledger-card::after{background:rgba(11,142,214,.05)}
 .home-card.reminder-card::after{background:rgba(230,146,63,.05)}
 .home-icon{
-  display:grid;place-items:center;width:31px;height:31px;border-radius:10px;margin-bottom:23px;
+  display:grid;place-items:center;width:31px;height:31px;border-radius:10px;margin-bottom:17px;
   background:rgba(10,168,122,.09);color:#0a8b67;font-size:12px;font-weight:600
 }
 .home-card:nth-child(2) .home-icon{background:rgba(11,142,214,.08);color:#0b83c3}
@@ -52,10 +51,6 @@ body[data-page="home"]::before{
 .home-card.reminder-card .home-icon{background:rgba(232,141,58,.09);color:#b36b28}
 .home-card b{display:block;font-size:16px;font-weight:500;color:#173029;letter-spacing:.04em}
 .home-card small{display:block;font-size:9.5px;line-height:1.45;color:#8b9ba2;margin-top:5px}
-.home-card.compact{min-height:98px;padding:13px 14px}
-.home-card.compact .home-icon{width:28px;height:28px;margin-bottom:12px;font-size:11px}
-.home-card.compact b{font-size:14px}
-.home-card.compact small{font-size:9px}
 .home-brand-card{
   cursor:default;background:rgba(255,255,255,.68)
 }

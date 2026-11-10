@@ -29,6 +29,7 @@ const scriptNames = [
   '52-meals.js',
   '60-fitness.js',
   '70-todo.js',
+  '72-home.js',
   '75-reminder.js',
   '80-ledger.js',
   '85-snooze.js',

@@ -82,6 +82,11 @@ function byId(id){ return document.getElementById(id); }
 function bySelector(sel, root){ return (root || document).querySelectorAll(sel); }
 function each(list, fn){ for (var i = 0; i < list.length; i++) fn(list[i], i); }
 function pad2(n){ return n < 10 ? '0' + n : '' + n; }
+function escHtml(v){
+  return String(v).replace(/[&<>"']/g, function(c){
+    return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+  });
+}
 
 // 统一交互入口：动态内容只声明 action，不直接拼 on* 事件代码。
 var APP_ACTION_NAMES = {

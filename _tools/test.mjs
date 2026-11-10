@@ -157,6 +157,17 @@ function staticChecks() {
   assert.doesNotMatch(html, /\son(?:click|change|input|submit)=/i, 'inline event handler remains');
   assert.doesNotMatch(html, /<script\s+[^>]*src=/i, 'external script found');
   assert.doesNotMatch(html, /<link\s+[^>]*href=/i, 'external stylesheet found');
+
+  const registryMatch = html.match(/var APP_ACTION_NAMES = \{([\s\S]*?)\n\};/);
+  assert.ok(registryMatch, 'APP_ACTION_NAMES registry missing');
+  const registered = new Set(
+    [...registryMatch[1].matchAll(/^\s*([A-Za-z_$][\w$]*)\s*:\s*true\s*,?/gm)].map(match => match[1])
+  );
+  const used = new Set();
+  for (const match of html.matchAll(/\bdata-(?:change-)?action="([A-Za-z_$][\w$]*)"/g)) used.add(match[1]);
+  for (const match of html.matchAll(/\bactionAttrs\('([A-Za-z_$][\w$]*)'/g)) used.add(match[1]);
+  const unregistered = [...used].filter(name => !registered.has(name)).sort();
+  assert.deepEqual(unregistered, [], `unregistered app actions: ${unregistered.join(', ')}`);
 }
 
 async function run() {
@@ -177,6 +188,10 @@ async function run() {
     await cdp.call('Page.reload', { ignoreCache: true });
     await waitForApp(cdp);
     await delay(300);
+    const missingActionFunctions = await evaluate(cdp, `Object.keys(APP_ACTION_NAMES).filter(function(name){
+      return typeof window[name] !== 'function';
+    }).sort()`);
+    assert.deepEqual(missingActionFunctions, [], `missing action functions: ${missingActionFunctions.join(', ')}`);
 
     if (process.env.BU_TEST_DEBUG) {
       const dom = await evaluate(cdp, `['p-home','p-fitness','p-water','p-meals','p-quit','p-todo','p-reminder','p-ledger'].map(function(id){
@@ -273,6 +288,27 @@ async function run() {
       dragOwnsHorizontalGesture: true,
       plainOwnsHorizontalGesture: false
     });
+
+    await cdp.call('Emulation.setDeviceMetricsOverride', {
+      width: 390,
+      height: 844,
+      deviceScaleFactor: 1,
+      mobile: true
+    });
+    const homeFit = await evaluate(cdp, `(function(){
+      goPage(0);
+      var home = byId('p-home');
+      var cards = home.querySelectorAll('.home-grid .home-card');
+      return {
+        clientHeight: home.clientHeight,
+        scrollHeight: home.scrollHeight,
+        cardHeight: cards[0] ? Math.round(cards[0].getBoundingClientRect().height) : 0
+      };
+    })()`);
+    await cdp.call('Emulation.clearDeviceMetricsOverride');
+    assert.ok(homeFit.scrollHeight <= homeFit.clientHeight + 1,
+      `home requires scrolling: ${homeFit.scrollHeight} > ${homeFit.clientHeight}`);
+    assert.ok(homeFit.cardHeight <= 120);
 
     const meals = await evaluate(cdp, `(function(){
       goPage(3);
@@ -583,8 +619,8 @@ async function run() {
       cleanupConfirmOpened: true,
       cleanupCalls: 1,
       aboutOpened: true,
-      changelogCount: 58,
-      aboutVersion: '5.9.19',
+      changelogCount: 59,
+      aboutVersion: '6.0.0',
       updateBackupExposed: true,
       updateCalls: 1,
       handledBack: true,

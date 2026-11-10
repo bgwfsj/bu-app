@@ -180,4 +180,4 @@ App 启动后会在后台静默检查一次新版本。只有发现新版本时�
 
 ## 开发
 
-开发、构建、测试、数据结构和发版流程见 [DEVELOPMENT.md](DEVELOPMENT.md)。
+开发、构建、测试、数据结构和发版流程见 [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)。

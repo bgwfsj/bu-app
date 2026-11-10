@@ -275,7 +275,6 @@ body[data-page="home"]::before{
 .home-hero{flex:0 0 auto;margin-bottom:23px}
 .home-eyebrow{font-size:10px;letter-spacing:.24em;color:var(--acc);font-weight:600;margin-bottom:9px}
 .home-title{font-size:36px;line-height:1.18;letter-spacing:-.045em;font-weight:400;color:#10241d;margin:0}
-.home-sub{font-size:11.5px;color:#7b8e95;margin:11px 0 0;line-height:1.65;letter-spacing:.04em}
 .home-notice{
   display:flex;align-items:center;width:100%;min-height:58px;margin:-5px 0 14px;
   border-radius:14px;border:1px solid rgba(229,72,77,.28);background:#fff1f1;
@@ -291,7 +290,7 @@ body[data-page="home"]::before{
 .home-notice-close{width:35px;align-self:stretch;border:0;border-left:1px solid rgba(229,72,77,.12);background:transparent;color:#bd5c61;font-size:15px;cursor:pointer}
 .home-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;flex:0 0 auto}
 .home-card{
-  min-height:137px;padding:15px;border-radius:17px;border:1px solid var(--line2);background:rgba(255,255,255,.82);
+  min-height:116px;padding:13px 14px;border-radius:17px;border:1px solid var(--line2);background:rgba(255,255,255,.82);
   text-align:left;cursor:pointer;box-shadow:0 18px 42px -38px rgba(13,32,45,.6);position:relative;overflow:hidden
 }
 .home-card::after{content:'';position:absolute;right:-24px;bottom:-30px;width:92px;height:92px;border-radius:50%;background:rgba(10,168,122,.045)}
@@ -302,7 +301,7 @@ body[data-page="home"]::before{
 .home-card.ledger-card::after{background:rgba(11,142,214,.05)}
 .home-card.reminder-card::after{background:rgba(230,146,63,.05)}
 .home-icon{
-  display:grid;place-items:center;width:31px;height:31px;border-radius:10px;margin-bottom:23px;
+  display:grid;place-items:center;width:31px;height:31px;border-radius:10px;margin-bottom:17px;
   background:rgba(10,168,122,.09);color:#0a8b67;font-size:12px;font-weight:600
 }
 .home-card:nth-child(2) .home-icon{background:rgba(11,142,214,.08);color:#0b83c3}
@@ -313,10 +312,6 @@ body[data-page="home"]::before{
 .home-card.reminder-card .home-icon{background:rgba(232,141,58,.09);color:#b36b28}
 .home-card b{display:block;font-size:16px;font-weight:500;color:#173029;letter-spacing:.04em}
 .home-card small{display:block;font-size:9.5px;line-height:1.45;color:#8b9ba2;margin-top:5px}
-.home-card.compact{min-height:98px;padding:13px 14px}
-.home-card.compact .home-icon{width:28px;height:28px;margin-bottom:12px;font-size:11px}
-.home-card.compact b{font-size:14px}
-.home-card.compact small{font-size:9px}
 .home-brand-card{
   cursor:default;background:rgba(255,255,255,.68)
 }
@@ -2088,6 +2083,11 @@ function byId(id){ return document.getElementById(id); }
 function bySelector(sel, root){ return (root || document).querySelectorAll(sel); }
 function each(list, fn){ for (var i = 0; i < list.length; i++) fn(list[i], i); }
 function pad2(n){ return n < 10 ? '0' + n : '' + n; }
+function escHtml(v){
+  return String(v).replace(/[&<>"']/g, function(c){
+    return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+  });
+}
 
 // 统一交互入口：动态内容只声明 action，不直接拼 on* 事件代码。
 var APP_ACTION_NAMES = {
@@ -2475,6 +2475,7 @@ byId('mask').addEventListener('click', closeSheet);
    应用版本记录
    ============================================================ */
 var APP_CHANGELOG = [
+  { version: '6.0.0', date: '2026-11-10', changes: ['经典首页卡片高度略微收紧，在 390×844 手机视口下可以一屏完整显示。', '首页逻辑从待办模块拆分为独立模块，通用 HTML 转义工具移入核心层。', '开发文档集中到 docs 目录，历史安装包与本地参考资料完成归档。', '构建测试新增动作登记与对应函数检查，防止按钮动作失效。'] },
   { version: '5.9.19', date: '2026-11-10', changes: ['经典首页的“补充”卡片改为与普通功能卡片一致的尺寸、圆角、内边距和字体层级。', '“补充”卡片使用“补”图标与“补充”标题，仅在经典布局中显示。'] },
   { version: '5.9.18', date: '2026-11-10', changes: ['新增中心折面首页：整块屏幕比例画布由直线划分为七个不规则区域。', '蜂巢布局改为按屏幕可用宽度自适应放大，整体高度和字号同步调整。', '经典布局中提醒恢复普通卡片，左侧新增写有“补”的空白卡片；首页恢复左上角标记和相逢数字下方的诗性文案。', 'App 启动后静默检查一次新版本，只有发现新版本时弹窗；无更新或网络失败不打扰。'] },
   { version: '5.9.17', date: '2026-11-10', changes: ['删除首页左上角“补 / 每天补一点”，相逢次数和对应文案直接占据左上角。', '三餐“吃饭啦！”按钮恢复为整行方形，按钮内两行文字继续居中。'] },
@@ -4265,11 +4266,6 @@ function initMeals(){
 /* ============================================================
    8.5 训练
    ============================================================ */
-function escHtml(v){
-  return String(v).replace(/[&<>"']/g, function(c){
-    return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
-  });
-}
 
 function workoutDefaultState(){
   return {
@@ -6192,6 +6188,17 @@ function checkTodoReminder(){
   }
 }
 
+function initTodo(){
+  loadTodoState();
+  byId('btn-todo-add').addEventListener('click', openTodoEditor);
+  renderTodoPage();
+  syncTodoReminder();
+}
+
+/* 72-home.js */
+/* ============================================================
+   7.2 首页与首页布局
+   ============================================================ */
 function renderDashboard(){
   if (!byId('home-date')) return;
   var now = new Date();
@@ -6331,13 +6338,6 @@ function renderVisitStats(){
     copyBox.classList.toggle('special', !!copy.special);
   }
   box.hidden = false;
-}
-
-function initTodo(){
-  loadTodoState();
-  byId('btn-todo-add').addEventListener('click', openTodoEditor);
-  renderTodoPage();
-  syncTodoReminder();
 }
 
 /* 75-reminder.js */

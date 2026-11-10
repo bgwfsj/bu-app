@@ -1,12 +1,12 @@
 # 「补」开发与 AI 交接说明
 
-本文面向接手项目的开发者或 AI。产品使用方式见 [README.md](README.md)，历史交接背景见 [HANDOFF.md](HANDOFF.md)。
+本文面向接手项目的开发者或 AI。产品使用方式见 [README.md](../README.md)，历史交接背景见 [HANDOFF.md](HANDOFF.md)。
 
 ## 项目概览
 
 - 应用名：补
 - 包名：`com.quitsmoke.app`
-- 当前版本：5.9.19
+- 当前版本：6.0.0
 - 最低 Android：API 24
 - Target SDK：34
 - 仓库：`bgwfsj/bu-app`（公开）
@@ -41,9 +41,9 @@ _tools/
   verify.ps1                构建 + 检查 + 测试
 QuitSmokeApp/               Android 工程
 quit-app.html               生成的单文件，仍然提交到 Git
-README.md                   用户说明
-DEVELOPMENT.md              本文件
-HANDOFF.md                  历史交接与排障补充
+../README.md                用户说明
+docs/DEVELOPMENT.md         本文件
+docs/HANDOFF.md             历史交接与排障补充
 assets/source-art/          图标源图
 _local-data/                本地测试数据，已忽略，不进入 Git
 ```
