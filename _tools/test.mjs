@@ -619,8 +619,8 @@ async function run() {
       cleanupConfirmOpened: true,
       cleanupCalls: 1,
       aboutOpened: true,
-      changelogCount: 63,
-      aboutVersion: '6.0.4',
+      changelogCount: 64,
+      aboutVersion: '6.0.5',
       updateBackupExposed: true,
       updateCalls: 1,
       handledBack: true,
@@ -963,6 +963,7 @@ async function run() {
       renderHomeNotice();
       var homeNoticeVisible = !byId('home-notice').hidden;
       var allNoticeRows = byId('home-notice').querySelectorAll('.home-notice-row').length;
+      var homeNoticeHeight = byId('home-notice').getBoundingClientRect().height;
       var dueKey = reminderOccurrenceKey(reminderData.items[0], new Date());
       var dueKey2 = reminderOccurrenceKey(reminderData.items[1], new Date());
       reminderData.handledOccurrences[dueKey] = true;
@@ -1080,6 +1081,7 @@ async function run() {
         futureNoticeCleared: futureNoticeCleared,
         homeNoticeVisible: homeNoticeVisible,
         allNoticeRows: allNoticeRows,
+        homeNoticeHeight: homeNoticeHeight,
         partialHandledRows: partialHandledRows,
         handledNoticeHidden: handledNoticeHidden,
         xCompleted: xCompleted,
@@ -1125,6 +1127,7 @@ async function run() {
     assert.equal(reminders.futureNoticeCleared, true);
     assert.equal(reminders.homeNoticeVisible, true);
     assert.equal(reminders.allNoticeRows, 2);
+    assert.ok(reminders.homeNoticeHeight > 90);
     assert.equal(reminders.partialHandledRows, 1);
     assert.equal(reminders.handledNoticeHidden, true);
     assert.equal(reminders.xCompleted, true, JSON.stringify(reminders));

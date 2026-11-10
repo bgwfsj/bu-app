@@ -15,7 +15,7 @@ body[data-page="home"]::before{
 .home-eyebrow{font-size:10px;letter-spacing:.24em;color:var(--acc);font-weight:600;margin-bottom:9px}
 .home-title{font-size:36px;line-height:1.18;letter-spacing:-.045em;font-weight:400;color:#10241d;margin:0}
 .home-notice{
-  display:block;width:100%;margin:-5px 0 14px;overflow:hidden;
+  display:block;flex:0 0 auto;width:100%;margin:-5px 0 14px;overflow:hidden;
   border-radius:14px;border:1px solid rgba(229,72,77,.28);background:#fff1f1;
   color:#8f2025;box-shadow:0 14px 30px -25px rgba(229,72,77,.65)
 }
