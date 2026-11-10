@@ -6,8 +6,6 @@ body[data-page="home"]::before{
 }
 .home-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:24px}
 .home-identity{min-width:0;max-width:270px}
-.home-mark{font-size:17px;letter-spacing:.28em;color:#203b32;font-weight:500}
-.home-mark span{font-size:8px;letter-spacing:.18em;color:#98a6aa;margin-left:5px}
 .home-date{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:10px;color:#94a3a8}
 .home-meta{display:flex;align-items:center;gap:7px}
 .home-data-btn{width:30px;height:30px;border-radius:9px;border:1px solid var(--line2);background:rgba(255,255,255,.7);color:#87979c;font-size:15px;line-height:1;cursor:pointer}
@@ -89,7 +87,7 @@ body[data-page="home"]::before{
 .home-grid[data-layout="honeycomb"] .home-card:nth-child(7){left:50%;top:calc(50% + var(--hex-h) * 1.02);background:linear-gradient(145deg,rgba(255,249,241,.96),rgba(255,255,255,.88))}
 .home-grid[data-layout="honeycomb"] .home-card:active{transform:translate(-50%,-50%) scale(.975)}
 .home-visit-stats{
-  margin-top:7px;padding:0;text-align:left;
+  margin-top:3px;padding:0;text-align:left;
   font-size:9.5px;line-height:1.5;letter-spacing:.055em;color:#98a6aa
 }
 .home-visit-copy{margin-top:2px;color:#a4afb2;font-size:8.8px;line-height:1.55;letter-spacing:.035em}

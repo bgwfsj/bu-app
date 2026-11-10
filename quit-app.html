@@ -267,8 +267,6 @@ body[data-page="home"]::before{
 }
 .home-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:24px}
 .home-identity{min-width:0;max-width:270px}
-.home-mark{font-size:17px;letter-spacing:.28em;color:#203b32;font-weight:500}
-.home-mark span{font-size:8px;letter-spacing:.18em;color:#98a6aa;margin-left:5px}
 .home-date{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:10px;color:#94a3a8}
 .home-meta{display:flex;align-items:center;gap:7px}
 .home-data-btn{width:30px;height:30px;border-radius:9px;border:1px solid var(--line2);background:rgba(255,255,255,.7);color:#87979c;font-size:15px;line-height:1;cursor:pointer}
@@ -350,7 +348,7 @@ body[data-page="home"]::before{
 .home-grid[data-layout="honeycomb"] .home-card:nth-child(7){left:50%;top:calc(50% + var(--hex-h) * 1.02);background:linear-gradient(145deg,rgba(255,249,241,.96),rgba(255,255,255,.88))}
 .home-grid[data-layout="honeycomb"] .home-card:active{transform:translate(-50%,-50%) scale(.975)}
 .home-visit-stats{
-  margin-top:7px;padding:0;text-align:left;
+  margin-top:3px;padding:0;text-align:left;
   font-size:9.5px;line-height:1.5;letter-spacing:.055em;color:#98a6aa
 }
 .home-visit-copy{margin-top:2px;color:#a4afb2;font-size:8.8px;line-height:1.55;letter-spacing:.035em}
@@ -726,8 +724,8 @@ body[data-page="meals"]::before{
 }
 .meal-hero{margin-bottom:17px}
 .meal-record-btn{
-  flex:0 0 auto;align-self:center;width:112px;height:112px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
-  padding:10px;border:1px solid rgba(60,88,72,.16);border-radius:50%;
+  flex:0 0 auto;width:100%;min-height:68px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  padding:12px 15px;border:1px solid rgba(60,88,72,.16);border-radius:17px;
   background:linear-gradient(135deg,#385b4e,#557563);color:#fff;text-align:center;cursor:pointer;
   box-shadow:0 18px 36px -28px rgba(31,73,58,.68)
 }
@@ -1333,7 +1331,6 @@ body[data-page="fitness"]::before{
     <section class="page on" id="p-home">
       <div class="home-top">
         <div class="home-identity">
-          <div class="home-mark">补<span>每天补一点</span></div>
           <div class="home-visit-stats" id="home-visit-stats" aria-live="polite">
             <div id="home-visit-count"></div>
             <div class="home-visit-copy" id="home-visit-copy"></div>
@@ -2383,6 +2380,7 @@ byId('mask').addEventListener('click', closeSheet);
    应用版本记录
    ============================================================ */
 var APP_CHANGELOG = [
+  { version: '5.9.17', date: '2026-11-10', changes: ['删除首页左上角“补 / 每天补一点”，相逢次数和对应文案直接占据左上角。', '三餐“吃饭啦！”按钮恢复为整行方形，按钮内两行文字继续居中。'] },
   { version: '5.9.16', date: '2026-11-10', changes: ['训练计划支持上下调整动作顺序、复制和单独移除，同一动作可以重复添加并独立记录完成情况。', '当前时间处于理想就餐时段时，三餐倒计时改为显示该时段还剩多久。', '“吃饭啦！”改为圆形按钮；首页访问次数和对应文案移到左上角。', '新增七格蜂巢拼图首页，可在设置页与经典首页之间切换，布局选择纳入完整备份。'] },
   { version: '5.9.15', date: '2026-11-09', changes: ['三餐主按钮精简为居中两行：“吃饭啦！”和“将记为当前餐次”。', '移除按钮内加号与右侧“记录”文字，补记入口移入右上角菜单。', '下一顿倒计时只显示理想时间段，并新增倒计时进度条。', '“今天吃了什么”支持折叠，记录区域可以收起。'] },
   { version: '5.9.14', date: '2026-11-09', changes: ['新增三餐模块，可记录早餐、午餐、下午茶、晚餐和夜宵。', '记录时结合当前时间、理想用餐窗口和与上一顿的间隔给出评价。', '下一顿倒计时以理想用餐窗口的起点为准；新增过去 7 天摘要和三餐规律月历。', '规律正餐按 3 绿、2 黄、1 红、0 叉显示，夜宵显示小点。', '支持选择日期和时间补记；首页与底部导航加入三餐入口。', '完整备份升级为 v4，包含三餐数据。'] },

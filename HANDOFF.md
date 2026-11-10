@@ -17,7 +17,7 @@
     README.md                      面向用户的使用说明
     DEVELOPMENT.md                 面向开发者和 AI 的完整交接说明
     HANDOFF.md                     本文件：历史交接与排障补充
-    补.apk                         当前安装包（versionName 5.9.16 / versionCode 69）
+    补.apk                         当前安装包（versionName 5.9.17 / versionCode 70）
     历史版本/                      旧 APK、记账原版参考文件和一次性拆分工具
     assets/source-art/             图标原图等源资产
     _local-data/                   个人 CSV 与本地测试数据（不进入 Git）

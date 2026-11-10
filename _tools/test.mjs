@@ -346,6 +346,7 @@ async function run() {
       var progressWidth = byId('meal-next-progress').style.width;
       var mealTodayBox = document.querySelector('.meal-today');
       var mealButtonRect = document.querySelector('.meal-record-btn').getBoundingClientRect();
+      var mealButtonStyle = getComputedStyle(document.querySelector('.meal-record-btn'));
       var recordsOpenByDefault = mealTodayBox.open;
       mealTodayBox.querySelector('summary').click();
       var recordsCanCollapse = !mealTodayBox.open;
@@ -409,8 +410,8 @@ async function run() {
         progressWidth: progressWidth,
         recordsOpenByDefault: recordsOpenByDefault,
         recordsCanCollapse: recordsCanCollapse,
-        mealButtonRound: Math.abs(mealButtonRect.width - mealButtonRect.height) < 1 &&
-          getComputedStyle(document.querySelector('.meal-record-btn')).borderRadius === '50%',
+        mealButtonSquare: mealButtonRect.width > mealButtonRect.height * 2 &&
+          mealButtonStyle.borderRadius !== '50%',
         todayGrade: todayGrade.grade,
         todayLate: todayGrade.late,
         calendarRedX: calendarRedX,
@@ -472,7 +473,7 @@ async function run() {
     assert.match(meals.progressWidth, /^\d+(?:\.\d+)?%$/);
     assert.equal(meals.recordsOpenByDefault, true);
     assert.equal(meals.recordsCanCollapse, true);
-    assert.equal(meals.mealButtonRound, true);
+    assert.equal(meals.mealButtonSquare, true);
     assert.equal(meals.todayGrade, 'red');
     assert.equal(meals.todayLate, true);
     assert.equal(meals.calendarRedX, true);
@@ -545,8 +546,8 @@ async function run() {
       cleanupConfirmOpened: true,
       cleanupCalls: 1,
       aboutOpened: true,
-      changelogCount: 55,
-      aboutVersion: '5.9.16',
+      changelogCount: 56,
+      aboutVersion: '5.9.17',
       updateBackupExposed: true,
       updateCalls: 1,
       handledBack: true,
@@ -570,6 +571,7 @@ async function run() {
       var specialText = byId('home-visit-copy').textContent.trim();
       var specialClass = byId('home-visit-copy').classList.contains('special');
       var inTopLeft = !!byId('home-visit-stats').closest('.home-top');
+      var homeMarkRemoved = !document.querySelector('.home-mark');
       window.AppNative = originalNative;
       renderVisitStats();
       return {
@@ -579,6 +581,7 @@ async function run() {
         specialText: specialText,
         specialClass: specialClass,
         inTopLeft: inTopLeft,
+        homeMarkRemoved: homeMarkRemoved,
         yBankSize: Object.keys(VISIT_Y_COPY).length,
         yAllFive: Object.keys(VISIT_Y_COPY).every(function(key){
           return VISIT_Y_COPY[key].length === 5;
@@ -594,6 +597,7 @@ async function run() {
     assert.ok(visitStats.specialText.indexOf('一千不是尽头') >= 0);
     assert.equal(visitStats.specialClass, true);
     assert.equal(visitStats.inTopLeft, true);
+    assert.equal(visitStats.homeMarkRemoved, true);
     assert.equal(visitStats.yBankSize, 20);
     assert.equal(visitStats.yAllFive, true);
     assert.equal(visitStats.visible, true);
