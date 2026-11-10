@@ -305,6 +305,7 @@ async function run() {
       var nextBreakfast = mealNextTargetAt(new Date(2026, 10, 9, 19, 0), [{
         date: '2026-11-09', type: 'dinner'
       }]);
+      var currentWindow = mealCountdownTargetAt(new Date(2026, 10, 9, 12, 10), []);
       var now = new Date();
       var todayAt = function(hour, minute){
         return new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, minute);
@@ -344,6 +345,7 @@ async function run() {
       var noTomorrowPrompt = !byId('meal-next-time');
       var progressWidth = byId('meal-next-progress').style.width;
       var mealTodayBox = document.querySelector('.meal-today');
+      var mealButtonRect = document.querySelector('.meal-record-btn').getBoundingClientRect();
       var recordsOpenByDefault = mealTodayBox.open;
       mealTodayBox.querySelector('summary').click();
       var recordsCanCollapse = !mealTodayBox.open;
@@ -381,6 +383,9 @@ async function run() {
         nextLunchType: nextLunch.type,
         nextLunchRemain: nextLunch.target.getTime() - new Date(2026, 10, 9, 10, 0).getTime(),
         nextBreakfastTomorrow: nextBreakfast.tomorrow && nextBreakfast.type === 'breakfast',
+        currentWindowMode: currentWindow.currentWindow,
+        currentWindowType: currentWindow.type,
+        currentWindowRemain: currentWindow.target.getTime() - new Date(2026, 10, 9, 12, 10).getTime(),
         sheetTitle: sheetTitle,
         hasEvaluation: hasEvaluation,
         hasTip: hasTip,
@@ -404,6 +409,8 @@ async function run() {
         progressWidth: progressWidth,
         recordsOpenByDefault: recordsOpenByDefault,
         recordsCanCollapse: recordsCanCollapse,
+        mealButtonRound: Math.abs(mealButtonRect.width - mealButtonRect.height) < 1 &&
+          getComputedStyle(document.querySelector('.meal-record-btn')).borderRadius === '50%',
         todayGrade: todayGrade.grade,
         todayLate: todayGrade.late,
         calendarRedX: calendarRedX,
@@ -439,6 +446,9 @@ async function run() {
     assert.equal(meals.nextLunchType, 'lunch');
     assert.equal(meals.nextLunchRemain, 1.5 * 3600000);
     assert.equal(meals.nextBreakfastTomorrow, true);
+    assert.equal(meals.currentWindowMode, true);
+    assert.equal(meals.currentWindowType, 'lunch');
+    assert.equal(meals.currentWindowRemain, 50 * 60000);
     assert.equal(meals.sheetTitle, '午餐 · 12:05');
     assert.equal(meals.hasEvaluation, true);
     assert.equal(meals.hasTip, true);
@@ -462,6 +472,7 @@ async function run() {
     assert.match(meals.progressWidth, /^\d+(?:\.\d+)?%$/);
     assert.equal(meals.recordsOpenByDefault, true);
     assert.equal(meals.recordsCanCollapse, true);
+    assert.equal(meals.mealButtonRound, true);
     assert.equal(meals.todayGrade, 'red');
     assert.equal(meals.todayLate, true);
     assert.equal(meals.calendarRedX, true);
@@ -482,6 +493,13 @@ async function run() {
       byId('btn-app-settings').click();
       var opened = byId('p-settings').classList.contains('on') &&
         document.body.dataset.page === 'settings';
+      byId('btn-home-layout-honeycomb').click();
+      var honeycombApplied = document.querySelector('.home-grid').getAttribute('data-layout') === 'honeycomb' &&
+        byId('home-layout-honeycomb-state').textContent.trim() === '使用中';
+      var honeycombSaved = JSON.parse(localStorage.getItem(HOME_LAYOUT_KEY)) === 'honeycomb';
+      var tileClip = getComputedStyle(document.querySelector('.home-grid .home-card')).clipPath.indexOf('polygon') === 0;
+      byId('btn-home-layout-classic').click();
+      var classicRestored = document.querySelector('.home-grid').getAttribute('data-layout') === 'classic';
       var dataActions = byId('p-settings').querySelectorAll('[data-action="exportAppBackup"], [data-action="chooseAppBackup"]').length;
       var cleanupButton = byId('p-settings').querySelector('[data-action="requestCleanupOldBackups"]');
       cleanupButton.click();
@@ -499,6 +517,10 @@ async function run() {
       window.AppNative = originalNative;
       return {
         opened: opened,
+        honeycombApplied: honeycombApplied,
+        honeycombSaved: honeycombSaved,
+        tileClip: tileClip,
+        classicRestored: classicRestored,
         dataActions: dataActions,
         cleanupButton: !!cleanupButton,
         cleanupConfirmOpened: cleanupConfirmOpened,
@@ -514,13 +536,17 @@ async function run() {
     })()`);
     assert.deepEqual(settingsPage, {
       opened: true,
+      honeycombApplied: true,
+      honeycombSaved: true,
+      tileClip: true,
+      classicRestored: true,
       dataActions: 2,
       cleanupButton: true,
       cleanupConfirmOpened: true,
       cleanupCalls: 1,
       aboutOpened: true,
-      changelogCount: 54,
-      aboutVersion: '5.9.15',
+      changelogCount: 55,
+      aboutVersion: '5.9.16',
       updateBackupExposed: true,
       updateCalls: 1,
       handledBack: true,
@@ -543,6 +569,7 @@ async function run() {
       renderVisitStats();
       var specialText = byId('home-visit-copy').textContent.trim();
       var specialClass = byId('home-visit-copy').classList.contains('special');
+      var inTopLeft = !!byId('home-visit-stats').closest('.home-top');
       window.AppNative = originalNative;
       renderVisitStats();
       return {
@@ -551,6 +578,7 @@ async function run() {
         copySpecial: copySpecial,
         specialText: specialText,
         specialClass: specialClass,
+        inTopLeft: inTopLeft,
         yBankSize: Object.keys(VISIT_Y_COPY).length,
         yAllFive: Object.keys(VISIT_Y_COPY).every(function(key){
           return VISIT_Y_COPY[key].length === 5;
@@ -565,6 +593,7 @@ async function run() {
     assert.equal(visitStats.copySpecial, false);
     assert.ok(visitStats.specialText.indexOf('一千不是尽头') >= 0);
     assert.equal(visitStats.specialClass, true);
+    assert.equal(visitStats.inTopLeft, true);
     assert.equal(visitStats.yBankSize, 20);
     assert.equal(visitStats.yAllFive, true);
     assert.equal(visitStats.visible, true);
@@ -620,14 +649,31 @@ async function run() {
         completeTimedExercise(id);
       });
       var last = fit.sessions[fit.sessions.length - 1];
-      openWorkoutPlan();
+      openWorkoutPlan('plan_default');
       var planList = byId('plan-list');
       var planRows = planList ? planList.querySelectorAll('.plan-row') : [];
       var planNames = Array.prototype.map.call(planRows, function(row){
         return row.querySelector('.plan-name').textContent.trim();
       });
       var planListHeight = planList ? planList.getBoundingClientRect().height : 0;
-      closeSheet();
+      var initialOrder = planDraft.map(function(item){ return item.exerciseId; });
+      movePlanItem(planDraft[1].itemId, -1);
+      var reordered = planDraft.map(function(item){ return item.exerciseId; });
+      addExerciseToPlan('back');
+      var duplicateId = planDraft[planDraft.length - 1].itemId;
+      adjustPlanSets(duplicateId, -2);
+      var duplicateCount = planDraft.filter(function(item){ return item.exerciseId === 'back'; }).length;
+      saveWorkoutPlan();
+      var savedPlan = findWorkoutPlan('plan_default');
+      var savedOrder = savedPlan.items.map(function(item){ return item.exerciseId; });
+      var duplicateItems = savedPlan.items.filter(function(item){ return item.exerciseId === 'back'; });
+      startWorkoutFromPlan('plan_default');
+      var duplicateSession = activeWorkout();
+      var duplicatePlanItems = duplicateSession.plan.filter(function(item){ return item.exerciseId === 'back'; });
+      completeWorkoutSet(duplicatePlanItems[0].itemId);
+      var firstDuplicateDone = recordsForPlanItem(duplicateSession, duplicatePlanItems[0]).length;
+      var secondDuplicateDone = recordsForPlanItem(duplicateSession, duplicatePlanItems[1]).length;
+      discardWorkout();
       return {
         activeEnded: fit.activeSessionId === null,
         ended: !!last.endAt,
@@ -637,7 +683,12 @@ async function run() {
         stored: !!JSON.parse(localStorage.getItem('fitness_app_v1')).sessions.length,
         planRows: planRows.length,
         planNames: planNames,
-        planListHeight: planListHeight
+        planListHeight: planListHeight,
+        reorderWorked: reordered[0] === initialOrder[1] && reordered[1] === initialOrder[0],
+        reorderSaved: savedOrder[0] === initialOrder[1] && savedOrder[1] === initialOrder[0],
+        duplicateCount: duplicateCount,
+        duplicateIdsUnique: duplicateItems.length === 2 && duplicateItems[0].itemId !== duplicateItems[1].itemId,
+        duplicateRecordsIndependent: firstDuplicateDone === 1 && secondDuplicateDone === 0
       };
     })()`);
     assert.equal(workout.error, undefined);
@@ -650,6 +701,11 @@ async function run() {
     assert.ok(workout.planRows >= 5);
     assert.ok(workout.planListHeight > 0);
     assert.ok(workout.planNames.some(function(name){ return name.indexOf('背') === 0; }));
+    assert.equal(workout.reorderWorked, true);
+    assert.equal(workout.reorderSaved, true);
+    assert.equal(workout.duplicateCount, 2);
+    assert.equal(workout.duplicateIdsUnique, true);
+    assert.equal(workout.duplicateRecordsIndependent, true);
 
     const calendarDots = await evaluate(cdp, `(function(){
       var sample = document.createElement('button');
@@ -1435,6 +1491,7 @@ async function run() {
       saveReminderState();
       saveLedgerState();
       saveMealState();
+      setHomeLayout('honeycomb');
       var backup = appBackupPayload();
       backup.data.water.dailyGoal = 2600;
       receiveAppBackup(JSON.stringify(backup));
@@ -1453,6 +1510,7 @@ async function run() {
       var quit = JSON.parse(localStorage.getItem('quit_app_v1'));
       var previous = JSON.parse(localStorage.getItem('bu_pre_restore_v1'));
       return {
+        homeLayout: localStorage.getItem(HOME_LAYOUT_KEY) ? JSON.parse(localStorage.getItem(HOME_LAYOUT_KEY)) : '',
         waterGoal: water.dailyGoal,
         fitnessSessions: fitness.sessions.length,
         todoItems: todo.items.length,
@@ -1465,11 +1523,13 @@ async function run() {
         previousGoal: previous.data.water.dailyGoal,
         previousReminders: previous.data.reminders.items.length,
         previousMeals: previous.data.meals.records.length,
+        previousHomeLayout: previous.data.settings.homeLayout,
         previousReminderArchived: previous.data.reminders.archived.length,
         previousTodoArchived: previous.data.todo.archived.length
       };
     })()`);
     assert.equal(restored.waterGoal, 2600);
+    assert.equal(restored.homeLayout, 'honeycomb');
     assert.equal(restored.fitnessSessions, 1);
     assert.equal(restored.todoItems, 2);
     assert.equal(restored.todoArchived, 2);
@@ -1481,6 +1541,7 @@ async function run() {
     assert.equal(restored.previousGoal, 2345);
     assert.equal(restored.previousReminders, 5);
     assert.equal(restored.previousMeals, 4);
+    assert.equal(restored.previousHomeLayout, 'honeycomb');
     assert.equal(restored.previousReminderArchived, 1);
     assert.equal(restored.previousTodoArchived, 2);
 

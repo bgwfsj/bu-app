@@ -41,6 +41,7 @@ function boot(){
   initReminder();
   initLedger();
   bindDragGestures();
+  initHomeLayout();
   renderDashboard();
 
   setInterval(function(){

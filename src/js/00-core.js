@@ -10,6 +10,7 @@ var RKEY = 'reminder_app_v1';      // 独立提醒
 var LKEY = 'ledger_app_v1';        // 多账本收支记录
 var MKEY = 'meals_app_v1';         // 三餐记录
 var LOLDKEY = 'event-ledger-v2';   // 原独立记账 App 的旧存档，只读迁移
+var HOME_LAYOUT_KEY = 'bu_home_layout_v1';
 
 // 身体状况阶段（门槛取区间起点）
 var STAGES = [
@@ -51,6 +52,7 @@ var ledgerRecordMode = 'preview';
 var ledgerTreeOpen = false;
 var mealData = null;
 var mealCalendarOffset = 0;
+var homeLayoutMode = 'classic';
 var workoutFrameId = 0;
 var workoutLastPaint = 0;
 var page = 0;
@@ -103,6 +105,10 @@ var APP_ACTION_NAMES = {
   saveWorkoutPlan: true,
   togglePlanExercise: true,
   adjustPlanSets: true,
+  addExerciseToPlan: true,
+  movePlanItem: true,
+  duplicatePlanItem: true,
+  removePlanItem: true,
   saveBackfillWorkout: true,
   adjustBackfill: true,
   discardWorkout: true,
@@ -158,6 +164,7 @@ var APP_ACTION_NAMES = {
   checkAppUpdate: true,
   openSettingsPage: true,
   closeSettingsPage: true,
+  setHomeLayout: true,
   openAboutSheet: true,
   openLedgerMonthReport: true,
   toggleLedgerEventTree: true,
@@ -335,7 +342,8 @@ function appBackupPayload(){
       todo: todoData || null,
       reminders: reminderData || null,
       ledger: ledgerData || null,
-      meals: mealData || null
+      meals: mealData || null,
+      settings: { homeLayout: homeLayoutMode }
     }
   }));
 }
@@ -434,7 +442,7 @@ function receiveAppBackup(text){
     return;
   }
   appConfirm(
-    '恢复备份会覆盖这台设备现有的训练、喝水、三餐、戒烟、待办、提醒和记账数据。建议先导出一份当前备份。',
+    '恢复备份会覆盖这台设备现有的训练、喝水、三餐、戒烟、待办、提醒、记账和首页样式设置。建议先导出一份当前备份。',
     function(){
       storeSet('bu_pre_restore_v1', appBackupPayload());
       storeSet(AKEY, payload.data.quit || { quitDate: 0 });
@@ -444,6 +452,9 @@ function receiveAppBackup(text){
       storeSet(RKEY, payload.data.reminders || null);
       storeSet(LKEY, payload.data.ledger || null);
       storeSet(MKEY, payload.data.meals || null);
+      if (payload.data.settings && payload.data.settings.homeLayout) {
+        storeSet(HOME_LAYOUT_KEY, payload.data.settings.homeLayout);
+      }
       location.reload();
     },
     { title: '恢复全部数据', confirmLabel: '覆盖并恢复' }

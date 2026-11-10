@@ -265,7 +265,8 @@ body[data-page="home"]::before{
     radial-gradient(74% 46% at 24% -4%,rgba(10,168,122,.15),transparent 68%),
     radial-gradient(54% 42% at 92% 102%,rgba(11,142,214,.07),transparent 70%);
 }
-.home-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:34px}
+.home-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:24px}
+.home-identity{min-width:0;max-width:270px}
 .home-mark{font-size:17px;letter-spacing:.28em;color:#203b32;font-weight:500}
 .home-mark span{font-size:8px;letter-spacing:.18em;color:#98a6aa;margin-left:5px}
 .home-date{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:10px;color:#94a3a8}
@@ -316,16 +317,53 @@ body[data-page="home"]::before{
 .home-card.compact .home-icon{width:28px;height:28px;margin-bottom:12px;font-size:11px}
 .home-card.compact b{font-size:14px}
 .home-card.compact small{font-size:9px}
-.home-visit-stats{
-  margin-top:auto;padding:14px 0 2px;text-align:center;
-  font-size:10px;line-height:1.5;letter-spacing:.07em;color:#98a6aa
+
+/* ---------- 首页拼图布局 ---------- */
+.home-grid[data-layout="honeycomb"]{
+  --hex-w:clamp(94px,31vw,124px);
+  --hex-h:calc(var(--hex-w) * .9);
+  position:relative;display:block;height:calc(var(--hex-h) * 3.15);margin:4px 0 8px
 }
-.home-visit-copy{margin-top:3px;color:#a4afb2;font-size:9.5px;letter-spacing:.045em}
+.home-grid[data-layout="honeycomb"] .home-card{
+  position:absolute;left:50%;top:50%;width:var(--hex-w);height:var(--hex-h);min-height:0;
+  padding:17px 10px 12px;border:0;border-radius:0;
+  clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);
+  -webkit-clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+  background:rgba(255,255,255,.86);box-shadow:none;transform:translate(-50%,-50%)
+}
+.home-grid[data-layout="honeycomb"] .home-card::after{width:86px;height:86px;right:-17px;bottom:-24px}
+.home-grid[data-layout="honeycomb"] .home-card .home-icon{
+  width:25px;height:25px;flex:0 0 25px;margin:0 0 7px;border-radius:8px;font-size:10px
+}
+.home-grid[data-layout="honeycomb"] .home-card b{font-size:13.5px;line-height:1.15;letter-spacing:.05em}
+.home-grid[data-layout="honeycomb"] .home-card small{
+  max-width:92px;margin-top:4px;font-size:8.2px;line-height:1.32;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden
+}
+.home-grid[data-layout="honeycomb"] .home-card:nth-child(1){left:50%;top:50%;background:linear-gradient(145deg,rgba(230,248,241,.94),rgba(255,255,255,.88))}
+.home-grid[data-layout="honeycomb"] .home-card:nth-child(2){left:50%;top:calc(50% - var(--hex-h) * 1.02)}
+.home-grid[data-layout="honeycomb"] .home-card:nth-child(3){left:calc(50% - var(--hex-w) * .75);top:calc(50% - var(--hex-h) * .52);background:linear-gradient(145deg,rgba(255,246,235,.96),rgba(255,255,255,.88))}
+.home-grid[data-layout="honeycomb"] .home-card:nth-child(4){left:calc(50% + var(--hex-w) * .75);top:calc(50% - var(--hex-h) * .52)}
+.home-grid[data-layout="honeycomb"] .home-card:nth-child(5){left:calc(50% - var(--hex-w) * .75);top:calc(50% + var(--hex-h) * .52);background:linear-gradient(145deg,rgba(245,248,251,.96),rgba(255,255,255,.88))}
+.home-grid[data-layout="honeycomb"] .home-card:nth-child(6){left:calc(50% + var(--hex-w) * .75);top:calc(50% + var(--hex-h) * .52);background:linear-gradient(145deg,rgba(242,248,252,.96),rgba(255,255,255,.88))}
+.home-grid[data-layout="honeycomb"] .home-card:nth-child(7){left:50%;top:calc(50% + var(--hex-h) * 1.02);background:linear-gradient(145deg,rgba(255,249,241,.96),rgba(255,255,255,.88))}
+.home-grid[data-layout="honeycomb"] .home-card:active{transform:translate(-50%,-50%) scale(.975)}
+.home-visit-stats{
+  margin-top:7px;padding:0;text-align:left;
+  font-size:9.5px;line-height:1.5;letter-spacing:.055em;color:#98a6aa
+}
+.home-visit-copy{margin-top:2px;color:#a4afb2;font-size:8.8px;line-height:1.55;letter-spacing:.035em}
+.home-meta{margin-top:2px;flex:0 0 auto}
 .home-visit-copy.special{color:#b58945;font-weight:500;letter-spacing:.07em}
 
 /* 15-settings.css */
 /* ---------- 设置 ---------- */
 body[data-page="settings"] #page-pager{opacity:0;pointer-events:none}
+#p-settings{
+  overflow-y:auto;overscroll-behavior-y:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch
+}
+#p-settings>*{flex:0 0 auto}
 .settings-back{
   width:34px;height:34px;padding:0;border:1px solid var(--line2);border-radius:10px;
   background:rgba(255,255,255,.66);color:#71868f;font-size:23px;line-height:1;cursor:pointer
@@ -688,10 +726,10 @@ body[data-page="meals"]::before{
 }
 .meal-hero{margin-bottom:17px}
 .meal-record-btn{
-  flex:0 0 auto;width:100%;min-height:68px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
-  padding:12px 15px;border:1px solid rgba(60,88,72,.16);border-radius:17px;
+  flex:0 0 auto;align-self:center;width:112px;height:112px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  padding:10px;border:1px solid rgba(60,88,72,.16);border-radius:50%;
   background:linear-gradient(135deg,#385b4e,#557563);color:#fff;text-align:center;cursor:pointer;
-  box-shadow:0 18px 36px -30px rgba(31,73,58,.62)
+  box-shadow:0 18px 36px -28px rgba(31,73,58,.68)
 }
 .meal-record-btn b{font-size:16px;font-weight:500;letter-spacing:.12em;text-indent:.12em}
 .meal-record-btn small{font-size:9.5px;color:rgba(255,255,255,.64);letter-spacing:.06em}
@@ -1021,11 +1059,33 @@ body[data-page="fitness"]::before{
 .plan-row{display:grid;grid-template-columns:22px 1fr auto;align-items:center;gap:9px;padding:10px 11px;border:1px solid var(--line2);border-radius:11px;background:#fafcfb}
 .plan-row.active{border-color:rgba(10,168,122,.20);background:rgba(10,168,122,.04)}
 .plan-row input{width:16px;height:16px;accent-color:var(--acc);margin:0}
+.plan-order-index{
+  width:22px;height:22px;display:grid;place-items:center;border-radius:7px;
+  background:rgba(10,168,122,.07);color:#6b8c7f;font:500 10px var(--font-mono)
+}
 .plan-name{font-size:var(--fs-card);color:#344b43}
+.plan-row-controls{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
 .plan-stepper{display:flex;align-items:center;gap:6px}
 .plan-stepper button{width:27px;height:27px;border-radius:8px;border:1px solid var(--line);background:#fff;color:#63777c;font-size:15px;line-height:1;cursor:pointer}
 .plan-stepper b{min-width:34px;text-align:center;font-family:var(--font-mono);font-size:12.5px;color:#2f4b40}
 .plan-stepper small{font-size:10px;color:#92a0a6}
+.plan-row-actions{display:flex;align-items:center;justify-content:flex-end;gap:4px}
+.plan-row-actions button{
+  min-width:25px;height:23px;padding:0 5px;border-radius:7px;border:1px solid var(--line2);
+  background:rgba(255,255,255,.7);color:#788c86;font-size:9px;line-height:1;cursor:pointer
+}
+.plan-row-actions button:disabled{opacity:.28;cursor:default}
+.plan-picker{margin:0 0 14px;padding:10px;border-radius:12px;background:#f7f9f8;border:1px solid var(--line2)}
+.plan-picker-title{font-size:10px;letter-spacing:.1em;color:#8c9b96;margin-bottom:8px}
+.plan-picker-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.plan-picker-grid button{
+  position:relative;min-height:42px;padding:7px 28px 7px 9px;border-radius:9px;border:1px solid var(--line2);
+  background:rgba(255,255,255,.82);text-align:left;cursor:pointer;color:#4e665c
+}
+.plan-picker-grid b{display:block;font-size:11.5px;font-weight:500}
+.plan-picker-grid small{display:block;margin-top:3px;font-size:9px;color:#9aa7a3}
+.plan-picker-grid em{position:absolute;right:9px;top:50%;transform:translateY(-50%);font-style:normal;color:#67a18b;font-size:15px}
+.plan-empty{padding:18px 8px;text-align:center;color:#9aa7a3;font-size:11px}
 .new-exercise{display:flex;gap:7px;margin:2px 0 14px}
 .new-exercise input{flex:1;height:39px;border-radius:10px;border:1px solid var(--line);background:#f7f9fa;padding:0 11px;font-size:12px;color:#334a41;outline:none}
 .new-exercise button{height:39px;padding:0 12px;border-radius:10px;border:1px solid rgba(10,168,122,.25);background:rgba(10,168,122,.06);color:var(--acc);font-size:11.5px;cursor:pointer}
@@ -1272,7 +1332,13 @@ body[data-page="fitness"]::before{
     <!-- ================= 应用首页 ================= -->
     <section class="page on" id="p-home">
       <div class="home-top">
-        <div class="home-mark">补<span>每天补一点</span></div>
+        <div class="home-identity">
+          <div class="home-mark">补<span>每天补一点</span></div>
+          <div class="home-visit-stats" id="home-visit-stats" aria-live="polite">
+            <div id="home-visit-count"></div>
+            <div class="home-visit-copy" id="home-visit-copy"></div>
+          </div>
+        </div>
         <div class="home-meta"><div class="home-date" id="home-date"></div><button class="home-data-btn" id="btn-app-settings" data-action="openSettingsPage" title="设置" aria-label="设置">⋯</button></div>
       </div>
       <div class="home-hero">
@@ -1318,10 +1384,6 @@ body[data-page="fitness"]::before{
           <small id="home-reminder-copy">没有独立提醒</small>
         </button>
       </div>
-      <div class="home-visit-stats" id="home-visit-stats" aria-live="polite">
-        <div id="home-visit-count"></div>
-        <div class="home-visit-copy" id="home-visit-copy"></div>
-      </div>
     </section>
 
     <!-- ================= 设置 ================= -->
@@ -1346,6 +1408,15 @@ body[data-page="fitness"]::before{
         </button>
         <button class="settings-row" data-action="requestCleanupOldBackups">
           <span><b>清理旧备份</b><small>自动和手动清理都只保留最近 2 份</small></span><em>清理 ›</em>
+        </button>
+      </div>
+      <div class="settings-group">
+        <div class="settings-group-title">首页样式</div>
+        <button class="settings-row" id="btn-home-layout-classic" data-action="setHomeLayout" data-args='["classic"]'>
+          <span><b>经典布局</b><small>两列卡片，信息直接铺开</small></span><em id="home-layout-classic-state">使用中</em>
+        </button>
+        <button class="settings-row" id="btn-home-layout-honeycomb" data-action="setHomeLayout" data-args='["honeycomb"]'>
+          <span><b>拼图布局</b><small>七个多边形拼成蜂巢结构</small></span><em id="home-layout-honeycomb-state">切换 ›</em>
         </button>
       </div>
       <div class="settings-group">
@@ -1556,7 +1627,7 @@ body[data-page="fitness"]::before{
         <small id="meal-record-hint">将记为午餐</small>
       </button>
       <section class="meal-next-card">
-        <div class="meal-next-head"><span>距离下一顿最佳时间</span><b id="meal-next-name">午餐</b></div>
+        <div class="meal-next-head"><span id="meal-next-label">距离下一顿最佳时间</span><b id="meal-next-name">午餐</b></div>
         <div class="meal-next-timer" id="meal-next-timer">00:00:00</div>
         <div class="meal-next-progress"><i id="meal-next-progress"></i></div>
         <div class="meal-next-meta">
@@ -1854,6 +1925,7 @@ var RKEY = 'reminder_app_v1';      // 独立提醒
 var LKEY = 'ledger_app_v1';        // 多账本收支记录
 var MKEY = 'meals_app_v1';         // 三餐记录
 var LOLDKEY = 'event-ledger-v2';   // 原独立记账 App 的旧存档，只读迁移
+var HOME_LAYOUT_KEY = 'bu_home_layout_v1';
 
 // 身体状况阶段（门槛取区间起点）
 var STAGES = [
@@ -1895,6 +1967,7 @@ var ledgerRecordMode = 'preview';
 var ledgerTreeOpen = false;
 var mealData = null;
 var mealCalendarOffset = 0;
+var homeLayoutMode = 'classic';
 var workoutFrameId = 0;
 var workoutLastPaint = 0;
 var page = 0;
@@ -1947,6 +2020,10 @@ var APP_ACTION_NAMES = {
   saveWorkoutPlan: true,
   togglePlanExercise: true,
   adjustPlanSets: true,
+  addExerciseToPlan: true,
+  movePlanItem: true,
+  duplicatePlanItem: true,
+  removePlanItem: true,
   saveBackfillWorkout: true,
   adjustBackfill: true,
   discardWorkout: true,
@@ -2002,6 +2079,7 @@ var APP_ACTION_NAMES = {
   checkAppUpdate: true,
   openSettingsPage: true,
   closeSettingsPage: true,
+  setHomeLayout: true,
   openAboutSheet: true,
   openLedgerMonthReport: true,
   toggleLedgerEventTree: true,
@@ -2179,7 +2257,8 @@ function appBackupPayload(){
       todo: todoData || null,
       reminders: reminderData || null,
       ledger: ledgerData || null,
-      meals: mealData || null
+      meals: mealData || null,
+      settings: { homeLayout: homeLayoutMode }
     }
   }));
 }
@@ -2278,7 +2357,7 @@ function receiveAppBackup(text){
     return;
   }
   appConfirm(
-    '恢复备份会覆盖这台设备现有的训练、喝水、三餐、戒烟、待办、提醒和记账数据。建议先导出一份当前备份。',
+    '恢复备份会覆盖这台设备现有的训练、喝水、三餐、戒烟、待办、提醒、记账和首页样式设置。建议先导出一份当前备份。',
     function(){
       storeSet('bu_pre_restore_v1', appBackupPayload());
       storeSet(AKEY, payload.data.quit || { quitDate: 0 });
@@ -2288,6 +2367,9 @@ function receiveAppBackup(text){
       storeSet(RKEY, payload.data.reminders || null);
       storeSet(LKEY, payload.data.ledger || null);
       storeSet(MKEY, payload.data.meals || null);
+      if (payload.data.settings && payload.data.settings.homeLayout) {
+        storeSet(HOME_LAYOUT_KEY, payload.data.settings.homeLayout);
+      }
       location.reload();
     },
     { title: '恢复全部数据', confirmLabel: '覆盖并恢复' }
@@ -2301,6 +2383,7 @@ byId('mask').addEventListener('click', closeSheet);
    应用版本记录
    ============================================================ */
 var APP_CHANGELOG = [
+  { version: '5.9.16', date: '2026-11-10', changes: ['训练计划支持上下调整动作顺序、复制和单独移除，同一动作可以重复添加并独立记录完成情况。', '当前时间处于理想就餐时段时，三餐倒计时改为显示该时段还剩多久。', '“吃饭啦！”改为圆形按钮；首页访问次数和对应文案移到左上角。', '新增七格蜂巢拼图首页，可在设置页与经典首页之间切换，布局选择纳入完整备份。'] },
   { version: '5.9.15', date: '2026-11-09', changes: ['三餐主按钮精简为居中两行：“吃饭啦！”和“将记为当前餐次”。', '移除按钮内加号与右侧“记录”文字，补记入口移入右上角菜单。', '下一顿倒计时只显示理想时间段，并新增倒计时进度条。', '“今天吃了什么”支持折叠，记录区域可以收起。'] },
   { version: '5.9.14', date: '2026-11-09', changes: ['新增三餐模块，可记录早餐、午餐、下午茶、晚餐和夜宵。', '记录时结合当前时间、理想用餐窗口和与上一顿的间隔给出评价。', '下一顿倒计时以理想用餐窗口的起点为准；新增过去 7 天摘要和三餐规律月历。', '规律正餐按 3 绿、2 黄、1 红、0 叉显示，夜宵显示小点。', '支持选择日期和时间补记；首页与底部导航加入三餐入口。', '完整备份升级为 v4，包含三餐数据。'] },
   { version: '5.9.13', date: '2026-11-09', changes: ['记账最近记录移到“记一笔”上方，默认显示最新 3 笔，并可依次展开全部、完全折叠和恢复 3 笔。', '搜索框移到“记一笔”下方。', '记账设置页修复内容被挤压和无法上下滚动的问题；新建子事件入口移入设置页。', '记账事件区域和事件树节点默认折叠。'] },
@@ -3814,6 +3897,30 @@ function mealNextTargetAt(when, sourceRecords){
   };
 }
 
+function mealCountdownTargetAt(when, sourceRecords){
+  when = when instanceof Date ? when : new Date(when || Date.now());
+  var minutes = when.getHours() * 60 + when.getMinutes();
+  for (var i = 0; i < MEAL_TYPES.length; i++) {
+    var current = MEAL_TYPES[i];
+    if (!current.primary || minutes < current.idealStart || minutes > current.idealEnd) continue;
+    var start = new Date(when.getFullYear(), when.getMonth(), when.getDate(), 0, current.idealStart, 0, 0);
+    var end = new Date(when.getFullYear(), when.getMonth(), when.getDate(), 0, current.idealEnd, 0, 0);
+    return {
+      type: current.id,
+      name: current.name,
+      target: end,
+      from: start,
+      window: '理想 ' + current.idealLabel,
+      hint: '现在正处在' + current.name + '的理想时段，慢慢吃，不必赶时间。',
+      currentWindow: true,
+      tomorrow: false
+    };
+  }
+  var next = mealNextTargetAt(when, sourceRecords);
+  next.currentWindow = false;
+  return next;
+}
+
 function mealCountdownText(ms){
   var total = Math.max(0, Math.ceil(ms / 1000));
   var hours = Math.floor(total / 3600);
@@ -3826,9 +3933,10 @@ function paintMealCountdown(){
   if (!byId('meal-next-timer') || !mealData) return;
   var now = new Date();
   var current = mealTypeMeta(mealTypeForDate(now));
-  var next = mealNextTargetAt(now);
+  var next = mealCountdownTargetAt(now);
   setTxt('meal-top-date', (now.getMonth() + 1) + '月' + now.getDate() + '日 · 周' + ['日', '一', '二', '三', '四', '五', '六'][now.getDay()]);
   setTxt('meal-record-hint', '将记为' + current.name);
+  setTxt('meal-next-label', next.currentWindow ? '距离当前理想就餐时间结束' : '距离下一顿最佳时间');
   setTxt('meal-next-name', next.name);
   setTxt('meal-next-timer', mealCountdownText(next.target.getTime() - now.getTime()));
   setTxt('meal-next-window', next.window);
@@ -4075,7 +4183,7 @@ function workoutDefaultState(){
       id: 'plan_default',
       name: '默认训练',
       items: DEFAULT_EXERCISES.map(function(e){
-        return { exerciseId: e.id, type: e.type, sets: e.type === 'sets' ? 4 : 0, minutes: e.type === 'duration' ? 20 : 0 };
+        return { itemId: 'default_item_' + e.id, exerciseId: e.id, type: e.type, sets: e.type === 'sets' ? 4 : 0, minutes: e.type === 'duration' ? 20 : 0 };
       })
     }],
     sessions: [],
@@ -4085,12 +4193,19 @@ function workoutDefaultState(){
   };
 }
 
+var workoutItemSeq = 0;
+
+function newWorkoutItemId(){
+  workoutItemSeq++;
+  return 'item_' + Date.now().toString(36) + '_' + workoutItemSeq.toString(36);
+}
+
 function exerciseById(id){
   for (var i = 0; i < fit.exercises.length; i++) if (fit.exercises[i].id === id) return fit.exercises[i];
   return null;
 }
 
-function normalizedPlanItem(item){
+function normalizedPlanItem(item, index){
   if (!item || typeof item.exerciseId !== 'string') return null;
   var ex = exerciseById(item.exerciseId);
   var type = item.type || (ex && ex.type);
@@ -4100,22 +4215,24 @@ function normalizedPlanItem(item){
     }
   }
   if (type !== 'duration') type = 'sets';
+  var itemId = typeof item.itemId === 'string' && item.itemId ?
+    item.itemId : 'item_' + item.exerciseId + '_' + (Number(index) || 0);
   if (type === 'duration') {
     return {
-      exerciseId: item.exerciseId, name: item.name || '', type: type, sets: 0,
+      itemId: itemId, exerciseId: item.exerciseId, name: item.name || '', type: type, sets: 0,
       minutes: Math.min(180, Math.max(1, parseInt(item.minutes, 10) || 20))
     };
   }
   return {
-    exerciseId: item.exerciseId, name: item.name || '', type: type,
+    itemId: itemId, exerciseId: item.exerciseId, name: item.name || '', type: type,
     sets: Math.min(20, Math.max(1, parseInt(item.sets, 10) || 4)), minutes: 0
   };
 }
 
 function normalizedPlanItems(items){
   var out = [];
-  each(items || [], function(item){
-    var p = normalizedPlanItem(item);
+  each(items || [], function(item, index){
+    var p = normalizedPlanItem(item, index);
     if (p) out.push(p);
   });
   return out;
@@ -4169,7 +4286,38 @@ function loadWorkoutState(){
       p.name = (ex && ex.name) || p.name || p.exerciseId;
       return p;
     });
+    var planByExercise = {};
+    each(s.plan, function(item){
+      planByExercise[item.exerciseId] = planByExercise[item.exerciseId] || [];
+      planByExercise[item.exerciseId].push(item);
+    });
+    var usedByItem = {};
+    each(s.sets, function(record){
+      if (record.itemId) return;
+      var candidates = planByExercise[record.exerciseId] || [];
+      var chosen = candidates[0];
+      for (var i = 0; i < candidates.length; i++) {
+        var count = usedByItem[candidates[i].itemId] || 0;
+        var target = planItemType(candidates[i]) === 'duration' ? 1 : candidates[i].sets;
+        if (count < target) { chosen = candidates[i]; break; }
+      }
+      if (chosen) {
+        record.itemId = chosen.itemId;
+        usedByItem[chosen.itemId] = (usedByItem[chosen.itemId] || 0) + 1;
+      }
+    });
     if (!s.timedStarts || typeof s.timedStarts !== 'object') s.timedStarts = {};
+    var normalizedTimedStarts = {};
+    each(Object.keys(s.timedStarts), function(key){
+      var direct = s.plan.some(function(item){ return item.itemId === key; });
+      if (direct) {
+        normalizedTimedStarts[key] = s.timedStarts[key];
+        return;
+      }
+      var match = (planByExercise[key] || [])[0];
+      if (match) normalizedTimedStarts[match.itemId] = s.timedStarts[key];
+    });
+    s.timedStarts = normalizedTimedStarts;
   });
   d.cheatMeals = d.cheatMeals.filter(function(m){
     return m && typeof m.id === 'string' && typeof m.date === 'string' && typeof m.at === 'number';
@@ -4266,14 +4414,18 @@ function planItemType(item){
   return ex && ex.type === 'duration' ? 'duration' : 'sets';
 }
 
-function recordsForExercise(session, exerciseId){
-  return session.sets.filter(function(r){ return r.exerciseId === exerciseId; });
+function recordsForPlanItem(session, item){
+  if (!item) return [];
+  return session.sets.filter(function(record){
+    if (record.itemId) return record.itemId === item.itemId;
+    return record.exerciseId === item.exerciseId;
+  });
 }
 
 function completedTasks(session){
   var done = 0;
   each(session.plan, function(item){
-    var records = recordsForExercise(session, item.exerciseId);
+    var records = recordsForPlanItem(session, item);
     if (planItemType(item) === 'duration') {
       done += records.some(function(r){ return r.kind === 'duration' || r.durationMs > 0; }) ? 1 : 0;
     } else {
@@ -4373,7 +4525,7 @@ function renderActiveWorkout(){
   var pct = total.tasks ? Math.min(100, done / total.tasks * 100) : 0;
   var setDone = 0, timedDone = 0;
   each(active.plan, function(item){
-    var records = recordsForExercise(active, item.exerciseId);
+    var records = recordsForPlanItem(active, item);
     if (planItemType(item) === 'duration') {
       timedDone += records.some(function(r){ return r.kind === 'duration' || r.durationMs > 0; }) ? 1 : 0;
     } else {
@@ -4389,7 +4541,7 @@ function renderActiveWorkout(){
 
   var html = '';
   each(active.plan, function(item){
-    var records = recordsForExercise(active, item.exerciseId);
+    var records = recordsForPlanItem(active, item);
     var type = planItemType(item);
     var isDone, detail, times = '', action;
     if (type === 'duration') {
@@ -4401,14 +4553,14 @@ function renderActiveWorkout(){
         times = '<div class="fit-set-times"><span>实际 ' + formatWorkoutDuration(timedRecord.durationMs || 0) +
           ' · 本次 ' + formatWorkoutDuration(timedRecord.elapsed || 0) + '</span></div>';
       } else {
-        var hasStarted = active.timedStarts && Object.prototype.hasOwnProperty.call(active.timedStarts, item.exerciseId);
+        var hasStarted = active.timedStarts && Object.prototype.hasOwnProperty.call(active.timedStarts, item.itemId);
         if (hasStarted) {
-          var started = timedStartElapsed(active, item.exerciseId);
-          action = '<span class="fit-duration-live" data-timed-live="' + escHtml(item.exerciseId) + '">' +
+          var started = timedStartElapsed(active, item.itemId);
+          action = '<span class="fit-duration-live" data-timed-live="' + escHtml(item.itemId) + '">' +
             formatWorkoutDuration(Math.max(0, Date.now() - active.startAt - started)) + '</span>' +
-            '<button class="fit-setbtn" data-time-finish="' + escHtml(item.exerciseId) + '">完成</button>';
+            '<button class="fit-setbtn" data-time-finish="' + escHtml(item.itemId) + '">完成</button>';
         } else {
-          action = '<button class="fit-setbtn" data-time-start="' + escHtml(item.exerciseId) + '">开始计时</button>';
+          action = '<button class="fit-setbtn" data-time-start="' + escHtml(item.itemId) + '">开始计时</button>';
         }
       }
     } else {
@@ -4416,7 +4568,7 @@ function renderActiveWorkout(){
       isDone = setRecords.length >= item.sets;
       detail = '<span class="fit-ex-count">' + setRecords.length + ' / ' + item.sets + ' 组</span>';
       action = isDone ? '<span class="fit-setdone">已完成</span>' :
-        '<button class="fit-setbtn" data-ex="' + escHtml(item.exerciseId) + '">完成第 ' + (setRecords.length + 1) + ' 组</button>';
+        '<button class="fit-setbtn" data-ex="' + escHtml(item.itemId) + '">完成第 ' + (setRecords.length + 1) + ' 组</button>';
       if (setRecords.length) {
         times = '<div class="fit-set-times">' + setRecords.map(function(r){
           return '<span>' + formatWorkoutDuration(r.elapsed || 0) + '</span>';
@@ -4591,6 +4743,7 @@ function openWorkoutPlan(planId){
     escHtml(existing ? existing.name : '训练计划 ' + (fit.plans.length + 1)) + '">' +
     '<div class="plan-summary"><span id="plan-actions">0 个动作</span><b id="plan-sets">0 组</b></div>' +
     '<div class="plan-list" id="plan-list"></div>' +
+    '<div class="plan-picker" id="plan-picker"></div>' +
     '<div class="new-exercise"><input id="plan-new-name" maxlength="12" placeholder="新动作名称">' +
     '<select id="plan-new-type"><option value="sets">按组</option><option value="duration">按时长</option></select>' +
     '<button' + actionAttrs('addExerciseFromPlan') + '>添加</button></div>' +
@@ -4607,20 +4760,34 @@ function openWorkoutPlan(planId){
 function renderPlanRows(){
   var list = byId('plan-list');
   if (!list) return;
-  var draftById = {};
-  each(planDraft, function(p){ draftById[p.exerciseId] = p; });
-  list.innerHTML = fit.exercises.map(function(e){
-    var selected = draftById[e.id];
-    var target = selected ? (e.type === 'duration' ? selected.minutes : selected.sets) : (e.type === 'duration' ? 20 : 4);
-    var unit = e.type === 'duration' ? '分钟' : '组';
-    return '<div class="plan-row' + (selected ? ' active' : '') + '">' +
-      '<input type="checkbox"' + (selected ? ' checked' : '') +
-      actionAttrs('togglePlanExercise', [e.id], 'change') + ' data-event-value="checked">' +
-      '<span class="plan-name">' + escHtml(e.name) + '<small style="color:#9aa9a7;margin-left:5px">' + (e.type === 'duration' ? '时长' : '按组') + '</small></span>' +
-      '<span class="plan-stepper"><button type="button"' + actionAttrs('adjustPlanSets', [e.id, -1]) + '>−</button>' +
+  list.innerHTML = planDraft.length ? planDraft.map(function(p, index){
+    var ex = exerciseById(p.exerciseId) || { name: p.name || p.exerciseId, type: p.type };
+    var type = planItemType(p);
+    var target = type === 'duration' ? p.minutes : p.sets;
+    var unit = type === 'duration' ? '分钟' : '组';
+    return '<div class="plan-row active" data-item-id="' + escHtml(p.itemId) + '">' +
+      '<span class="plan-order-index">' + (index + 1) + '</span>' +
+      '<span class="plan-name">' + escHtml(ex.name) +
+      '<small style="color:#9aa9a7;margin-left:5px">' + (type === 'duration' ? '时长' : '按组') + '</small></span>' +
+      '<span class="plan-row-controls"><span class="plan-stepper">' +
+      '<button type="button"' + actionAttrs('adjustPlanSets', [p.itemId, -1]) + '>−</button>' +
       '<b>' + target + '</b><small>' + unit + '</small>' +
-      '<button type="button"' + actionAttrs('adjustPlanSets', [e.id, 1]) + '>＋</button></span></div>';
-  }).join('');
+      '<button type="button"' + actionAttrs('adjustPlanSets', [p.itemId, 1]) + '>＋</button></span>' +
+      '<span class="plan-row-actions">' +
+      '<button type="button" data-action="movePlanItem" data-args="[&quot;' + escHtml(p.itemId) + '&quot;,-1]"' + (index === 0 ? ' disabled' : '') + ' aria-label="上移">↑</button>' +
+      '<button type="button" data-action="movePlanItem" data-args="[&quot;' + escHtml(p.itemId) + '&quot;,1]"' + (index === planDraft.length - 1 ? ' disabled' : '') + ' aria-label="下移">↓</button>' +
+      '<button type="button" data-action="duplicatePlanItem" data-args="[&quot;' + escHtml(p.itemId) + '&quot;]" aria-label="复制动作">复制</button>' +
+      '<button class="plan-row-remove" type="button" data-action="removePlanItem" data-args="[&quot;' + escHtml(p.itemId) + '&quot;]" aria-label="移除动作">×</button>' +
+      '</span></span></div>';
+  }).join('') : '<div class="plan-empty">还没有动作，从下面添加。</div>';
+  var picker = byId('plan-picker');
+  if (picker) {
+    picker.innerHTML = '<div class="plan-picker-title">添加动作</div><div class="plan-picker-grid">' +
+      fit.exercises.map(function(ex){
+        return '<button type="button"' + actionAttrs('addExerciseToPlan', [ex.id]) + '>' +
+          '<b>' + escHtml(ex.name) + '</b><small>' + (ex.type === 'duration' ? '按时长' : '按组') + '</small><em>＋</em></button>';
+      }).join('') + '</div>';
+  }
   var totals = workoutPlanTotals(planDraft);
   setTxt('plan-actions', totals.exercises + ' 个动作');
   var bits = [];
@@ -4629,33 +4796,72 @@ function renderPlanRows(){
   setTxt('plan-sets', bits.join(' · ') || '未设置');
 }
 
-function togglePlanExercise(id, selected){
-  var ex = exerciseById(id);
-  if (!ex) return;
-  var existing = -1;
-  for (var i = 0; i < planDraft.length; i++) if (planDraft[i].exerciseId === id) existing = i;
-  if (selected && existing < 0) {
-    planDraft.push(ex.type === 'duration' ?
-      { exerciseId: id, type: 'duration', sets: 0, minutes: 20 } :
-      { exerciseId: id, type: 'sets', sets: 4, minutes: 0 });
+function planDraftIndex(identifier){
+  var index = -1;
+  for (var i = 0; i < planDraft.length; i++) {
+    if (planDraft[i].itemId === identifier) return i;
   }
-  if (!selected && existing >= 0) planDraft.splice(existing, 1);
+  for (var j = 0; j < planDraft.length; j++) {
+    if (planDraft[j].exerciseId === identifier) { index = j; break; }
+  }
+  return index;
+}
+
+function newPlanDraftItem(ex){
+  return ex.type === 'duration' ?
+    { itemId: newWorkoutItemId(), exerciseId: ex.id, name: ex.name, type: 'duration', sets: 0, minutes: 20 } :
+    { itemId: newWorkoutItemId(), exerciseId: ex.id, name: ex.name, type: 'sets', sets: 4, minutes: 0 };
+}
+
+function addExerciseToPlan(exerciseId){
+  var ex = exerciseById(exerciseId);
+  if (!ex) return;
+  planDraft.push(newPlanDraftItem(ex));
   renderPlanRows();
 }
 
-function adjustPlanSets(id, delta){
+function togglePlanExercise(id, selected){
   var ex = exerciseById(id);
   if (!ex) return;
-  var item = null;
-  for (var i = 0; i < planDraft.length; i++) if (planDraft[i].exerciseId === id) item = planDraft[i];
-  if (!item) {
-    item = ex.type === 'duration' ?
-      { exerciseId: id, type: 'duration', sets: 0, minutes: 20 } :
-      { exerciseId: id, type: 'sets', sets: 4, minutes: 0 };
-    planDraft.push(item);
+  if (selected) addExerciseToPlan(id);
+  else {
+    planDraft = planDraft.filter(function(item){ return item.exerciseId !== id; });
+    renderPlanRows();
   }
-  if (ex.type === 'duration') item.minutes = Math.min(180, Math.max(5, (parseInt(item.minutes, 10) || 20) + delta * 5));
-  else item.sets = Math.min(20, Math.max(1, item.sets + delta));
+}
+
+function adjustPlanSets(identifier, delta){
+  var index = planDraftIndex(identifier);
+  if (index < 0) return;
+  var item = planDraft[index];
+  if (planItemType(item) === 'duration') item.minutes = Math.min(180, Math.max(5, (parseInt(item.minutes, 10) || 20) + delta * 5));
+  else item.sets = Math.min(20, Math.max(1, (parseInt(item.sets, 10) || 1) + delta));
+  renderPlanRows();
+}
+
+function movePlanItem(identifier, delta){
+  var index = planDraftIndex(identifier);
+  var next = index + (Number(delta) || 0);
+  if (index < 0 || next < 0 || next >= planDraft.length) return;
+  var item = planDraft[index];
+  planDraft[index] = planDraft[next];
+  planDraft[next] = item;
+  renderPlanRows();
+}
+
+function duplicatePlanItem(identifier){
+  var index = planDraftIndex(identifier);
+  if (index < 0) return;
+  var copy = JSON.parse(JSON.stringify(planDraft[index]));
+  copy.itemId = newWorkoutItemId();
+  planDraft.splice(index + 1, 0, copy);
+  renderPlanRows();
+}
+
+function removePlanItem(identifier){
+  var index = planDraftIndex(identifier);
+  if (index < 0) return;
+  planDraft.splice(index, 1);
   renderPlanRows();
 }
 
@@ -4679,9 +4885,7 @@ function addExerciseFromPlan(){
   var type = byId('plan-new-type') ? byId('plan-new-type').value : 'sets';
   var ex = addWorkoutExercise(input.value, type);
   if (!ex) return;
-  planDraft.push(ex.type === 'duration' ?
-    { exerciseId: ex.id, type: 'duration', sets: 0, minutes: 20 } :
-    { exerciseId: ex.id, type: 'sets', sets: 4, minutes: 0 });
+  planDraft.push(newPlanDraftItem(ex));
   input.value = '';
   renderPlanRows();
   input.focus();
@@ -4726,6 +4930,7 @@ function startWorkoutFromPlan(planId){
     var ex = exerciseById(p.exerciseId);
     if (ex) {
       plan.push({
+        itemId: p.itemId || newWorkoutItemId(),
         exerciseId: p.exerciseId, name: ex.name,
         type: ex.type, sets: ex.type === 'sets' ? p.sets : 0,
         minutes: ex.type === 'duration' ? p.minutes : 0
@@ -4782,6 +4987,7 @@ function loadBackfillDraft(){
     each(plan.items, function(item){
       var type = planItemType(item);
       backfillDraft.push({
+        itemId: item.itemId,
         exerciseId: item.exerciseId,
         name: item.name || workoutExerciseName(item.exerciseId),
         type: type,
@@ -4804,9 +5010,9 @@ function renderBackfillDraft(){
     var target = item.type === 'duration' ? item.targetMinutes + ' 分钟' : item.targetSets + ' 组';
     return '<div class="plan-row active"><span></span><span class="plan-name">' + escHtml(item.name) +
       '<span class="active-edit-note">计划 ' + target + '</span></span>' +
-      '<span class="plan-stepper"><button type="button"' + actionAttrs('adjustBackfill', [item.exerciseId, -1]) + '>−</button>' +
+      '<span class="plan-stepper"><button type="button"' + actionAttrs('adjustBackfill', [item.itemId, -1]) + '>−</button>' +
       '<b>' + actual + '</b><small>' + unit + '</small>' +
-      '<button type="button"' + actionAttrs('adjustBackfill', [item.exerciseId, 1]) + '>＋</button></span></div>';
+      '<button type="button"' + actionAttrs('adjustBackfill', [item.itemId, 1]) + '>＋</button></span></div>';
   }).join('');
   var sets = 0, minutes = 0;
   each(backfillDraft, function(item){
@@ -4816,9 +5022,9 @@ function renderBackfillDraft(){
   setTxt('backfill-summary', (sets ? sets + ' 组' : '') + (sets && minutes ? ' · ' : '') + (minutes ? minutes + ' 分钟' : '') || '0');
 }
 
-function adjustBackfill(exerciseId, delta){
+function adjustBackfill(itemId, delta){
   each(backfillDraft, function(item){
-    if (item.exerciseId !== exerciseId) return;
+    if (item.itemId !== itemId) return;
     if (item.type === 'duration') item.actualMinutes = Math.min(180, Math.max(0, item.actualMinutes + delta * 5));
     else item.actualSets = Math.min(20, Math.max(0, item.actualSets + delta));
   });
@@ -4838,19 +5044,19 @@ function saveBackfillWorkout(){
   var snapshot = [];
   each(backfillDraft, function(item){
     var planItem = normalizedPlanItem({
-      exerciseId: item.exerciseId, name: item.name, type: item.type,
+      itemId: item.itemId, exerciseId: item.exerciseId, name: item.name, type: item.type,
       sets: item.targetSets, minutes: item.targetMinutes
     });
     snapshot.push(planItem);
     if (item.type === 'duration' && item.actualMinutes > 0) {
       records.push({
-        exerciseId: item.exerciseId, kind: 'duration', manual: true,
+        itemId: item.itemId, exerciseId: item.exerciseId, kind: 'duration', manual: true,
         startedElapsed: 0, durationMs: item.actualMinutes * 60000, elapsed: 0
       });
     } else if (item.type === 'sets') {
       for (var i = 0; i < item.actualSets; i++) {
         records.push({
-          exerciseId: item.exerciseId, kind: 'set', setNo: i + 1,
+          itemId: item.itemId, exerciseId: item.exerciseId, kind: 'set', setNo: i + 1,
           elapsed: 0, manual: true
         });
       }
@@ -4878,20 +5084,29 @@ function saveBackfillWorkout(){
   toast('训练已补记');
 }
 
-function completeWorkoutSet(exerciseId){
+function activePlanItem(active, identifier){
+  if (!active) return null;
+  for (var i = 0; i < active.plan.length; i++) {
+    if (active.plan[i].itemId === identifier) return active.plan[i];
+  }
+  for (var j = 0; j < active.plan.length; j++) {
+    if (active.plan[j].exerciseId === identifier) return active.plan[j];
+  }
+  return null;
+}
+
+function completeWorkoutSet(identifier){
   var active = activeWorkout();
   if (!active) { toast('没有进行中的训练'); return; }
-  var planItem = null;
-  for (var i = 0; i < active.plan.length; i++) {
-    if (active.plan[i].exerciseId === exerciseId) planItem = active.plan[i];
-  }
+  var planItem = activePlanItem(active, identifier);
   if (!planItem) return;
   if (planItemType(planItem) !== 'sets') { toast('这个动作按时长记录'); return; }
-  var done = active.sets.filter(function(s){ return s.exerciseId === exerciseId && s.kind !== 'duration'; }).length;
+  var done = recordsForPlanItem(active, planItem).filter(function(s){ return s.kind !== 'duration'; }).length;
   if (done >= planItem.sets) { toast('这个动作已经完成'); return; }
   var now = Date.now();
   active.sets.push({
-    exerciseId: exerciseId,
+    itemId: planItem.itemId,
+    exerciseId: planItem.exerciseId,
     kind: 'set',
     setNo: done + 1,
     elapsed: now - active.startAt
@@ -4902,30 +5117,34 @@ function completeWorkoutSet(exerciseId){
   toast('第 ' + (done + 1) + ' 组完成');
 }
 
-function startTimedExercise(exerciseId){
+function startTimedExercise(identifier){
   var active = activeWorkout();
   if (!active) return;
+  var planItem = activePlanItem(active, identifier);
+  if (!planItem) return;
   if (!active.timedStarts) active.timedStarts = {};
-  if (active.timedStarts[exerciseId]) return;
-  active.timedStarts[exerciseId] = Math.max(0, Date.now() - active.startAt);
+  if (active.timedStarts[planItem.itemId]) return;
+  active.timedStarts[planItem.itemId] = Math.max(0, Date.now() - active.startAt);
   saveWorkout();
   renderActiveWorkout();
 }
 
-function completeTimedExercise(exerciseId){
+function completeTimedExercise(identifier){
   var active = activeWorkout();
-  if (!active || !active.timedStarts || !Object.prototype.hasOwnProperty.call(active.timedStarts, exerciseId)) return;
+  var planItem = activePlanItem(active, identifier);
+  if (!active || !planItem || !active.timedStarts || !Object.prototype.hasOwnProperty.call(active.timedStarts, planItem.itemId)) return;
   var now = Date.now();
-  var startedElapsed = timedStartElapsed(active, exerciseId);
+  var startedElapsed = timedStartElapsed(active, planItem.itemId);
   var currentElapsed = now - active.startAt;
   active.sets.push({
-    exerciseId: exerciseId,
+    itemId: planItem.itemId,
+    exerciseId: planItem.exerciseId,
     kind: 'duration',
     startedElapsed: startedElapsed,
     durationMs: Math.max(0, currentElapsed - startedElapsed),
     elapsed: currentElapsed
   });
-  delete active.timedStarts[exerciseId];
+  delete active.timedStarts[planItem.itemId];
   saveWorkout();
   if (workoutIsComplete(active)) { finishWorkout('auto'); return; }
   renderWorkoutHome();
@@ -4988,7 +5207,7 @@ function deleteWorkoutSession(id){
 }
 
 function activeItemDoneCount(active, item){
-  var records = recordsForExercise(active, item.exerciseId);
+  var records = recordsForPlanItem(active, item);
   if (planItemType(item) === 'duration') {
     return records.some(function(r){ return r.kind === 'duration' || r.durationMs > 0; }) ? 1 : 0;
   }
@@ -4998,24 +5217,22 @@ function activeItemDoneCount(active, item){
 function openActiveWorkoutEditor(){
   var active = activeWorkout();
   if (!active) return;
-  var inPlan = {};
-  each(active.plan, function(item){ inPlan[item.exerciseId] = true; });
-  var available = fit.exercises.filter(function(e){ return !inPlan[e.id]; });
+  var available = fit.exercises;
   var html = '<h3>调整本次训练</h3><p>可以临时增加或删除动作，也可以增减组数和目标时长。</p><div class="plan-list">';
   each(active.plan, function(item){
     var type = planItemType(item);
     var done = activeItemDoneCount(active, item);
-    var records = recordsForExercise(active, item.exerciseId);
+    var records = recordsForPlanItem(active, item);
     var target = type === 'duration' ? item.minutes : item.sets;
     var unit = type === 'duration' ? '分钟' : '组';
     html += '<div class="plan-row active">' +
       '<span></span><span class="plan-name">' + escHtml(item.name) +
       '<span class="active-edit-note">' + (type === 'duration' ? (done ? '已完成时长' : '尚未记录') : ('已完成 ' + done + ' 组')) + '</span></span>' +
-      '<span class="plan-stepper"><button type="button"' + actionAttrs('adjustActiveTarget', [item.exerciseId, -1]) + '>−</button>' +
+      '<span class="plan-stepper"><button type="button"' + actionAttrs('adjustActiveTarget', [item.itemId, -1]) + '>−</button>' +
       '<b>' + target + '</b><small>' + unit + '</small>' +
-      '<button type="button"' + actionAttrs('adjustActiveTarget', [item.exerciseId, 1]) + '>＋</button>' +
-      (records.length ? '<button type="button"' + actionAttrs('undoActiveRecord', [item.exerciseId]) + ' title="撤销最近记录">↶</button>' : '') +
-      '<button class="plan-row-remove" type="button"' + actionAttrs('removeActiveExercise', [item.exerciseId]) + '>×</button></span></div>';
+      '<button type="button"' + actionAttrs('adjustActiveTarget', [item.itemId, 1]) + '>＋</button>' +
+      (records.length ? '<button type="button"' + actionAttrs('undoActiveRecord', [item.itemId]) + ' title="撤销最近记录">↶</button>' : '') +
+      '<button class="plan-row-remove" type="button"' + actionAttrs('removeActiveExercise', [item.itemId]) + '>×</button></span></div>';
   });
   html += '</div>';
   if (available.length) {
@@ -5027,11 +5244,10 @@ function openActiveWorkoutEditor(){
   openSheet(html);
 }
 
-function adjustActiveTarget(exerciseId, delta){
+function adjustActiveTarget(identifier, delta){
   var active = activeWorkout();
   if (!active) return;
-  var item = null;
-  each(active.plan, function(p){ if (p.exerciseId === exerciseId) item = p; });
+  var item = activePlanItem(active, identifier);
   if (!item) return;
   if (planItemType(item) === 'duration') {
     item.minutes = Math.min(180, Math.max(5, (parseInt(item.minutes, 10) || 20) + delta * 5));
@@ -5045,12 +5261,14 @@ function adjustActiveTarget(exerciseId, delta){
   else openActiveWorkoutEditor();
 }
 
-function undoActiveRecord(exerciseId){
+function undoActiveRecord(identifier){
   var active = activeWorkout();
   if (!active) return;
+  var item = activePlanItem(active, identifier);
+  if (!item) return;
   var last = -1;
   for (var i = 0; i < active.sets.length; i++) {
-    if (active.sets[i].exerciseId === exerciseId) last = i;
+    if (active.sets[i].itemId === item.itemId) last = i;
   }
   if (last < 0) return;
   active.sets.splice(last, 1);
@@ -5059,19 +5277,18 @@ function undoActiveRecord(exerciseId){
   openActiveWorkoutEditor();
 }
 
-function removeActiveExercise(exerciseId){
+function removeActiveExercise(identifier){
   var active = activeWorkout();
   if (!active || active.plan.length <= 1) { toast('至少保留一个动作'); return; }
-  var item = null;
-  each(active.plan, function(p){ if (p.exerciseId === exerciseId) item = p; });
+  var item = activePlanItem(active, identifier);
   if (!item) return;
-  var hasRecords = recordsForExercise(active, exerciseId).length ||
-    (active.timedStarts && active.timedStarts[exerciseId]);
+  var hasRecords = recordsForPlanItem(active, item).length ||
+    (active.timedStarts && active.timedStarts[item.itemId]);
   if (hasRecords) {
     appConfirm('删除这个动作？它在本次训练中已有记录，也会一起移除。', function(){
-      active.plan = active.plan.filter(function(p){ return p.exerciseId !== exerciseId; });
-      active.sets = active.sets.filter(function(r){ return r.exerciseId !== exerciseId; });
-      if (active.timedStarts) delete active.timedStarts[exerciseId];
+      active.plan = active.plan.filter(function(p){ return p.itemId !== item.itemId; });
+      active.sets = active.sets.filter(function(r){ return r.itemId !== item.itemId; });
+      if (active.timedStarts) delete active.timedStarts[item.itemId];
       saveWorkout();
       renderWorkoutHome();
       if (workoutIsComplete(active)) finishWorkout('auto');
@@ -5079,9 +5296,9 @@ function removeActiveExercise(exerciseId){
     }, { title: '删除动作', onCancel: openActiveWorkoutEditor });
     return;
   }
-  active.plan = active.plan.filter(function(p){ return p.exerciseId !== exerciseId; });
-  active.sets = active.sets.filter(function(r){ return r.exerciseId !== exerciseId; });
-  if (active.timedStarts) delete active.timedStarts[exerciseId];
+  active.plan = active.plan.filter(function(p){ return p.itemId !== item.itemId; });
+  active.sets = active.sets.filter(function(r){ return r.itemId !== item.itemId; });
+  if (active.timedStarts) delete active.timedStarts[item.itemId];
   saveWorkout();
   renderWorkoutHome();
   if (workoutIsComplete(active)) finishWorkout('auto');
@@ -5094,9 +5311,8 @@ function addActiveExercise(){
   if (!active || !select || !select.value) return;
   var ex = exerciseById(select.value);
   if (!ex) return;
-  active.plan.push(ex.type === 'duration' ?
-    { exerciseId: ex.id, name: ex.name, type: 'duration', sets: 0, minutes: 20 } :
-    { exerciseId: ex.id, name: ex.name, type: 'sets', sets: 4, minutes: 0 });
+  var item = newPlanDraftItem(ex);
+  active.plan.push(item);
   saveWorkout();
   renderWorkoutHome();
   openActiveWorkoutEditor();
@@ -5236,7 +5452,7 @@ function openSessionDetail(id){
     '<span>' + (session.backfilled ? '补记' : formatWorkoutDuration(end - session.startAt)) + '</span>' +
     '<span>' + completedTasks(session) + ' / ' + total.tasks + ' 项</span></div>';
   each(session.plan, function(item){
-    var records = recordsForExercise(session, item.exerciseId);
+    var records = recordsForPlanItem(session, item);
     var type = planItemType(item);
     var done = type === 'duration' ?
       records.filter(function(r){ return r.kind === 'duration' || r.durationMs > 0; }).length :
@@ -5922,6 +6138,31 @@ function renderDashboard(){
     setTxt('home-ledger-copy', total ? '本月 ' + ledgerMoney(total) : '本月还没有记录');
   }
   renderVisitStats();
+}
+
+function renderHomeLayoutSettings(){
+  var classic = byId('home-layout-classic-state');
+  var honeycomb = byId('home-layout-honeycomb-state');
+  if (classic) classic.textContent = homeLayoutMode === 'classic' ? '使用中' : '切换 ›';
+  if (honeycomb) honeycomb.textContent = homeLayoutMode === 'honeycomb' ? '使用中' : '切换 ›';
+}
+
+function applyHomeLayout(mode){
+  homeLayoutMode = mode === 'honeycomb' ? 'honeycomb' : 'classic';
+  var grid = document.querySelector('.home-grid');
+  if (grid) grid.setAttribute('data-layout', homeLayoutMode);
+  renderHomeLayoutSettings();
+}
+
+function setHomeLayout(mode){
+  applyHomeLayout(mode);
+  storeSet(HOME_LAYOUT_KEY, homeLayoutMode);
+  toast(homeLayoutMode === 'honeycomb' ? '已切换为拼图布局' : '已切换为经典布局');
+}
+
+function initHomeLayout(){
+  var mode = storeGet(HOME_LAYOUT_KEY, 'classic');
+  applyHomeLayout(mode);
 }
 
 var webVisitPreviewCounted = false;
@@ -8088,6 +8329,7 @@ function boot(){
   initReminder();
   initLedger();
   bindDragGestures();
+  initHomeLayout();
   renderDashboard();
 
   setInterval(function(){

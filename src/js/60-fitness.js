@@ -14,7 +14,7 @@ function workoutDefaultState(){
       id: 'plan_default',
       name: '默认训练',
       items: DEFAULT_EXERCISES.map(function(e){
-        return { exerciseId: e.id, type: e.type, sets: e.type === 'sets' ? 4 : 0, minutes: e.type === 'duration' ? 20 : 0 };
+        return { itemId: 'default_item_' + e.id, exerciseId: e.id, type: e.type, sets: e.type === 'sets' ? 4 : 0, minutes: e.type === 'duration' ? 20 : 0 };
       })
     }],
     sessions: [],
@@ -24,12 +24,19 @@ function workoutDefaultState(){
   };
 }
 
+var workoutItemSeq = 0;
+
+function newWorkoutItemId(){
+  workoutItemSeq++;
+  return 'item_' + Date.now().toString(36) + '_' + workoutItemSeq.toString(36);
+}
+
 function exerciseById(id){
   for (var i = 0; i < fit.exercises.length; i++) if (fit.exercises[i].id === id) return fit.exercises[i];
   return null;
 }
 
-function normalizedPlanItem(item){
+function normalizedPlanItem(item, index){
   if (!item || typeof item.exerciseId !== 'string') return null;
   var ex = exerciseById(item.exerciseId);
   var type = item.type || (ex && ex.type);
@@ -39,22 +46,24 @@ function normalizedPlanItem(item){
     }
   }
   if (type !== 'duration') type = 'sets';
+  var itemId = typeof item.itemId === 'string' && item.itemId ?
+    item.itemId : 'item_' + item.exerciseId + '_' + (Number(index) || 0);
   if (type === 'duration') {
     return {
-      exerciseId: item.exerciseId, name: item.name || '', type: type, sets: 0,
+      itemId: itemId, exerciseId: item.exerciseId, name: item.name || '', type: type, sets: 0,
       minutes: Math.min(180, Math.max(1, parseInt(item.minutes, 10) || 20))
     };
   }
   return {
-    exerciseId: item.exerciseId, name: item.name || '', type: type,
+    itemId: itemId, exerciseId: item.exerciseId, name: item.name || '', type: type,
     sets: Math.min(20, Math.max(1, parseInt(item.sets, 10) || 4)), minutes: 0
   };
 }
 
 function normalizedPlanItems(items){
   var out = [];
-  each(items || [], function(item){
-    var p = normalizedPlanItem(item);
+  each(items || [], function(item, index){
+    var p = normalizedPlanItem(item, index);
     if (p) out.push(p);
   });
   return out;
@@ -108,7 +117,38 @@ function loadWorkoutState(){
       p.name = (ex && ex.name) || p.name || p.exerciseId;
       return p;
     });
+    var planByExercise = {};
+    each(s.plan, function(item){
+      planByExercise[item.exerciseId] = planByExercise[item.exerciseId] || [];
+      planByExercise[item.exerciseId].push(item);
+    });
+    var usedByItem = {};
+    each(s.sets, function(record){
+      if (record.itemId) return;
+      var candidates = planByExercise[record.exerciseId] || [];
+      var chosen = candidates[0];
+      for (var i = 0; i < candidates.length; i++) {
+        var count = usedByItem[candidates[i].itemId] || 0;
+        var target = planItemType(candidates[i]) === 'duration' ? 1 : candidates[i].sets;
+        if (count < target) { chosen = candidates[i]; break; }
+      }
+      if (chosen) {
+        record.itemId = chosen.itemId;
+        usedByItem[chosen.itemId] = (usedByItem[chosen.itemId] || 0) + 1;
+      }
+    });
     if (!s.timedStarts || typeof s.timedStarts !== 'object') s.timedStarts = {};
+    var normalizedTimedStarts = {};
+    each(Object.keys(s.timedStarts), function(key){
+      var direct = s.plan.some(function(item){ return item.itemId === key; });
+      if (direct) {
+        normalizedTimedStarts[key] = s.timedStarts[key];
+        return;
+      }
+      var match = (planByExercise[key] || [])[0];
+      if (match) normalizedTimedStarts[match.itemId] = s.timedStarts[key];
+    });
+    s.timedStarts = normalizedTimedStarts;
   });
   d.cheatMeals = d.cheatMeals.filter(function(m){
     return m && typeof m.id === 'string' && typeof m.date === 'string' && typeof m.at === 'number';
@@ -205,14 +245,18 @@ function planItemType(item){
   return ex && ex.type === 'duration' ? 'duration' : 'sets';
 }
 
-function recordsForExercise(session, exerciseId){
-  return session.sets.filter(function(r){ return r.exerciseId === exerciseId; });
+function recordsForPlanItem(session, item){
+  if (!item) return [];
+  return session.sets.filter(function(record){
+    if (record.itemId) return record.itemId === item.itemId;
+    return record.exerciseId === item.exerciseId;
+  });
 }
 
 function completedTasks(session){
   var done = 0;
   each(session.plan, function(item){
-    var records = recordsForExercise(session, item.exerciseId);
+    var records = recordsForPlanItem(session, item);
     if (planItemType(item) === 'duration') {
       done += records.some(function(r){ return r.kind === 'duration' || r.durationMs > 0; }) ? 1 : 0;
     } else {
@@ -312,7 +356,7 @@ function renderActiveWorkout(){
   var pct = total.tasks ? Math.min(100, done / total.tasks * 100) : 0;
   var setDone = 0, timedDone = 0;
   each(active.plan, function(item){
-    var records = recordsForExercise(active, item.exerciseId);
+    var records = recordsForPlanItem(active, item);
     if (planItemType(item) === 'duration') {
       timedDone += records.some(function(r){ return r.kind === 'duration' || r.durationMs > 0; }) ? 1 : 0;
     } else {
@@ -328,7 +372,7 @@ function renderActiveWorkout(){
 
   var html = '';
   each(active.plan, function(item){
-    var records = recordsForExercise(active, item.exerciseId);
+    var records = recordsForPlanItem(active, item);
     var type = planItemType(item);
     var isDone, detail, times = '', action;
     if (type === 'duration') {
@@ -340,14 +384,14 @@ function renderActiveWorkout(){
         times = '<div class="fit-set-times"><span>实际 ' + formatWorkoutDuration(timedRecord.durationMs || 0) +
           ' · 本次 ' + formatWorkoutDuration(timedRecord.elapsed || 0) + '</span></div>';
       } else {
-        var hasStarted = active.timedStarts && Object.prototype.hasOwnProperty.call(active.timedStarts, item.exerciseId);
+        var hasStarted = active.timedStarts && Object.prototype.hasOwnProperty.call(active.timedStarts, item.itemId);
         if (hasStarted) {
-          var started = timedStartElapsed(active, item.exerciseId);
-          action = '<span class="fit-duration-live" data-timed-live="' + escHtml(item.exerciseId) + '">' +
+          var started = timedStartElapsed(active, item.itemId);
+          action = '<span class="fit-duration-live" data-timed-live="' + escHtml(item.itemId) + '">' +
             formatWorkoutDuration(Math.max(0, Date.now() - active.startAt - started)) + '</span>' +
-            '<button class="fit-setbtn" data-time-finish="' + escHtml(item.exerciseId) + '">完成</button>';
+            '<button class="fit-setbtn" data-time-finish="' + escHtml(item.itemId) + '">完成</button>';
         } else {
-          action = '<button class="fit-setbtn" data-time-start="' + escHtml(item.exerciseId) + '">开始计时</button>';
+          action = '<button class="fit-setbtn" data-time-start="' + escHtml(item.itemId) + '">开始计时</button>';
         }
       }
     } else {
@@ -355,7 +399,7 @@ function renderActiveWorkout(){
       isDone = setRecords.length >= item.sets;
       detail = '<span class="fit-ex-count">' + setRecords.length + ' / ' + item.sets + ' 组</span>';
       action = isDone ? '<span class="fit-setdone">已完成</span>' :
-        '<button class="fit-setbtn" data-ex="' + escHtml(item.exerciseId) + '">完成第 ' + (setRecords.length + 1) + ' 组</button>';
+        '<button class="fit-setbtn" data-ex="' + escHtml(item.itemId) + '">完成第 ' + (setRecords.length + 1) + ' 组</button>';
       if (setRecords.length) {
         times = '<div class="fit-set-times">' + setRecords.map(function(r){
           return '<span>' + formatWorkoutDuration(r.elapsed || 0) + '</span>';
@@ -530,6 +574,7 @@ function openWorkoutPlan(planId){
     escHtml(existing ? existing.name : '训练计划 ' + (fit.plans.length + 1)) + '">' +
     '<div class="plan-summary"><span id="plan-actions">0 个动作</span><b id="plan-sets">0 组</b></div>' +
     '<div class="plan-list" id="plan-list"></div>' +
+    '<div class="plan-picker" id="plan-picker"></div>' +
     '<div class="new-exercise"><input id="plan-new-name" maxlength="12" placeholder="新动作名称">' +
     '<select id="plan-new-type"><option value="sets">按组</option><option value="duration">按时长</option></select>' +
     '<button' + actionAttrs('addExerciseFromPlan') + '>添加</button></div>' +
@@ -546,20 +591,34 @@ function openWorkoutPlan(planId){
 function renderPlanRows(){
   var list = byId('plan-list');
   if (!list) return;
-  var draftById = {};
-  each(planDraft, function(p){ draftById[p.exerciseId] = p; });
-  list.innerHTML = fit.exercises.map(function(e){
-    var selected = draftById[e.id];
-    var target = selected ? (e.type === 'duration' ? selected.minutes : selected.sets) : (e.type === 'duration' ? 20 : 4);
-    var unit = e.type === 'duration' ? '分钟' : '组';
-    return '<div class="plan-row' + (selected ? ' active' : '') + '">' +
-      '<input type="checkbox"' + (selected ? ' checked' : '') +
-      actionAttrs('togglePlanExercise', [e.id], 'change') + ' data-event-value="checked">' +
-      '<span class="plan-name">' + escHtml(e.name) + '<small style="color:#9aa9a7;margin-left:5px">' + (e.type === 'duration' ? '时长' : '按组') + '</small></span>' +
-      '<span class="plan-stepper"><button type="button"' + actionAttrs('adjustPlanSets', [e.id, -1]) + '>−</button>' +
+  list.innerHTML = planDraft.length ? planDraft.map(function(p, index){
+    var ex = exerciseById(p.exerciseId) || { name: p.name || p.exerciseId, type: p.type };
+    var type = planItemType(p);
+    var target = type === 'duration' ? p.minutes : p.sets;
+    var unit = type === 'duration' ? '分钟' : '组';
+    return '<div class="plan-row active" data-item-id="' + escHtml(p.itemId) + '">' +
+      '<span class="plan-order-index">' + (index + 1) + '</span>' +
+      '<span class="plan-name">' + escHtml(ex.name) +
+      '<small style="color:#9aa9a7;margin-left:5px">' + (type === 'duration' ? '时长' : '按组') + '</small></span>' +
+      '<span class="plan-row-controls"><span class="plan-stepper">' +
+      '<button type="button"' + actionAttrs('adjustPlanSets', [p.itemId, -1]) + '>−</button>' +
       '<b>' + target + '</b><small>' + unit + '</small>' +
-      '<button type="button"' + actionAttrs('adjustPlanSets', [e.id, 1]) + '>＋</button></span></div>';
-  }).join('');
+      '<button type="button"' + actionAttrs('adjustPlanSets', [p.itemId, 1]) + '>＋</button></span>' +
+      '<span class="plan-row-actions">' +
+      '<button type="button" data-action="movePlanItem" data-args="[&quot;' + escHtml(p.itemId) + '&quot;,-1]"' + (index === 0 ? ' disabled' : '') + ' aria-label="上移">↑</button>' +
+      '<button type="button" data-action="movePlanItem" data-args="[&quot;' + escHtml(p.itemId) + '&quot;,1]"' + (index === planDraft.length - 1 ? ' disabled' : '') + ' aria-label="下移">↓</button>' +
+      '<button type="button" data-action="duplicatePlanItem" data-args="[&quot;' + escHtml(p.itemId) + '&quot;]" aria-label="复制动作">复制</button>' +
+      '<button class="plan-row-remove" type="button" data-action="removePlanItem" data-args="[&quot;' + escHtml(p.itemId) + '&quot;]" aria-label="移除动作">×</button>' +
+      '</span></span></div>';
+  }).join('') : '<div class="plan-empty">还没有动作，从下面添加。</div>';
+  var picker = byId('plan-picker');
+  if (picker) {
+    picker.innerHTML = '<div class="plan-picker-title">添加动作</div><div class="plan-picker-grid">' +
+      fit.exercises.map(function(ex){
+        return '<button type="button"' + actionAttrs('addExerciseToPlan', [ex.id]) + '>' +
+          '<b>' + escHtml(ex.name) + '</b><small>' + (ex.type === 'duration' ? '按时长' : '按组') + '</small><em>＋</em></button>';
+      }).join('') + '</div>';
+  }
   var totals = workoutPlanTotals(planDraft);
   setTxt('plan-actions', totals.exercises + ' 个动作');
   var bits = [];
@@ -568,33 +627,72 @@ function renderPlanRows(){
   setTxt('plan-sets', bits.join(' · ') || '未设置');
 }
 
-function togglePlanExercise(id, selected){
-  var ex = exerciseById(id);
-  if (!ex) return;
-  var existing = -1;
-  for (var i = 0; i < planDraft.length; i++) if (planDraft[i].exerciseId === id) existing = i;
-  if (selected && existing < 0) {
-    planDraft.push(ex.type === 'duration' ?
-      { exerciseId: id, type: 'duration', sets: 0, minutes: 20 } :
-      { exerciseId: id, type: 'sets', sets: 4, minutes: 0 });
+function planDraftIndex(identifier){
+  var index = -1;
+  for (var i = 0; i < planDraft.length; i++) {
+    if (planDraft[i].itemId === identifier) return i;
   }
-  if (!selected && existing >= 0) planDraft.splice(existing, 1);
+  for (var j = 0; j < planDraft.length; j++) {
+    if (planDraft[j].exerciseId === identifier) { index = j; break; }
+  }
+  return index;
+}
+
+function newPlanDraftItem(ex){
+  return ex.type === 'duration' ?
+    { itemId: newWorkoutItemId(), exerciseId: ex.id, name: ex.name, type: 'duration', sets: 0, minutes: 20 } :
+    { itemId: newWorkoutItemId(), exerciseId: ex.id, name: ex.name, type: 'sets', sets: 4, minutes: 0 };
+}
+
+function addExerciseToPlan(exerciseId){
+  var ex = exerciseById(exerciseId);
+  if (!ex) return;
+  planDraft.push(newPlanDraftItem(ex));
   renderPlanRows();
 }
 
-function adjustPlanSets(id, delta){
+function togglePlanExercise(id, selected){
   var ex = exerciseById(id);
   if (!ex) return;
-  var item = null;
-  for (var i = 0; i < planDraft.length; i++) if (planDraft[i].exerciseId === id) item = planDraft[i];
-  if (!item) {
-    item = ex.type === 'duration' ?
-      { exerciseId: id, type: 'duration', sets: 0, minutes: 20 } :
-      { exerciseId: id, type: 'sets', sets: 4, minutes: 0 };
-    planDraft.push(item);
+  if (selected) addExerciseToPlan(id);
+  else {
+    planDraft = planDraft.filter(function(item){ return item.exerciseId !== id; });
+    renderPlanRows();
   }
-  if (ex.type === 'duration') item.minutes = Math.min(180, Math.max(5, (parseInt(item.minutes, 10) || 20) + delta * 5));
-  else item.sets = Math.min(20, Math.max(1, item.sets + delta));
+}
+
+function adjustPlanSets(identifier, delta){
+  var index = planDraftIndex(identifier);
+  if (index < 0) return;
+  var item = planDraft[index];
+  if (planItemType(item) === 'duration') item.minutes = Math.min(180, Math.max(5, (parseInt(item.minutes, 10) || 20) + delta * 5));
+  else item.sets = Math.min(20, Math.max(1, (parseInt(item.sets, 10) || 1) + delta));
+  renderPlanRows();
+}
+
+function movePlanItem(identifier, delta){
+  var index = planDraftIndex(identifier);
+  var next = index + (Number(delta) || 0);
+  if (index < 0 || next < 0 || next >= planDraft.length) return;
+  var item = planDraft[index];
+  planDraft[index] = planDraft[next];
+  planDraft[next] = item;
+  renderPlanRows();
+}
+
+function duplicatePlanItem(identifier){
+  var index = planDraftIndex(identifier);
+  if (index < 0) return;
+  var copy = JSON.parse(JSON.stringify(planDraft[index]));
+  copy.itemId = newWorkoutItemId();
+  planDraft.splice(index + 1, 0, copy);
+  renderPlanRows();
+}
+
+function removePlanItem(identifier){
+  var index = planDraftIndex(identifier);
+  if (index < 0) return;
+  planDraft.splice(index, 1);
   renderPlanRows();
 }
 
@@ -618,9 +716,7 @@ function addExerciseFromPlan(){
   var type = byId('plan-new-type') ? byId('plan-new-type').value : 'sets';
   var ex = addWorkoutExercise(input.value, type);
   if (!ex) return;
-  planDraft.push(ex.type === 'duration' ?
-    { exerciseId: ex.id, type: 'duration', sets: 0, minutes: 20 } :
-    { exerciseId: ex.id, type: 'sets', sets: 4, minutes: 0 });
+  planDraft.push(newPlanDraftItem(ex));
   input.value = '';
   renderPlanRows();
   input.focus();
@@ -665,6 +761,7 @@ function startWorkoutFromPlan(planId){
     var ex = exerciseById(p.exerciseId);
     if (ex) {
       plan.push({
+        itemId: p.itemId || newWorkoutItemId(),
         exerciseId: p.exerciseId, name: ex.name,
         type: ex.type, sets: ex.type === 'sets' ? p.sets : 0,
         minutes: ex.type === 'duration' ? p.minutes : 0
@@ -721,6 +818,7 @@ function loadBackfillDraft(){
     each(plan.items, function(item){
       var type = planItemType(item);
       backfillDraft.push({
+        itemId: item.itemId,
         exerciseId: item.exerciseId,
         name: item.name || workoutExerciseName(item.exerciseId),
         type: type,
@@ -743,9 +841,9 @@ function renderBackfillDraft(){
     var target = item.type === 'duration' ? item.targetMinutes + ' 分钟' : item.targetSets + ' 组';
     return '<div class="plan-row active"><span></span><span class="plan-name">' + escHtml(item.name) +
       '<span class="active-edit-note">计划 ' + target + '</span></span>' +
-      '<span class="plan-stepper"><button type="button"' + actionAttrs('adjustBackfill', [item.exerciseId, -1]) + '>−</button>' +
+      '<span class="plan-stepper"><button type="button"' + actionAttrs('adjustBackfill', [item.itemId, -1]) + '>−</button>' +
       '<b>' + actual + '</b><small>' + unit + '</small>' +
-      '<button type="button"' + actionAttrs('adjustBackfill', [item.exerciseId, 1]) + '>＋</button></span></div>';
+      '<button type="button"' + actionAttrs('adjustBackfill', [item.itemId, 1]) + '>＋</button></span></div>';
   }).join('');
   var sets = 0, minutes = 0;
   each(backfillDraft, function(item){
@@ -755,9 +853,9 @@ function renderBackfillDraft(){
   setTxt('backfill-summary', (sets ? sets + ' 组' : '') + (sets && minutes ? ' · ' : '') + (minutes ? minutes + ' 分钟' : '') || '0');
 }
 
-function adjustBackfill(exerciseId, delta){
+function adjustBackfill(itemId, delta){
   each(backfillDraft, function(item){
-    if (item.exerciseId !== exerciseId) return;
+    if (item.itemId !== itemId) return;
     if (item.type === 'duration') item.actualMinutes = Math.min(180, Math.max(0, item.actualMinutes + delta * 5));
     else item.actualSets = Math.min(20, Math.max(0, item.actualSets + delta));
   });
@@ -777,19 +875,19 @@ function saveBackfillWorkout(){
   var snapshot = [];
   each(backfillDraft, function(item){
     var planItem = normalizedPlanItem({
-      exerciseId: item.exerciseId, name: item.name, type: item.type,
+      itemId: item.itemId, exerciseId: item.exerciseId, name: item.name, type: item.type,
       sets: item.targetSets, minutes: item.targetMinutes
     });
     snapshot.push(planItem);
     if (item.type === 'duration' && item.actualMinutes > 0) {
       records.push({
-        exerciseId: item.exerciseId, kind: 'duration', manual: true,
+        itemId: item.itemId, exerciseId: item.exerciseId, kind: 'duration', manual: true,
         startedElapsed: 0, durationMs: item.actualMinutes * 60000, elapsed: 0
       });
     } else if (item.type === 'sets') {
       for (var i = 0; i < item.actualSets; i++) {
         records.push({
-          exerciseId: item.exerciseId, kind: 'set', setNo: i + 1,
+          itemId: item.itemId, exerciseId: item.exerciseId, kind: 'set', setNo: i + 1,
           elapsed: 0, manual: true
         });
       }
@@ -817,20 +915,29 @@ function saveBackfillWorkout(){
   toast('训练已补记');
 }
 
-function completeWorkoutSet(exerciseId){
+function activePlanItem(active, identifier){
+  if (!active) return null;
+  for (var i = 0; i < active.plan.length; i++) {
+    if (active.plan[i].itemId === identifier) return active.plan[i];
+  }
+  for (var j = 0; j < active.plan.length; j++) {
+    if (active.plan[j].exerciseId === identifier) return active.plan[j];
+  }
+  return null;
+}
+
+function completeWorkoutSet(identifier){
   var active = activeWorkout();
   if (!active) { toast('没有进行中的训练'); return; }
-  var planItem = null;
-  for (var i = 0; i < active.plan.length; i++) {
-    if (active.plan[i].exerciseId === exerciseId) planItem = active.plan[i];
-  }
+  var planItem = activePlanItem(active, identifier);
   if (!planItem) return;
   if (planItemType(planItem) !== 'sets') { toast('这个动作按时长记录'); return; }
-  var done = active.sets.filter(function(s){ return s.exerciseId === exerciseId && s.kind !== 'duration'; }).length;
+  var done = recordsForPlanItem(active, planItem).filter(function(s){ return s.kind !== 'duration'; }).length;
   if (done >= planItem.sets) { toast('这个动作已经完成'); return; }
   var now = Date.now();
   active.sets.push({
-    exerciseId: exerciseId,
+    itemId: planItem.itemId,
+    exerciseId: planItem.exerciseId,
     kind: 'set',
     setNo: done + 1,
     elapsed: now - active.startAt
@@ -841,30 +948,34 @@ function completeWorkoutSet(exerciseId){
   toast('第 ' + (done + 1) + ' 组完成');
 }
 
-function startTimedExercise(exerciseId){
+function startTimedExercise(identifier){
   var active = activeWorkout();
   if (!active) return;
+  var planItem = activePlanItem(active, identifier);
+  if (!planItem) return;
   if (!active.timedStarts) active.timedStarts = {};
-  if (active.timedStarts[exerciseId]) return;
-  active.timedStarts[exerciseId] = Math.max(0, Date.now() - active.startAt);
+  if (active.timedStarts[planItem.itemId]) return;
+  active.timedStarts[planItem.itemId] = Math.max(0, Date.now() - active.startAt);
   saveWorkout();
   renderActiveWorkout();
 }
 
-function completeTimedExercise(exerciseId){
+function completeTimedExercise(identifier){
   var active = activeWorkout();
-  if (!active || !active.timedStarts || !Object.prototype.hasOwnProperty.call(active.timedStarts, exerciseId)) return;
+  var planItem = activePlanItem(active, identifier);
+  if (!active || !planItem || !active.timedStarts || !Object.prototype.hasOwnProperty.call(active.timedStarts, planItem.itemId)) return;
   var now = Date.now();
-  var startedElapsed = timedStartElapsed(active, exerciseId);
+  var startedElapsed = timedStartElapsed(active, planItem.itemId);
   var currentElapsed = now - active.startAt;
   active.sets.push({
-    exerciseId: exerciseId,
+    itemId: planItem.itemId,
+    exerciseId: planItem.exerciseId,
     kind: 'duration',
     startedElapsed: startedElapsed,
     durationMs: Math.max(0, currentElapsed - startedElapsed),
     elapsed: currentElapsed
   });
-  delete active.timedStarts[exerciseId];
+  delete active.timedStarts[planItem.itemId];
   saveWorkout();
   if (workoutIsComplete(active)) { finishWorkout('auto'); return; }
   renderWorkoutHome();
@@ -927,7 +1038,7 @@ function deleteWorkoutSession(id){
 }
 
 function activeItemDoneCount(active, item){
-  var records = recordsForExercise(active, item.exerciseId);
+  var records = recordsForPlanItem(active, item);
   if (planItemType(item) === 'duration') {
     return records.some(function(r){ return r.kind === 'duration' || r.durationMs > 0; }) ? 1 : 0;
   }
@@ -937,24 +1048,22 @@ function activeItemDoneCount(active, item){
 function openActiveWorkoutEditor(){
   var active = activeWorkout();
   if (!active) return;
-  var inPlan = {};
-  each(active.plan, function(item){ inPlan[item.exerciseId] = true; });
-  var available = fit.exercises.filter(function(e){ return !inPlan[e.id]; });
+  var available = fit.exercises;
   var html = '<h3>调整本次训练</h3><p>可以临时增加或删除动作，也可以增减组数和目标时长。</p><div class="plan-list">';
   each(active.plan, function(item){
     var type = planItemType(item);
     var done = activeItemDoneCount(active, item);
-    var records = recordsForExercise(active, item.exerciseId);
+    var records = recordsForPlanItem(active, item);
     var target = type === 'duration' ? item.minutes : item.sets;
     var unit = type === 'duration' ? '分钟' : '组';
     html += '<div class="plan-row active">' +
       '<span></span><span class="plan-name">' + escHtml(item.name) +
       '<span class="active-edit-note">' + (type === 'duration' ? (done ? '已完成时长' : '尚未记录') : ('已完成 ' + done + ' 组')) + '</span></span>' +
-      '<span class="plan-stepper"><button type="button"' + actionAttrs('adjustActiveTarget', [item.exerciseId, -1]) + '>−</button>' +
+      '<span class="plan-stepper"><button type="button"' + actionAttrs('adjustActiveTarget', [item.itemId, -1]) + '>−</button>' +
       '<b>' + target + '</b><small>' + unit + '</small>' +
-      '<button type="button"' + actionAttrs('adjustActiveTarget', [item.exerciseId, 1]) + '>＋</button>' +
-      (records.length ? '<button type="button"' + actionAttrs('undoActiveRecord', [item.exerciseId]) + ' title="撤销最近记录">↶</button>' : '') +
-      '<button class="plan-row-remove" type="button"' + actionAttrs('removeActiveExercise', [item.exerciseId]) + '>×</button></span></div>';
+      '<button type="button"' + actionAttrs('adjustActiveTarget', [item.itemId, 1]) + '>＋</button>' +
+      (records.length ? '<button type="button"' + actionAttrs('undoActiveRecord', [item.itemId]) + ' title="撤销最近记录">↶</button>' : '') +
+      '<button class="plan-row-remove" type="button"' + actionAttrs('removeActiveExercise', [item.itemId]) + '>×</button></span></div>';
   });
   html += '</div>';
   if (available.length) {
@@ -966,11 +1075,10 @@ function openActiveWorkoutEditor(){
   openSheet(html);
 }
 
-function adjustActiveTarget(exerciseId, delta){
+function adjustActiveTarget(identifier, delta){
   var active = activeWorkout();
   if (!active) return;
-  var item = null;
-  each(active.plan, function(p){ if (p.exerciseId === exerciseId) item = p; });
+  var item = activePlanItem(active, identifier);
   if (!item) return;
   if (planItemType(item) === 'duration') {
     item.minutes = Math.min(180, Math.max(5, (parseInt(item.minutes, 10) || 20) + delta * 5));
@@ -984,12 +1092,14 @@ function adjustActiveTarget(exerciseId, delta){
   else openActiveWorkoutEditor();
 }
 
-function undoActiveRecord(exerciseId){
+function undoActiveRecord(identifier){
   var active = activeWorkout();
   if (!active) return;
+  var item = activePlanItem(active, identifier);
+  if (!item) return;
   var last = -1;
   for (var i = 0; i < active.sets.length; i++) {
-    if (active.sets[i].exerciseId === exerciseId) last = i;
+    if (active.sets[i].itemId === item.itemId) last = i;
   }
   if (last < 0) return;
   active.sets.splice(last, 1);
@@ -998,19 +1108,18 @@ function undoActiveRecord(exerciseId){
   openActiveWorkoutEditor();
 }
 
-function removeActiveExercise(exerciseId){
+function removeActiveExercise(identifier){
   var active = activeWorkout();
   if (!active || active.plan.length <= 1) { toast('至少保留一个动作'); return; }
-  var item = null;
-  each(active.plan, function(p){ if (p.exerciseId === exerciseId) item = p; });
+  var item = activePlanItem(active, identifier);
   if (!item) return;
-  var hasRecords = recordsForExercise(active, exerciseId).length ||
-    (active.timedStarts && active.timedStarts[exerciseId]);
+  var hasRecords = recordsForPlanItem(active, item).length ||
+    (active.timedStarts && active.timedStarts[item.itemId]);
   if (hasRecords) {
     appConfirm('删除这个动作？它在本次训练中已有记录，也会一起移除。', function(){
-      active.plan = active.plan.filter(function(p){ return p.exerciseId !== exerciseId; });
-      active.sets = active.sets.filter(function(r){ return r.exerciseId !== exerciseId; });
-      if (active.timedStarts) delete active.timedStarts[exerciseId];
+      active.plan = active.plan.filter(function(p){ return p.itemId !== item.itemId; });
+      active.sets = active.sets.filter(function(r){ return r.itemId !== item.itemId; });
+      if (active.timedStarts) delete active.timedStarts[item.itemId];
       saveWorkout();
       renderWorkoutHome();
       if (workoutIsComplete(active)) finishWorkout('auto');
@@ -1018,9 +1127,9 @@ function removeActiveExercise(exerciseId){
     }, { title: '删除动作', onCancel: openActiveWorkoutEditor });
     return;
   }
-  active.plan = active.plan.filter(function(p){ return p.exerciseId !== exerciseId; });
-  active.sets = active.sets.filter(function(r){ return r.exerciseId !== exerciseId; });
-  if (active.timedStarts) delete active.timedStarts[exerciseId];
+  active.plan = active.plan.filter(function(p){ return p.itemId !== item.itemId; });
+  active.sets = active.sets.filter(function(r){ return r.itemId !== item.itemId; });
+  if (active.timedStarts) delete active.timedStarts[item.itemId];
   saveWorkout();
   renderWorkoutHome();
   if (workoutIsComplete(active)) finishWorkout('auto');
@@ -1033,9 +1142,8 @@ function addActiveExercise(){
   if (!active || !select || !select.value) return;
   var ex = exerciseById(select.value);
   if (!ex) return;
-  active.plan.push(ex.type === 'duration' ?
-    { exerciseId: ex.id, name: ex.name, type: 'duration', sets: 0, minutes: 20 } :
-    { exerciseId: ex.id, name: ex.name, type: 'sets', sets: 4, minutes: 0 });
+  var item = newPlanDraftItem(ex);
+  active.plan.push(item);
   saveWorkout();
   renderWorkoutHome();
   openActiveWorkoutEditor();
@@ -1175,7 +1283,7 @@ function openSessionDetail(id){
     '<span>' + (session.backfilled ? '补记' : formatWorkoutDuration(end - session.startAt)) + '</span>' +
     '<span>' + completedTasks(session) + ' / ' + total.tasks + ' 项</span></div>';
   each(session.plan, function(item){
-    var records = recordsForExercise(session, item.exerciseId);
+    var records = recordsForPlanItem(session, item);
     var type = planItemType(item);
     var done = type === 'duration' ?
       records.filter(function(r){ return r.kind === 'duration' || r.durationMs > 0; }).length :

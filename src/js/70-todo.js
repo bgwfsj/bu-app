@@ -629,6 +629,31 @@ function renderDashboard(){
   renderVisitStats();
 }
 
+function renderHomeLayoutSettings(){
+  var classic = byId('home-layout-classic-state');
+  var honeycomb = byId('home-layout-honeycomb-state');
+  if (classic) classic.textContent = homeLayoutMode === 'classic' ? '使用中' : '切换 ›';
+  if (honeycomb) honeycomb.textContent = homeLayoutMode === 'honeycomb' ? '使用中' : '切换 ›';
+}
+
+function applyHomeLayout(mode){
+  homeLayoutMode = mode === 'honeycomb' ? 'honeycomb' : 'classic';
+  var grid = document.querySelector('.home-grid');
+  if (grid) grid.setAttribute('data-layout', homeLayoutMode);
+  renderHomeLayoutSettings();
+}
+
+function setHomeLayout(mode){
+  applyHomeLayout(mode);
+  storeSet(HOME_LAYOUT_KEY, homeLayoutMode);
+  toast(homeLayoutMode === 'honeycomb' ? '已切换为拼图布局' : '已切换为经典布局');
+}
+
+function initHomeLayout(){
+  var mode = storeGet(HOME_LAYOUT_KEY, 'classic');
+  applyHomeLayout(mode);
+}
+
 var webVisitPreviewCounted = false;
 
 function renderVisitStats(){

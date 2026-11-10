@@ -19,7 +19,13 @@
     <!-- ================= 应用首页 ================= -->
     <section class="page on" id="p-home">
       <div class="home-top">
-        <div class="home-mark">补<span>每天补一点</span></div>
+        <div class="home-identity">
+          <div class="home-mark">补<span>每天补一点</span></div>
+          <div class="home-visit-stats" id="home-visit-stats" aria-live="polite">
+            <div id="home-visit-count"></div>
+            <div class="home-visit-copy" id="home-visit-copy"></div>
+          </div>
+        </div>
         <div class="home-meta"><div class="home-date" id="home-date"></div><button class="home-data-btn" id="btn-app-settings" data-action="openSettingsPage" title="设置" aria-label="设置">⋯</button></div>
       </div>
       <div class="home-hero">
@@ -65,10 +71,6 @@
           <small id="home-reminder-copy">没有独立提醒</small>
         </button>
       </div>
-      <div class="home-visit-stats" id="home-visit-stats" aria-live="polite">
-        <div id="home-visit-count"></div>
-        <div class="home-visit-copy" id="home-visit-copy"></div>
-      </div>
     </section>
 
     <!-- ================= 设置 ================= -->
@@ -93,6 +95,15 @@
         </button>
         <button class="settings-row" data-action="requestCleanupOldBackups">
           <span><b>清理旧备份</b><small>自动和手动清理都只保留最近 2 份</small></span><em>清理 ›</em>
+        </button>
+      </div>
+      <div class="settings-group">
+        <div class="settings-group-title">首页样式</div>
+        <button class="settings-row" id="btn-home-layout-classic" data-action="setHomeLayout" data-args='["classic"]'>
+          <span><b>经典布局</b><small>两列卡片，信息直接铺开</small></span><em id="home-layout-classic-state">使用中</em>
+        </button>
+        <button class="settings-row" id="btn-home-layout-honeycomb" data-action="setHomeLayout" data-args='["honeycomb"]'>
+          <span><b>拼图布局</b><small>七个多边形拼成蜂巢结构</small></span><em id="home-layout-honeycomb-state">切换 ›</em>
         </button>
       </div>
       <div class="settings-group">
@@ -303,7 +314,7 @@
         <small id="meal-record-hint">将记为午餐</small>
       </button>
       <section class="meal-next-card">
-        <div class="meal-next-head"><span>距离下一顿最佳时间</span><b id="meal-next-name">午餐</b></div>
+        <div class="meal-next-head"><span id="meal-next-label">距离下一顿最佳时间</span><b id="meal-next-name">午餐</b></div>
         <div class="meal-next-timer" id="meal-next-timer">00:00:00</div>
         <div class="meal-next-progress"><i id="meal-next-progress"></i></div>
         <div class="meal-next-meta">

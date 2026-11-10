@@ -254,6 +254,30 @@ function mealNextTargetAt(when, sourceRecords){
   };
 }
 
+function mealCountdownTargetAt(when, sourceRecords){
+  when = when instanceof Date ? when : new Date(when || Date.now());
+  var minutes = when.getHours() * 60 + when.getMinutes();
+  for (var i = 0; i < MEAL_TYPES.length; i++) {
+    var current = MEAL_TYPES[i];
+    if (!current.primary || minutes < current.idealStart || minutes > current.idealEnd) continue;
+    var start = new Date(when.getFullYear(), when.getMonth(), when.getDate(), 0, current.idealStart, 0, 0);
+    var end = new Date(when.getFullYear(), when.getMonth(), when.getDate(), 0, current.idealEnd, 0, 0);
+    return {
+      type: current.id,
+      name: current.name,
+      target: end,
+      from: start,
+      window: '理想 ' + current.idealLabel,
+      hint: '现在正处在' + current.name + '的理想时段，慢慢吃，不必赶时间。',
+      currentWindow: true,
+      tomorrow: false
+    };
+  }
+  var next = mealNextTargetAt(when, sourceRecords);
+  next.currentWindow = false;
+  return next;
+}
+
 function mealCountdownText(ms){
   var total = Math.max(0, Math.ceil(ms / 1000));
   var hours = Math.floor(total / 3600);
@@ -266,9 +290,10 @@ function paintMealCountdown(){
   if (!byId('meal-next-timer') || !mealData) return;
   var now = new Date();
   var current = mealTypeMeta(mealTypeForDate(now));
-  var next = mealNextTargetAt(now);
+  var next = mealCountdownTargetAt(now);
   setTxt('meal-top-date', (now.getMonth() + 1) + '月' + now.getDate() + '日 · 周' + ['日', '一', '二', '三', '四', '五', '六'][now.getDay()]);
   setTxt('meal-record-hint', '将记为' + current.name);
+  setTxt('meal-next-label', next.currentWindow ? '距离当前理想就餐时间结束' : '距离下一顿最佳时间');
   setTxt('meal-next-name', next.name);
   setTxt('meal-next-timer', mealCountdownText(next.target.getTime() - now.getTime()));
   setTxt('meal-next-window', next.window);

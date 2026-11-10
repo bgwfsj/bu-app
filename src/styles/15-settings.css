@@ -1,5 +1,9 @@
 /* ---------- 设置 ---------- */
 body[data-page="settings"] #page-pager{opacity:0;pointer-events:none}
+#p-settings{
+  overflow-y:auto;overscroll-behavior-y:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch
+}
+#p-settings>*{flex:0 0 auto}
 .settings-back{
   width:34px;height:34px;padding:0;border:1px solid var(--line2);border-radius:10px;
   background:rgba(255,255,255,.66);color:#71868f;font-size:23px;line-height:1;cursor:pointer
