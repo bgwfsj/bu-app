@@ -6,7 +6,7 @@
 
 - 应用名：补
 - 包名：`com.quitsmoke.app`
-- 当前版本：6.0.2
+- 当前版本：6.0.3
 - 最低 Android：API 24
 - Target SDK：34
 - 仓库：`bgwfsj/bu-app`（公开）
@@ -177,7 +177,7 @@ bu_pre_restore_v1    完整恢复前的安全副本
 - 从归档移回过期的仅一次提醒时保留原日期，并用 `restoredPastOnce` 阻止它被立即再次归档。
 - 提醒仅支持短距离横向滑动，不启用长按拖拽。
 - 普通状态和归档均按 once、daily、weekly、monthly、yearly 分组；折叠状态保存在 `reminderData.groupCollapsed`。
-- 首页提醒只显示当天已经到点、且 `handledOccurrences` 中没有对应事件键的提醒。事件键格式为 `id|yyyy-MM-dd|HH:mm`，通知后台确认或稍后时写入原生 SharedPreferences，App 恢复时由 `applyConfirmedReminders()` 同步。
+- 首页提醒会列出所有当天已经到点、且 `handledOccurrences` 中没有对应事件键的提醒，不使用“只显示第一条 + 另有 N 条”的摘要。每条右侧 `×` 调用 `completeHomeReminder()`，同时写入 `handledOccurrences` 和 `completedOccurrences`，所以首页移除并让提醒列表划线。事件键格式为 `id|yyyy-MM-dd|HH:mm`，通知后台确认或稍后时写入原生 SharedPreferences，App 恢复时由 `applyConfirmedReminders()` 同步。
 - 通知“确认”对一次性提醒记录完成 ID并归档；对重复提醒写入 `completed_keys`，由 `MainActivity.consumeCompletedReminderKeys()` 同步到 `completedOccurrences`。通知“稍后”只写 `handled_keys`，不得触发划线。
 - 待办与提醒可以一对一互相转换。转换后源项目进入归档并标记 `archiveReason = converted`。可一一对应的重复规则会直接保留；工作日、周末、自定义多日期待办转换为一条 `once` 提醒，日期取最近一次。
 
@@ -247,6 +247,8 @@ bu_pre_restore_v1    完整恢复前的安全副本
 `MainActivity.onPageFinished()` 每个 Activity 生命周期只安排一次启动更新检查，约延迟 2 秒后调用 `AppUpdater.checkOnStartup()`。启动模式必须静默：无更新、网络失败或已有检查/下载任务时不弹 Toast 或对话框；只有发现更高版本才显示更新弹窗。设置页手动检查继续使用 `AppUpdater.check()`，保留“正在检查”和“已是最新”反馈。
 
 下载时必须在通知栏显示进度百分比和已下载/总大小。下载完成后同一条通知更新状态。
+
+独立提醒的 PendingIntent requestCode 必须分离：`StandaloneReminderScheduler` 的 AlarmClock show intent 使用 `requestCode(id) ^ 0x5348`，通知内容 intent 使用 `requestCode(id)`，确认和稍后动作另有独立 XOR 值。`PendingIntent` 的身份判断忽略 extras；如果内容点击与闹钟点击复用同一个 requestCode，重复提醒排下一次时会用不含弹框参数的 extras 覆盖通知内容 intent。待办提醒正常的原因就是它的 AlarmClock show request（4101）与通知内容 request（0）本来就不同。
 
 用户确认更新后，`AppUpdater` 先调用 `MainActivity.backupBeforeUpdate()`，由 WebView 执行 `window.exportUpdateBackup()` 并保存完整 JSON。只有备份返回成功才进入下载；备份失败时停止更新。
 

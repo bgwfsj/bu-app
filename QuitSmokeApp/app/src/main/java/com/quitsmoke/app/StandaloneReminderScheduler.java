@@ -22,6 +22,7 @@ public final class StandaloneReminderScheduler {
     public static final String KEY_ITEMS = "items";
     public static final String CHANNEL_ID = "standalone_reminders";
     private static final String ACTION_FIRE = "com.quitsmoke.app.STANDALONE_REMINDER";
+    private static final int SHOW_REQUEST_XOR = 0x5348;
 
     private StandaloneReminderScheduler() {}
 
@@ -121,7 +122,7 @@ public final class StandaloneReminderScheduler {
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             PendingIntent showPending = PendingIntent.getActivity(
                 context,
-                requestCode(id),
+                requestCode(id) ^ SHOW_REQUEST_XOR,
                 showIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
             );

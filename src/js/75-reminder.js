@@ -15,7 +15,6 @@ function reminderDefaultState(){
     handledOccurrences: {},
     completedOccurrences: {},
     homeNoticeEnabled: true,
-    homeNoticeDismissedDate: '',
     groupCollapsed: { active: {}, archived: {} }
   };
 }
@@ -79,7 +78,7 @@ function loadReminderState(){
   pruneHandledReminderOccurrences(d.handledOccurrences);
   pruneHandledReminderOccurrences(d.completedOccurrences);
   if (typeof d.homeNoticeEnabled !== 'boolean') d.homeNoticeEnabled = true;
-  if (typeof d.homeNoticeDismissedDate !== 'string') d.homeNoticeDismissedDate = '';
+  delete d.homeNoticeDismissedDate;
   if (!d.groupCollapsed || typeof d.groupCollapsed !== 'object') {
     d.groupCollapsed = { active: {}, archived: {} };
   }
@@ -213,9 +212,7 @@ function reminderCompletedForDate(item, date){
 function renderHomeNotice(){
   var box = byId('home-notice');
   if (!box || !reminderData) return;
-  if (reminderData.homeNoticeEnabled === false ||
-      reminderData.homeNoticeDismissedDate === wTodayStr() ||
-      !reminderData.items.length) {
+  if (reminderData.homeNoticeEnabled === false || !reminderData.items.length) {
     box.hidden = true;
     return;
   }
@@ -228,19 +225,25 @@ function renderHomeNotice(){
     return item.time <= currentTime &&
       !reminderData.handledOccurrences[reminderOccurrenceKey(item, now)];
   });
-  var title = '';
-  var copy = '';
-  if (dueItems.length) {
-    var first = dueItems[0];
-    title = '今天有提醒到时间了';
-    copy = first.title + ' · ' + first.time + (dueItems.length > 1 ? '，另有 ' + (dueItems.length - 1) + ' 条' : '');
-  } else {
+  if (!dueItems.length) {
     box.hidden = true;
     return;
   }
   box.hidden = false;
-  setTxt('home-notice-title', title);
-  setTxt('home-notice-copy', copy);
+  box.innerHTML = '<div class="home-notice-head"><span>今天有提醒到时间了</span><small>' +
+    dueItems.length + ' 条</small></div>' + dueItems.map(function(item){
+      var key = reminderOccurrenceKey(item, now);
+      return '<div class="home-notice-row"><button class="home-notice-main"' +
+        actionAttrs('goPage', [7]) + '><span class="home-notice-dot"></span>' +
+        '<span><b>' + escHtml(item.title) + '</b><small>' + escHtml(item.time) +
+        '</small></span><em>查看</em></button><button class="home-notice-close"' +
+        actionAttrs('completeHomeReminder', [item.id, key]) +
+        ' aria-label="标记今天完成">×</button></div>';
+    }).join('');
+}
+
+function completeHomeReminder(id, occurrenceKey){
+  confirmNotificationAction('standalone', id, -1, occurrenceKey);
 }
 
 function updateReminderSettings(){
@@ -661,16 +664,9 @@ function convertReminderToTodo(id){
 
 function toggleReminderHomeNotice(){
   reminderData.homeNoticeEnabled = reminderData.homeNoticeEnabled === false;
-  if (reminderData.homeNoticeEnabled) reminderData.homeNoticeDismissedDate = '';
   saveReminderState(false);
   renderReminderPage();
   if (byId('sheet').classList.contains('on')) openReminderMenu();
-}
-
-function dismissHomeNoticeToday(){
-  reminderData.homeNoticeDismissedDate = wTodayStr();
-  saveReminderState(false);
-  renderHomeNotice();
 }
 
 function reminderNativeItem(item){

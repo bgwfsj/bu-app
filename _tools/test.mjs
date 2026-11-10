@@ -619,8 +619,8 @@ async function run() {
       cleanupConfirmOpened: true,
       cleanupCalls: 1,
       aboutOpened: true,
-      changelogCount: 61,
-      aboutVersion: '6.0.2',
+      changelogCount: 62,
+      aboutVersion: '6.0.3',
       updateBackupExposed: true,
       updateCalls: 1,
       handledBack: true,
@@ -947,30 +947,42 @@ async function run() {
       var savedNoticeItems = reminderData.items.slice();
       var tomorrow = new Date(Date.now() + 86400000);
       var tomorrowText = tomorrow.getFullYear() + '-' + pad2(tomorrow.getMonth() + 1) + '-' + pad2(tomorrow.getDate());
-      reminderData.homeNoticeDismissedDate = '';
       reminderData.items = [{
         id: 'future_notice', title: '明天提醒', mode: 'once', time: '09:00',
         date: tomorrowText, createdAt: new Date().toISOString()
       }];
       renderHomeNotice();
       var futureNoticeHidden = byId('home-notice').hidden;
-      reminderData.items = [{
-        id: 'due_notice', title: '已到点提醒', mode: 'daily', time: '00:00',
-        createdAt: new Date().toISOString()
-      }];
+      reminderData.items = [
+        { id: 'due_notice', title: '已到点提醒', mode: 'daily', time: '00:00', createdAt: new Date().toISOString() },
+        { id: 'due_notice_2', title: '另一条到点提醒', mode: 'daily', time: '00:01', createdAt: new Date().toISOString() }
+      ];
       renderHomeNotice();
       var homeNoticeVisible = !byId('home-notice').hidden;
+      var allNoticeRows = byId('home-notice').querySelectorAll('.home-notice-row').length;
       var dueKey = reminderOccurrenceKey(reminderData.items[0], new Date());
+      var dueKey2 = reminderOccurrenceKey(reminderData.items[1], new Date());
       reminderData.handledOccurrences[dueKey] = true;
+      renderHomeNotice();
+      var partialHandledRows = byId('home-notice').querySelectorAll('.home-notice-row').length;
+      reminderData.handledOccurrences[dueKey2] = true;
       renderHomeNotice();
       var handledNoticeHidden = byId('home-notice').hidden;
       delete reminderData.handledOccurrences[dueKey];
+      delete reminderData.handledOccurrences[dueKey2];
       renderHomeNotice();
       document.querySelector('.home-notice-close').click();
-      var dismissedToday = byId('home-notice').hidden &&
-        reminderData.homeNoticeDismissedDate === wTodayStr();
-      reminderData.homeNoticeDismissedDate = '2000-01-01';
-      renderHomeNotice();
+      var xCompleted = reminderData.handledOccurrences[dueKey] === true &&
+        reminderData.completedOccurrences[dueKey] === true;
+      var remainingNoticeRows = byId('home-notice').querySelectorAll('.home-notice-row').length;
+      renderReminderPage();
+      var xStruckRow = byId('reminder-list').querySelector('[data-drag-id="due_notice"]');
+      var xStruck = !!xStruckRow && xStruckRow.classList.contains('done-today');
+      var xCompletedHelper = reminderCompletedForDate(reminderItemById('due_notice'), new Date());
+      var xDailyCollapsed = !!reminderData.groupCollapsed.active.daily;
+      delete reminderData.handledOccurrences[dueKey];
+      delete reminderData.completedOccurrences[dueKey];
+      renderReminderPage();
       var returnedNextCycle = !byId('home-notice').hidden;
       toggleReminderHomeNotice();
       var homeNoticeHidden = byId('home-notice').hidden;
@@ -1063,8 +1075,15 @@ async function run() {
         stored: JSON.parse(localStorage.getItem(RKEY)).items.length,
         futureNoticeHidden: futureNoticeHidden,
         homeNoticeVisible: homeNoticeVisible,
+        allNoticeRows: allNoticeRows,
+        partialHandledRows: partialHandledRows,
         handledNoticeHidden: handledNoticeHidden,
-        dismissedToday: dismissedToday,
+        xCompleted: xCompleted,
+        xStruck: xStruck,
+        xCompletedHelper: xCompletedHelper,
+        xDailyCollapsed: xDailyCollapsed,
+        xRowFound: !!xStruckRow,
+        remainingNoticeRows: remainingNoticeRows,
         returnedNextCycle: returnedNextCycle,
         homeNoticeHidden: homeNoticeHidden,
         savedOff: savedOff,
@@ -1100,8 +1119,12 @@ async function run() {
     assert.equal(reminders.stored, 5);
     assert.equal(reminders.futureNoticeHidden, true);
     assert.equal(reminders.homeNoticeVisible, true);
+    assert.equal(reminders.allNoticeRows, 2);
+    assert.equal(reminders.partialHandledRows, 1);
     assert.equal(reminders.handledNoticeHidden, true);
-    assert.equal(reminders.dismissedToday, true);
+    assert.equal(reminders.xCompleted, true, JSON.stringify(reminders));
+    assert.equal(reminders.xStruck, true, JSON.stringify(reminders));
+    assert.equal(reminders.remainingNoticeRows, 1);
     assert.equal(reminders.returnedNextCycle, true);
     assert.equal(reminders.homeNoticeHidden, true);
     assert.equal(reminders.savedOff, true);
