@@ -27,6 +27,7 @@ function confirmNotificationAction(type, id, notificationId, occurrenceKey){
   var changed = false;
   if (type === 'standalone' && occurrenceKey) {
     reminderData.handledOccurrences[occurrenceKey] = true;
+    reminderData.completedOccurrences[occurrenceKey] = true;
     changed = true;
   }
   if (type === 'standalone' && item && item.mode === 'once') {

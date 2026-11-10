@@ -13,6 +13,7 @@ function reminderDefaultState(){
     items: [],
     archived: [],
     handledOccurrences: {},
+    completedOccurrences: {},
     homeNoticeEnabled: true,
     homeNoticeDismissedDate: '',
     groupCollapsed: { active: {}, archived: {} }
@@ -72,7 +73,11 @@ function loadReminderState(){
   if (!d.handledOccurrences || typeof d.handledOccurrences !== 'object') {
     d.handledOccurrences = {};
   }
+  if (!d.completedOccurrences || typeof d.completedOccurrences !== 'object') {
+    d.completedOccurrences = {};
+  }
   pruneHandledReminderOccurrences(d.handledOccurrences);
+  pruneHandledReminderOccurrences(d.completedOccurrences);
   if (typeof d.homeNoticeEnabled !== 'boolean') d.homeNoticeEnabled = true;
   if (typeof d.homeNoticeDismissedDate !== 'string') d.homeNoticeDismissedDate = '';
   if (!d.groupCollapsed || typeof d.groupCollapsed !== 'object') {
@@ -198,6 +203,13 @@ function pruneHandledReminderOccurrences(handled){
   });
 }
 
+function reminderCompletedForDate(item, date){
+  if (!item || item.mode === 'once') return false;
+  var day = date || new Date();
+  return reminderOccursOnDate(item, day) &&
+    !!reminderData.completedOccurrences[reminderOccurrenceKey(item, day)];
+}
+
 function renderHomeNotice(){
   var box = byId('home-notice');
   if (!box || !reminderData) return;
@@ -278,7 +290,9 @@ function renderReminderPage(){
       REMINDER_MODE_NAMES[mode] + '</span><small>' + rows.length + ' 条</small></button>' +
       '<div class="reminder-group-list">' + rows.map(function(row){
         var item = row.item;
-        return '<div class="reminder-item" data-drag-kind="reminder" data-drag-state="active" data-drag-id="' +
+        var doneToday = reminderCompletedForDate(item, new Date());
+        return '<div class="reminder-item' + (doneToday ? ' done-today' : '') +
+          '" data-drag-kind="reminder" data-drag-state="active" data-drag-id="' +
           escHtml(item.id) + '"' + actionAttrs('editReminder', [item.id]) + '>' +
           '<span class="reminder-time-chip">' + escHtml(item.time) + '</span>' +
           '<span class="reminder-copy"><b>' + escHtml(item.title) + '</b>' +
@@ -328,6 +342,7 @@ function applyConfirmedReminders(){
   if (!reminderData || !window.AppNative) return;
   var ids = [];
   var handledKeys = [];
+  var completedKeys = [];
   try {
     if (window.AppNative.consumeConfirmedReminderIds) {
       ids = JSON.parse(window.AppNative.consumeConfirmedReminderIds() || '[]');
@@ -335,9 +350,13 @@ function applyConfirmedReminders(){
     if (window.AppNative.consumeHandledReminderKeys) {
       handledKeys = JSON.parse(window.AppNative.consumeHandledReminderKeys() || '[]');
     }
+    if (window.AppNative.consumeCompletedReminderKeys) {
+      completedKeys = JSON.parse(window.AppNative.consumeCompletedReminderKeys() || '[]');
+    }
   } catch (error) {}
   if (!Array.isArray(ids)) ids = [];
   if (!Array.isArray(handledKeys)) handledKeys = [];
+  if (!Array.isArray(completedKeys)) completedKeys = [];
   var keep = [], changed = false;
   each(reminderData.items, function(item){
     if (item.mode === 'once' && ids.indexOf(item.id) >= 0) {
@@ -355,9 +374,17 @@ function applyConfirmedReminders(){
       changed = true;
     }
   });
+  each(completedKeys, function(key){
+    if (typeof key === 'string' && key) {
+      reminderData.handledOccurrences[key] = true;
+      reminderData.completedOccurrences[key] = true;
+      changed = true;
+    }
+  });
   if (!changed) return;
   reminderData.items = keep;
   pruneHandledReminderOccurrences(reminderData.handledOccurrences);
+  pruneHandledReminderOccurrences(reminderData.completedOccurrences);
   saveReminderState(false);
   renderReminderPage();
   renderHomeNotice();

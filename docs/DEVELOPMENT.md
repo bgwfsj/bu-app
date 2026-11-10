@@ -6,7 +6,7 @@
 
 - 应用名：补
 - 包名：`com.quitsmoke.app`
-- 当前版本：6.0.0
+- 当前版本：6.0.1
 - 最低 Android：API 24
 - Target SDK：34
 - 仓库：`bgwfsj/bu-app`（公开）
@@ -170,6 +170,7 @@ bu_pre_restore_v1    完整恢复前的安全副本
 - 模式：once、daily、weekly、monthly、yearly。
 - 一次性提醒到期后自动进入归档。
 - 重复提醒不会因一次触发而停止。
+- 重复提醒的完成状态记录在 `completedOccurrences`，与仅用于隐藏首页通知/稍后的 `handledOccurrences` 分开。当前 occurrence key 存在时提醒行显示 `.done-today` 划线；次日 key 不同，自动恢复。
 - 手动删除先进入归档。
 - 归档可移回或彻底删除。
 - 移回已过期的一次性提醒时，会安排最近的未来同名时间。
@@ -177,7 +178,7 @@ bu_pre_restore_v1    完整恢复前的安全副本
 - 提醒仅支持短距离横向滑动，不启用长按拖拽。
 - 普通状态和归档均按 once、daily、weekly、monthly、yearly 分组；折叠状态保存在 `reminderData.groupCollapsed`。
 - 首页提醒只显示当天已经到点、且 `handledOccurrences` 中没有对应事件键的提醒。事件键格式为 `id|yyyy-MM-dd|HH:mm`，通知后台确认或稍后时写入原生 SharedPreferences，App 恢复时由 `applyConfirmedReminders()` 同步。
-- 通知“确认”只会对一次性提醒记录完成 ID；App 回到前台后 `applyConfirmedReminders()` 将对应提醒移入归档并标记 `archiveReason = completed`。
+- 通知“确认”对一次性提醒记录完成 ID并归档；对重复提醒写入 `completed_keys`，由 `MainActivity.consumeCompletedReminderKeys()` 同步到 `completedOccurrences`。通知“稍后”只写 `handled_keys`，不得触发划线。
 - 待办与提醒可以一对一互相转换。转换后源项目进入归档并标记 `archiveReason = converted`。可一一对应的重复规则会直接保留；工作日、周末、自定义多日期待办转换为一条 `once` 提醒，日期取最近一次。
 
 ## 备份清理

@@ -375,6 +375,16 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @JavascriptInterface
+        public String consumeCompletedReminderKeys() {
+            android.content.SharedPreferences prefs = getSharedPreferences(
+                "notification_confirmations", MODE_PRIVATE);
+            Set<String> keys = new HashSet<>(prefs.getStringSet(
+                "completed_keys", new HashSet<>()));
+            prefs.edit().remove("completed_keys").apply();
+            return new org.json.JSONArray(keys).toString();
+        }
+
+        @JavascriptInterface
         public String getAppVisitStats() {
             android.content.SharedPreferences prefs = getSharedPreferences(
                 VISIT_PREFS, MODE_PRIVATE);

@@ -619,8 +619,8 @@ async function run() {
       cleanupConfirmOpened: true,
       cleanupCalls: 1,
       aboutOpened: true,
-      changelogCount: 59,
-      aboutVersion: '6.0.0',
+      changelogCount: 60,
+      aboutVersion: '6.0.1',
       updateBackupExposed: true,
       updateCalls: 1,
       handledBack: true,
@@ -923,6 +923,21 @@ async function run() {
       saveReminder();
       var edited = reminderItemById(weekly.id);
       var dailyItem = reminderData.items.filter(function(item){ return item.mode === 'daily'; })[0];
+      var dailyKey = reminderOccurrenceKey(dailyItem, new Date());
+      reminderData.handledOccurrences[dailyKey] = true;
+      renderReminderPage();
+      var snoozedRowStillNormal = !byId('reminder-list').querySelector('[data-drag-id="' + dailyItem.id + '"]').classList.contains('done-today');
+      reminderData.completedOccurrences[dailyKey] = true;
+      renderReminderPage();
+      var completedDailyRow = byId('reminder-list').querySelector('[data-drag-id="' + dailyItem.id + '"]');
+      var completedTodayStruck = completedDailyRow.classList.contains('done-today') &&
+        getComputedStyle(completedDailyRow.querySelector('.reminder-copy b')).textDecorationLine.indexOf('line-through') >= 0;
+      var tomorrowDate = new Date();
+      tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+      var restoredTomorrow = !reminderCompletedForDate(dailyItem, tomorrowDate);
+      delete reminderData.handledOccurrences[dailyKey];
+      delete reminderData.completedOccurrences[dailyKey];
+      renderReminderPage();
       var rows = reminderSortedItems();
       byId('btn-reminder-menu').click();
       var reminderMenuOpened = byId('sheet').classList.contains('on') &&
@@ -1038,6 +1053,9 @@ async function run() {
         modes: reminderData.items.map(function(item){ return item.mode; }).sort(),
         title: edited && edited.title,
         dailyRule: dailyItem && reminderRuleText(dailyItem),
+        snoozedRowStillNormal: snoozedRowStillNormal,
+        completedTodayStruck: completedTodayStruck,
+        restoredTomorrow: restoredTomorrow,
         allHaveNext: rows.every(function(row){ return !!row.next; }),
         orderValid: rows.every(function(row, index){
           return index === 0 || rows[index - 1].ts <= row.ts;
@@ -1074,6 +1092,9 @@ async function run() {
     assert.deepEqual(reminders.modes, ['daily', 'monthly', 'once', 'weekly', 'yearly']);
     assert.equal(reminders.title, '提醒-每周（已编辑）');
     assert.equal(reminders.dailyRule, '每天');
+    assert.equal(reminders.snoozedRowStillNormal, true);
+    assert.equal(reminders.completedTodayStruck, true);
+    assert.equal(reminders.restoredTomorrow, true);
     assert.equal(reminders.allHaveNext, true);
     assert.equal(reminders.orderValid, true);
     assert.equal(reminders.stored, 5);

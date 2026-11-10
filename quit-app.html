@@ -567,6 +567,10 @@ body[data-page="settings"] #page-pager{opacity:0;pointer-events:none}
 .reminder-item.drag-left,.reminder-archive-item.drag-left{border-color:rgba(229,72,77,.26);background:#fff5f5}
 .reminder-item.drag-right,.reminder-archive-item.drag-right{border-color:rgba(10,168,122,.24);background:#f3fbf8}
 .reminder-item.past{opacity:.58}
+.reminder-item.done-today{opacity:.7;background:#f8faf9}
+.reminder-item.done-today .reminder-time-chip,
+.reminder-item.done-today .reminder-copy b{text-decoration:line-through;text-decoration-thickness:1px}
+.reminder-item.done-today .reminder-copy b{color:#71847d}
 .reminder-time-chip{flex:0 0 43px;height:43px;border-radius:12px;background:rgba(10,168,122,.07);color:#087d5c;display:grid;place-items:center;font:11px ui-monospace,"SF Mono",Menlo,Consolas,monospace;letter-spacing:-.02em}
 .reminder-copy{flex:1;min-width:0}
 .reminder-copy b{display:block;font-size:var(--fs-card);font-weight:500;color:#334b42;line-height:1.4;overflow-wrap:anywhere}
@@ -2475,6 +2479,7 @@ byId('mask').addEventListener('click', closeSheet);
    应用版本记录
    ============================================================ */
 var APP_CHANGELOG = [
+  { version: '6.0.1', date: '2026-11-10', changes: ['重复提醒确认完成当天会保留在提醒列表中并划线，次日自动恢复正常显示。', '“稍后提醒”不会触发划线；系统通知栏的“确认”与 App 内确认都会同步当天完成状态。'] },
   { version: '6.0.0', date: '2026-11-10', changes: ['经典首页卡片高度略微收紧，在 390×844 手机视口下可以一屏完整显示。', '首页逻辑从待办模块拆分为独立模块，通用 HTML 转义工具移入核心层。', '开发文档集中到 docs 目录，历史安装包与本地参考资料完成归档。', '构建测试新增动作登记与对应函数检查，防止按钮动作失效。'] },
   { version: '5.9.19', date: '2026-11-10', changes: ['经典首页的“补充”卡片改为与普通功能卡片一致的尺寸、圆角、内边距和字体层级。', '“补充”卡片使用“补”图标与“补充”标题，仅在经典布局中显示。'] },
   { version: '5.9.18', date: '2026-11-10', changes: ['新增中心折面首页：整块屏幕比例画布由直线划分为七个不规则区域。', '蜂巢布局改为按屏幕可用宽度自适应放大，整体高度和字号同步调整。', '经典布局中提醒恢复普通卡片，左侧新增写有“补”的空白卡片；首页恢复左上角标记和相逢数字下方的诗性文案。', 'App 启动后静默检查一次新版本，只有发现新版本时弹窗；无更新或网络失败不打扰。'] },
@@ -6356,6 +6361,7 @@ function reminderDefaultState(){
     items: [],
     archived: [],
     handledOccurrences: {},
+    completedOccurrences: {},
     homeNoticeEnabled: true,
     homeNoticeDismissedDate: '',
     groupCollapsed: { active: {}, archived: {} }
@@ -6415,7 +6421,11 @@ function loadReminderState(){
   if (!d.handledOccurrences || typeof d.handledOccurrences !== 'object') {
     d.handledOccurrences = {};
   }
+  if (!d.completedOccurrences || typeof d.completedOccurrences !== 'object') {
+    d.completedOccurrences = {};
+  }
   pruneHandledReminderOccurrences(d.handledOccurrences);
+  pruneHandledReminderOccurrences(d.completedOccurrences);
   if (typeof d.homeNoticeEnabled !== 'boolean') d.homeNoticeEnabled = true;
   if (typeof d.homeNoticeDismissedDate !== 'string') d.homeNoticeDismissedDate = '';
   if (!d.groupCollapsed || typeof d.groupCollapsed !== 'object') {
@@ -6541,6 +6551,13 @@ function pruneHandledReminderOccurrences(handled){
   });
 }
 
+function reminderCompletedForDate(item, date){
+  if (!item || item.mode === 'once') return false;
+  var day = date || new Date();
+  return reminderOccursOnDate(item, day) &&
+    !!reminderData.completedOccurrences[reminderOccurrenceKey(item, day)];
+}
+
 function renderHomeNotice(){
   var box = byId('home-notice');
   if (!box || !reminderData) return;
@@ -6621,7 +6638,9 @@ function renderReminderPage(){
       REMINDER_MODE_NAMES[mode] + '</span><small>' + rows.length + ' 条</small></button>' +
       '<div class="reminder-group-list">' + rows.map(function(row){
         var item = row.item;
-        return '<div class="reminder-item" data-drag-kind="reminder" data-drag-state="active" data-drag-id="' +
+        var doneToday = reminderCompletedForDate(item, new Date());
+        return '<div class="reminder-item' + (doneToday ? ' done-today' : '') +
+          '" data-drag-kind="reminder" data-drag-state="active" data-drag-id="' +
           escHtml(item.id) + '"' + actionAttrs('editReminder', [item.id]) + '>' +
           '<span class="reminder-time-chip">' + escHtml(item.time) + '</span>' +
           '<span class="reminder-copy"><b>' + escHtml(item.title) + '</b>' +
@@ -6671,6 +6690,7 @@ function applyConfirmedReminders(){
   if (!reminderData || !window.AppNative) return;
   var ids = [];
   var handledKeys = [];
+  var completedKeys = [];
   try {
     if (window.AppNative.consumeConfirmedReminderIds) {
       ids = JSON.parse(window.AppNative.consumeConfirmedReminderIds() || '[]');
@@ -6678,9 +6698,13 @@ function applyConfirmedReminders(){
     if (window.AppNative.consumeHandledReminderKeys) {
       handledKeys = JSON.parse(window.AppNative.consumeHandledReminderKeys() || '[]');
     }
+    if (window.AppNative.consumeCompletedReminderKeys) {
+      completedKeys = JSON.parse(window.AppNative.consumeCompletedReminderKeys() || '[]');
+    }
   } catch (error) {}
   if (!Array.isArray(ids)) ids = [];
   if (!Array.isArray(handledKeys)) handledKeys = [];
+  if (!Array.isArray(completedKeys)) completedKeys = [];
   var keep = [], changed = false;
   each(reminderData.items, function(item){
     if (item.mode === 'once' && ids.indexOf(item.id) >= 0) {
@@ -6698,9 +6722,17 @@ function applyConfirmedReminders(){
       changed = true;
     }
   });
+  each(completedKeys, function(key){
+    if (typeof key === 'string' && key) {
+      reminderData.handledOccurrences[key] = true;
+      reminderData.completedOccurrences[key] = true;
+      changed = true;
+    }
+  });
   if (!changed) return;
   reminderData.items = keep;
   pruneHandledReminderOccurrences(reminderData.handledOccurrences);
+  pruneHandledReminderOccurrences(reminderData.completedOccurrences);
   saveReminderState(false);
   renderReminderPage();
   renderHomeNotice();
@@ -8184,6 +8216,7 @@ function confirmNotificationAction(type, id, notificationId, occurrenceKey){
   var changed = false;
   if (type === 'standalone' && occurrenceKey) {
     reminderData.handledOccurrences[occurrenceKey] = true;
+    reminderData.completedOccurrences[occurrenceKey] = true;
     changed = true;
   }
   if (type === 'standalone' && item && item.mode === 'once') {

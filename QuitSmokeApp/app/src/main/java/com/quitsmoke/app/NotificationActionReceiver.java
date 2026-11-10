@@ -37,6 +37,14 @@ public class NotificationActionReceiver extends BroadcastReceiver {
             }
             return;
         }
+        if (eventKey != null && !eventKey.isEmpty()) {
+            SharedPreferences prefs = context.getSharedPreferences(
+                "notification_confirmations", Context.MODE_PRIVATE);
+            Set<String> completedKeys = new HashSet<>(
+                prefs.getStringSet("completed_keys", new HashSet<>()));
+            completedKeys.add(eventKey);
+            prefs.edit().putStringSet("completed_keys", completedKeys).commit();
+        }
         String reminderId = intent.getStringExtra("reminder_confirm_id");
         if (reminderId != null && "once".equals(intent.getStringExtra("reminder_confirm_mode"))) {
             SharedPreferences prefs = context.getSharedPreferences(

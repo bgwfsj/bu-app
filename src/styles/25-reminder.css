@@ -22,6 +22,10 @@
 .reminder-item.drag-left,.reminder-archive-item.drag-left{border-color:rgba(229,72,77,.26);background:#fff5f5}
 .reminder-item.drag-right,.reminder-archive-item.drag-right{border-color:rgba(10,168,122,.24);background:#f3fbf8}
 .reminder-item.past{opacity:.58}
+.reminder-item.done-today{opacity:.7;background:#f8faf9}
+.reminder-item.done-today .reminder-time-chip,
+.reminder-item.done-today .reminder-copy b{text-decoration:line-through;text-decoration-thickness:1px}
+.reminder-item.done-today .reminder-copy b{color:#71847d}
 .reminder-time-chip{flex:0 0 43px;height:43px;border-radius:12px;background:rgba(10,168,122,.07);color:#087d5c;display:grid;place-items:center;font:11px ui-monospace,"SF Mono",Menlo,Consolas,monospace;letter-spacing:-.02em}
 .reminder-copy{flex:1;min-width:0}
 .reminder-copy b{display:block;font-size:var(--fs-card);font-weight:500;color:#334b42;line-height:1.4;overflow-wrap:anywhere}
