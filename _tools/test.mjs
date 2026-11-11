@@ -231,7 +231,10 @@ async function run() {
       var todoNext = page === 6 &&
         byId('page-pager').querySelector('button.on').textContent.trim() === '账';
       moveByHorizontalSwipe(-1);
-      var ledgerNext = page === 7 &&
+      var ledgerNext = page === 8 &&
+        byId('page-pager').querySelector('button.on').textContent.trim() === '酒';
+      moveByHorizontalSwipe(-1);
+      var alcoholNext = page === 7 &&
         byId('page-pager').querySelector('button.on').textContent.trim() === '醒';
       var pagerLabels = Array.prototype.map.call(
         byId('page-pager').querySelectorAll('button'),
@@ -263,6 +266,7 @@ async function run() {
         wrappedBackward: wrappedBackward,
         todoNext: todoNext,
         ledgerNext: ledgerNext,
+        alcoholNext: alcoholNext,
         handledBack: handledBack,
         pagerLabels: pagerLabels,
         controlsSeparate: controlsSeparate,
@@ -279,8 +283,9 @@ async function run() {
       wrappedBackward: true,
       todoNext: true,
       ledgerNext: true,
+      alcoholNext: true,
       handledBack: true,
-      pagerLabels: ['练', '水', '饭', '戒', '记', '账', '醒'],
+      pagerLabels: ['练', '水', '饭', '戒', '记', '账', '酒', '醒'],
       controlsSeparate: true,
       quitRecordBesideBreak: true,
       activeQuickLabel: '戒',
@@ -519,6 +524,72 @@ async function run() {
     assert.equal(meals.gradeNone, 'none');
     assert.equal(meals.allHomeCardsEqual, true);
 
+    const alcohol = await evaluate(cdp, `(function(){
+      goPage(8);
+      var active = byId('p-alcohol').classList.contains('on') &&
+        document.body.dataset.page === 'alcohol';
+      var pagerLabel = byId('page-pager').querySelector('button.on').textContent.trim();
+      var calculated = alcoholGramsFor(500, 4.5);
+      openAlcoholRecordForm();
+      pickAlcoholType('beer');
+      byId('alcohol-abv').value = '4.5';
+      byId('alcohol-volume').value = '500';
+      updateAlcoholFormPreview();
+      var preview = byId('alcohol-form-grams').textContent.trim();
+      saveAlcoholRecord();
+      var feedback = byId('sheet').textContent;
+      var feedbackHasWarning = byId('sheet').querySelectorAll('.alcohol-feedback-tip').length === 1;
+      closeSheet();
+      var stored = JSON.parse(localStorage.getItem(ALKEY));
+      var today = new Date();
+      var todayKey = alcoholDateKey(today);
+      var monthPrefix = todayKey.slice(0, 7);
+      var monthGrams = alcoholTotals(stored.records.filter(function(record){
+        return record.date.indexOf(monthPrefix) === 0;
+      })).grams;
+      var calendarRow = Array.prototype.find.call(
+        byId('alcohol-calendar-grid').querySelectorAll('[data-action="openAlcoholDay"]'),
+        function(button){ return button.getAttribute('data-args') === JSON.stringify([todayKey]); }
+      );
+      openAlcoholDay(todayKey);
+      var dayRows = byId('sheet').querySelectorAll('.alcohol-day-row').length;
+      closeSheet();
+      return {
+        active: active,
+        pagerLabel: pagerLabel,
+        calculated: calculated,
+        preview: preview,
+        feedbackHasTip: feedbackHasWarning && feedback.indexOf('纯酒精') >= 0,
+        feedbackHasStandardUnit: feedback.indexOf('标准杯') >= 0,
+        stored: stored.records.length,
+        summary: byId('alcohol-today-grams').textContent.trim(),
+        monthSummary: byId('alcohol-month-grams').textContent.trim(),
+        monthGrams: monthGrams,
+        knowledgeRows: byId('p-alcohol').querySelectorAll('.alcohol-knowledge div').length,
+        supplyLabel: byId('p-alcohol').querySelector('[data-action="goPage"][data-args="[0]"]').textContent.trim(),
+        listRows: byId('alcohol-list').querySelectorAll('.alcohol-record').length,
+        calendarFound: !!calendarRow,
+        dayRows: dayRows,
+        homeCopy: byId('home-alcohol-copy').textContent.trim()
+      };
+    })()`);
+    assert.equal(alcohol.active, true);
+    assert.equal(alcohol.pagerLabel, '酒');
+    assert.equal(alcohol.calculated, 17.75);
+    assert.equal(alcohol.preview, '约 17.8 g 纯酒精');
+    assert.equal(alcohol.feedbackHasTip, true);
+    assert.equal(alcohol.feedbackHasStandardUnit, false);
+    assert.equal(alcohol.stored, 1);
+    assert.equal(alcohol.summary, '17.8');
+    assert.equal(alcohol.monthSummary, '17.8');
+    assert.equal(alcohol.monthGrams, 17.75);
+    assert.equal(alcohol.knowledgeRows, 4);
+    assert.equal(alcohol.supplyLabel, '补给');
+    assert.equal(alcohol.listRows, 1);
+    assert.equal(alcohol.calendarFound, true);
+    assert.equal(alcohol.dayRows, 1);
+    assert.equal(alcohol.homeCopy, '今天 17.8g 酒精');
+
     const settingsPage = await evaluate(cdp, `(function(){
       var originalNative = window.AppNative;
       var calls = 0;
@@ -534,7 +605,7 @@ async function run() {
       var honeycombApplied = document.querySelector('.home-grid').getAttribute('data-layout') === 'honeycomb' &&
         byId('home-layout-honeycomb-state').textContent.trim() === '使用中';
       var honeycombSaved = JSON.parse(localStorage.getItem(HOME_LAYOUT_KEY)) === 'honeycomb';
-      var brandHiddenInHoneycomb = getComputedStyle(document.querySelector('.home-brand-card')).display === 'none';
+      var alcoholHiddenInHoneycomb = getComputedStyle(document.querySelector('.alcohol-card')).display === 'none';
       var tileClip = getComputedStyle(document.querySelector('.home-grid .home-card')).clipPath.indexOf('polygon') === 0;
       var honeyGridRect = document.querySelector('.home-grid').getBoundingClientRect();
       var honeyCardRect = document.querySelector('.home-grid .home-card').getBoundingClientRect();
@@ -544,22 +615,21 @@ async function run() {
       var facetApplied = document.querySelector('.home-grid').getAttribute('data-layout') === 'facet' &&
         byId('home-layout-facet-state').textContent.trim() === '使用中';
       var facetClip = getComputedStyle(document.querySelector('.home-grid .home-card')).clipPath.indexOf('polygon') === 0;
-      var brandHiddenInFacet = getComputedStyle(document.querySelector('.home-brand-card')).display === 'none';
+      var alcoholHiddenInFacet = getComputedStyle(document.querySelector('.alcohol-card')).display === 'none';
       byId('btn-home-layout-classic').click();
       var classicRestored = document.querySelector('.home-grid').getAttribute('data-layout') === 'classic';
       var reminderCard = document.querySelector('.home-grid .reminder-card');
       var fitnessCard = document.querySelector('.home-grid .fitness-card');
-      var brandCard = document.querySelector('.home-grid .home-brand-card');
+      var alcoholCard = document.querySelector('.home-grid .alcohol-card');
       var reminderNormal = Math.abs(reminderCard.getBoundingClientRect().width - fitnessCard.getBoundingClientRect().width) < 1 &&
         Math.abs(reminderCard.getBoundingClientRect().height - fitnessCard.getBoundingClientRect().height) < 1;
-      var brandBesideReminder = brandCard.nextElementSibling === reminderCard &&
-        brandCard.getBoundingClientRect().left < reminderCard.getBoundingClientRect().left &&
-        Math.abs(brandCard.getBoundingClientRect().top - reminderCard.getBoundingClientRect().top) < 1 &&
-        brandCard.classList.contains('home-card') &&
-        brandCard.querySelector('.home-icon').textContent.trim() === '补' &&
-        brandCard.querySelector('b').textContent.trim() === '补充' &&
-        Math.abs(brandCard.getBoundingClientRect().width - reminderCard.getBoundingClientRect().width) < 1 &&
-        Math.abs(brandCard.getBoundingClientRect().height - reminderCard.getBoundingClientRect().height) < 1;
+      var alcoholBesideReminder = alcoholCard.nextElementSibling === reminderCard &&
+        alcoholCard.getBoundingClientRect().left < reminderCard.getBoundingClientRect().left &&
+        Math.abs(alcoholCard.getBoundingClientRect().top - reminderCard.getBoundingClientRect().top) < 1 &&
+        alcoholCard.querySelector('.home-icon').textContent.trim() === '酒' &&
+        alcoholCard.querySelector('b').textContent.trim() === '酒记' &&
+        Math.abs(alcoholCard.getBoundingClientRect().width - reminderCard.getBoundingClientRect().width) < 1 &&
+        Math.abs(alcoholCard.getBoundingClientRect().height - reminderCard.getBoundingClientRect().height) < 1;
       var dataActions = byId('p-settings').querySelectorAll('[data-action="exportAppBackup"], [data-action="chooseAppBackup"]').length;
       var cleanupButton = byId('p-settings').querySelector('[data-action="requestCleanupOldBackups"]');
       cleanupButton.click();
@@ -579,15 +649,15 @@ async function run() {
         opened: opened,
         honeycombApplied: honeycombApplied,
         honeycombSaved: honeycombSaved,
-        brandHiddenInHoneycomb: brandHiddenInHoneycomb,
+        alcoholHiddenInHoneycomb: alcoholHiddenInHoneycomb,
         tileClip: tileClip,
         honeycombAdaptive: honeycombAdaptive,
         facetApplied: facetApplied,
         facetClip: facetClip,
-        brandHiddenInFacet: brandHiddenInFacet,
+        alcoholHiddenInFacet: alcoholHiddenInFacet,
         classicRestored: classicRestored,
         reminderNormal: reminderNormal,
-        brandBesideReminder: brandBesideReminder,
+        alcoholBesideReminder: alcoholBesideReminder,
         dataActions: dataActions,
         cleanupButton: !!cleanupButton,
         cleanupConfirmOpened: cleanupConfirmOpened,
@@ -605,22 +675,22 @@ async function run() {
       opened: true,
       honeycombApplied: true,
       honeycombSaved: true,
-      brandHiddenInHoneycomb: true,
+      alcoholHiddenInHoneycomb: true,
       tileClip: true,
       honeycombAdaptive: true,
       facetApplied: true,
       facetClip: true,
-      brandHiddenInFacet: true,
+      alcoholHiddenInFacet: true,
       classicRestored: true,
       reminderNormal: true,
-      brandBesideReminder: true,
+      alcoholBesideReminder: true,
       dataActions: 2,
       cleanupButton: true,
       cleanupConfirmOpened: true,
       cleanupCalls: 1,
       aboutOpened: true,
-      changelogCount: 66,
-      aboutVersion: '6.0.7',
+      changelogCount: 67,
+      aboutVersion: '6.0.8',
       updateBackupExposed: true,
       updateCalls: 1,
       handledBack: true,
@@ -1633,6 +1703,7 @@ async function run() {
       saveReminderState();
       saveLedgerState();
       saveMealState();
+      saveAlcoholState();
       setHomeLayout('facet');
       var backup = appBackupPayload();
       backup.data.water.dailyGoal = 2600;
@@ -1649,6 +1720,7 @@ async function run() {
       var reminders = JSON.parse(localStorage.getItem('reminder_app_v1'));
       var ledger = JSON.parse(localStorage.getItem('ledger_app_v1'));
       var meals = JSON.parse(localStorage.getItem('meals_app_v1'));
+      var alcohol = JSON.parse(localStorage.getItem('alcohol_app_v1'));
       var quit = JSON.parse(localStorage.getItem('quit_app_v1'));
       var previous = JSON.parse(localStorage.getItem('bu_pre_restore_v1'));
       return {
@@ -1661,10 +1733,12 @@ async function run() {
         reminderArchived: reminders.archived.length,
         ledgerRecords: ledger.books.reduce(function(sum, book){ return sum + book.records.length; }, 0),
         mealRecords: meals.records.length,
+        alcoholRecords: alcohol.records.length,
         quitDate: quit.quitDate,
         previousGoal: previous.data.water.dailyGoal,
         previousReminders: previous.data.reminders.items.length,
         previousMeals: previous.data.meals.records.length,
+        previousAlcohol: previous.data.alcohol.records.length,
         previousHomeLayout: previous.data.settings.homeLayout,
         previousReminderArchived: previous.data.reminders.archived.length,
         previousTodoArchived: previous.data.todo.archived.length
@@ -1679,10 +1753,12 @@ async function run() {
     assert.equal(restored.reminderArchived, 1);
     assert.equal(restored.ledgerRecords, 118);
     assert.equal(restored.mealRecords, 4);
+    assert.equal(restored.alcoholRecords, 1);
     assert.ok(restored.quitDate > 0);
     assert.equal(restored.previousGoal, 2345);
     assert.equal(restored.previousReminders, 5);
     assert.equal(restored.previousMeals, 4);
+    assert.equal(restored.previousAlcohol, 1);
     assert.equal(restored.previousHomeLayout, 'facet');
     assert.equal(restored.previousReminderArchived, 1);
     assert.equal(restored.previousTodoArchived, 2);

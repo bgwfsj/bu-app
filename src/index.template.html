@@ -58,10 +58,10 @@
           <span class="home-icon">账</span><b>记账</b>
           <small id="home-ledger-copy">本月还没有记录</small>
         </button>
-        <div class="home-card home-brand-card" aria-hidden="true">
-          <span class="home-icon">补</span><b>补充</b>
-          <small>给今天留一点空白</small>
-        </div>
+        <button class="home-card alcohol-card" data-action="goPage" data-args="[8]">
+          <span class="home-icon">酒</span><b>酒记</b>
+          <small id="home-alcohol-copy">今天还没有记录</small>
+        </button>
         <button class="home-card reminder-card" data-action="goPage" data-args="[7]">
           <span class="home-icon">醒</span><b>提醒</b>
           <small id="home-reminder-copy">没有独立提醒</small>
@@ -84,7 +84,7 @@
       <div class="settings-group">
         <div class="settings-group-title">数据</div>
         <button class="settings-row" data-action="exportAppBackup">
-          <span><b>导出完整备份</b><small>训练、喝水、戒烟、待办、提醒和记账</small></span><em>导出 ›</em>
+          <span><b>导出完整备份</b><small>训练、喝水、三餐、酒记、戒烟、待办、提醒和记账</small></span><em>导出 ›</em>
         </button>
         <button class="settings-row" data-action="chooseAppBackup">
           <span><b>恢复完整备份</b><small>使用之前导出的 JSON 备份文件</small></span><em>选择文件 ›</em>
@@ -468,6 +468,50 @@
       <p class="reminder-hint" id="reminder-hint">提醒只保存在这台设备上。</p>
     </section>
 
+    <!-- ================= 酒记 ================= -->
+    <section class="page" id="p-alcohol">
+      <div class="top">
+        <div class="brand"><span class="led"></span>酒记</div>
+        <div class="alcohol-top-actions">
+          <span class="alcohol-top-date" id="alcohol-top-date"></span>
+          <button class="alcohol-supply" type="button" data-action="goPage" data-args="[0]" aria-label="回到首页">补给</button>
+        </div>
+      </div>
+      <div class="section-hero alcohol-hero">
+        <div class="section-kicker">本月饮酒</div>
+        <h1 class="section-title">喝到哪，记到哪</h1>
+        <div class="ledger-total alcohol-month-total"><span id="alcohol-month-grams">0.0</span><small>g</small></div>
+        <div class="alcohol-month-label">本月累计纯酒精</div>
+      </div>
+      <button class="alcohol-add" type="button" data-action="openAlcoholRecordForm">干杯</button>
+      <section class="alcohol-today-card">
+        <div class="alcohol-today-number">
+          <span>今日饮酒量</span>
+          <b><span id="alcohol-today-grams">0.0</span><small> g</small></b>
+        </div>
+        <div class="alcohol-knowledge">
+          <div><span>计算</span><p>纯酒精 = 饮用量 × 酒精度数 × 0.789</p></div>
+          <div><span>参考</span><p>330 ml、4.5% 的啤酒，约含 11.7 g 纯酒精。</p></div>
+          <div><span>对比</span><p>同样 50 ml，52° 白酒的纯酒精约为 4.5% 啤酒的 11.6 倍。</p></div>
+          <div><span>提醒</span><p>空腹饮酒吸收更快；酒精是一类致癌物，不存在对所有人都绝对安全的饮酒量。</p></div>
+        </div>
+      </section>
+      <section class="alcohol-today">
+        <div class="alcohol-section-head"><h3>今日记录</h3></div>
+        <div class="alcohol-list" id="alcohol-list"></div>
+      </section>
+      <section class="alcohol-calendar-card">
+        <div class="alcohol-calendar-head">
+          <button type="button" data-action="changeAlcoholCalendarMonth" data-args="[-1]" aria-label="上个月">‹</button>
+          <b id="alcohol-calendar-title"></b>
+          <button type="button" data-action="changeAlcoholCalendarMonth" data-args="[1]" aria-label="下个月">›</button>
+        </div>
+        <div class="alcohol-calendar-week"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div>
+        <div class="alcohol-calendar-grid" id="alcohol-calendar-grid"></div>
+        <div class="alcohol-calendar-legend"><i></i>有饮酒记录，点日期查看</div>
+      </section>
+    </section>
+
     <!-- ================= 记账 ================= -->
     <section class="page" id="p-ledger">
       <div class="top">
@@ -588,6 +632,7 @@
     <button data-page-index="4" data-action="goPage" data-args="[4]" aria-label="戒烟"><span>戒</span></button>
     <button data-page-index="5" data-action="goPage" data-args="[5]" aria-label="待办"><span>记</span></button>
     <button data-page-index="6" data-action="goPage" data-args="[6]" aria-label="记账"><span>账</span></button>
+    <button data-page-index="8" data-action="goPage" data-args="[8]" aria-label="酒记"><span>酒</span></button>
     <button data-page-index="7" data-action="goPage" data-args="[7]" aria-label="提醒"><span>醒</span></button>
   </nav>
 

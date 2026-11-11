@@ -57,10 +57,9 @@ body[data-page="home"]::before{
 .home-card.reminder-card .home-icon{background:rgba(232,141,58,.09);color:#b36b28}
 .home-card b{display:block;font-size:16px;font-weight:500;color:#173029;letter-spacing:.04em}
 .home-card small{display:block;font-size:9.5px;line-height:1.45;color:#8b9ba2;margin-top:5px}
-.home-brand-card{
-  cursor:default;background:rgba(255,255,255,.68)
-}
-.home-grid:not([data-layout="classic"]) .home-brand-card{display:none!important}
+.home-card.alcohol-card::after{background:rgba(127,103,151,.055)}
+.home-card.alcohol-card .home-icon{background:rgba(127,103,151,.09);color:#77608f}
+.home-grid:not([data-layout="classic"]) .alcohol-card{display:none!important}
 }
 
 /* ---------- 首页拼图布局 ---------- */

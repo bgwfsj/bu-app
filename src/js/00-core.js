@@ -9,6 +9,7 @@ var TKEY = 'todo_app_v1';          // 每日待办与提醒设置
 var RKEY = 'reminder_app_v1';      // 独立提醒
 var LKEY = 'ledger_app_v1';        // 多账本收支记录
 var MKEY = 'meals_app_v1';         // 三餐记录
+var ALKEY = 'alcohol_app_v1';      // 饮酒记录
 var LOLDKEY = 'event-ledger-v2';   // 原独立记账 App 的旧存档，只读迁移
 var HOME_LAYOUT_KEY = 'bu_home_layout_v1';
 
@@ -52,6 +53,9 @@ var ledgerRecordMode = 'preview';
 var ledgerTreeOpen = false;
 var mealData = null;
 var mealCalendarOffset = 0;
+var alcoholData = null;
+var alcoholCalendarOffset = 0;
+var alcoholDraftType = 'beer';
 var homeLayoutMode = 'classic';
 var homeLayoutResizeBound = false;
 var workoutFrameId = 0;
@@ -144,6 +148,12 @@ var APP_ACTION_NAMES = {
   enableTodoReminder: true,
   disableTodoReminder: true,
   recordMealNow: true,
+  openAlcoholRecordForm: true,
+  pickAlcoholType: true,
+  saveAlcoholRecord: true,
+  deleteAlcoholRecord: true,
+  changeAlcoholCalendarMonth: true,
+  openAlcoholDay: true,
   openMealMenu: true,
   openMealBackfill: true,
   saveMealBackfill: true,
@@ -334,7 +344,7 @@ function resolveAppConfirm(confirmed){
 }
 
 var APP_BACKUP_FORMAT = 'bu-app-backup';
-var APP_BACKUP_VERSION = 4;
+var APP_BACKUP_VERSION = 5;
 
 function appBackupPayload(){
   return JSON.parse(JSON.stringify({
@@ -349,6 +359,7 @@ function appBackupPayload(){
       reminders: reminderData || null,
       ledger: ledgerData || null,
       meals: mealData || null,
+      alcohol: alcoholData || null,
       settings: { homeLayout: homeLayoutMode }
     }
   }));
@@ -448,7 +459,7 @@ function receiveAppBackup(text){
     return;
   }
   appConfirm(
-    '恢复备份会覆盖这台设备现有的训练、喝水、三餐、戒烟、待办、提醒、记账和首页样式设置。建议先导出一份当前备份。',
+    '恢复备份会覆盖这台设备现有的训练、喝水、三餐、酒记、戒烟、待办、提醒、记账和首页样式设置。建议先导出一份当前备份。',
     function(){
       storeSet('bu_pre_restore_v1', appBackupPayload());
       storeSet(AKEY, payload.data.quit || { quitDate: 0 });
@@ -458,6 +469,7 @@ function receiveAppBackup(text){
       storeSet(RKEY, payload.data.reminders || null);
       storeSet(LKEY, payload.data.ledger || null);
       storeSet(MKEY, payload.data.meals || null);
+      storeSet(ALKEY, payload.data.alcohol || null);
       if (payload.data.settings && payload.data.settings.homeLayout) {
         storeSet(HOME_LAYOUT_KEY, payload.data.settings.homeLayout);
       }

@@ -37,6 +37,7 @@ function boot(){
   renderQuit();
   initWater();
   initMeals();
+  initAlcohol();
   initTodo();
   initReminder();
   initLedger();
@@ -58,6 +59,7 @@ function boot(){
     if (todoData && page === 5) renderTodoPage();
     if (mealData && page === 3) renderMealPage();
     if (reminderData && page === 7) renderReminderPage();
+    if (alcoholData && page === 8) renderAlcoholPage();
     checkTodoReminder();
   }, 30000);
 }

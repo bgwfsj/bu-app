@@ -1,0 +1,105 @@
+/* ---------- 酒记 ---------- */
+body[data-page="alcohol"]::before{
+  background:
+    radial-gradient(70% 42% at 30% -5%,rgba(123,86,148,.13),transparent 68%),
+    radial-gradient(52% 38% at 92% 102%,rgba(188,137,84,.08),transparent 70%);
+}
+.alcohol-top-actions{display:flex;align-items:center;gap:7px}
+.alcohol-top-date{font:10px var(--font-mono);color:#99a5a6}
+.alcohol-supply{
+  height:27px;padding:0 9px;border-radius:8px;border:1px solid rgba(119,96,143,.16);
+  background:rgba(255,255,255,.72);color:#756581;font-size:10px;letter-spacing:.08em;cursor:pointer
+}
+.alcohol-hero{margin-bottom:14px}
+.alcohol-month-total{
+  margin-top:8px;color:#29242d
+}
+.alcohol-month-total small{margin:0 0 0 5px;color:#8d7b91}
+.alcohol-month-label{margin-top:6px;font-size:10.5px;letter-spacing:.08em;color:#9b8c9f}
+.alcohol-add{
+  flex:0 0 auto;width:100%;height:46px;border-radius:13px;border:1px solid rgba(105,78,124,.48);
+  background:linear-gradient(135deg,#5c4b66,#7f647e);color:#fff;font-size:13px;letter-spacing:.18em;cursor:pointer
+}
+.alcohol-today-card{
+  flex:0 0 auto;margin:12px 0 16px;padding:13px;border-radius:14px;
+  border:1px solid var(--line2);background:rgba(255,255,255,.78)
+}
+.alcohol-today-number{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding-bottom:11px;border-bottom:1px solid var(--line2)}
+.alcohol-today-number>span{font-size:12px;letter-spacing:.1em;color:#756978}
+.alcohol-today-number b{font:500 27px var(--font-mono);line-height:1;color:#604e68}
+.alcohol-today-number b span{font:inherit}
+.alcohol-today-number b small{font-size:11px;color:#998c9f}
+.alcohol-knowledge{display:flex;flex-direction:column;gap:8px;padding-top:11px}
+.alcohol-knowledge div{display:grid;grid-template-columns:38px 1fr;gap:8px;align-items:start}
+.alcohol-knowledge span{font-size:9.5px;line-height:1.55;letter-spacing:.08em;color:#9b6f78}
+.alcohol-knowledge p{margin:0;font-size:10.5px;line-height:1.62;color:#7c7280}
+.alcohol-today{flex:0 0 auto;margin-bottom:16px}
+.alcohol-section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.alcohol-section-head h3{margin:0;font-size:13px;font-weight:500;letter-spacing:.08em;color:#596d68}
+.alcohol-section-head small{font-size:10px;color:#9ca8a5}
+.alcohol-list{display:flex;flex-direction:column;gap:6px}
+.alcohol-record{
+  display:grid;grid-template-columns:42px minmax(0,1fr) auto;align-items:center;gap:9px;
+  padding:9px 11px;border-radius:12px;border:1px solid var(--line2);background:rgba(255,255,255,.82)
+}
+.alcohol-record-time{font:500 11px var(--font-mono);color:#8c9795}
+.alcohol-record-main{min-width:0}
+.alcohol-record-main b{display:block;font-size:12.5px;color:#4a4d4f;font-weight:500}
+.alcohol-record-main small{display:block;margin-top:3px;font-size:9.5px;color:#9a9fa0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.alcohol-record strong{font:600 12px var(--font-mono);color:#755d80;white-space:nowrap}
+.alcohol-empty{padding:22px 10px;text-align:center;border:1px dashed var(--line);border-radius:12px;color:#99a5a3;font-size:11px;line-height:1.65}
+.alcohol-calendar-card{
+  flex:0 0 auto;margin:2px 0 10px;padding:11px 10px 12px;border:1px solid var(--line2);
+  border-radius:13px;background:rgba(255,255,255,.72)
+}
+.alcohol-calendar-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+.alcohol-calendar-head b{font-size:11.5px;font-weight:500;color:#5e716b;letter-spacing:.06em}
+.alcohol-calendar-head button{
+  width:28px;height:27px;border:1px solid var(--line2);border-radius:8px;background:rgba(255,255,255,.7);
+  color:#8c9b96;font-size:16px;cursor:pointer
+}
+.alcohol-calendar-head button:disabled{opacity:.28;cursor:default}
+.alcohol-calendar-week,.alcohol-calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.alcohol-calendar-week{margin-bottom:5px;text-align:center;font-size:9px;color:#a4afab}
+.alcohol-cal-blank,.alcohol-cal-day{min-height:36px}
+.alcohol-cal-day{
+  position:relative;display:flex;align-items:center;justify-content:center;border-radius:8px;
+  color:#71827c;font-size:10px;border:1px solid transparent
+}
+.alcohol-cal-day.has-record{background:rgba(119,96,143,.055);color:#65546f;cursor:pointer}
+.alcohol-cal-day.today{border-color:rgba(13,32,45,.13)}
+.alcohol-cal-day i{
+  position:absolute;bottom:4px;left:50%;transform:translateX(-50%);
+  width:4px;height:4px;border-radius:50%;background:#977b9e;box-shadow:0 0 0 2px rgba(151,123,158,.09)
+}
+.alcohol-calendar-legend{
+  display:flex;align-items:center;gap:5px;margin-top:9px;padding-top:8px;border-top:1px solid var(--line2);
+  font-size:8.5px;color:#98a4a0
+}
+.alcohol-calendar-legend i{width:5px;height:5px;border-radius:50%;background:#977b9e}
+.alcohol-type-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:5px 0 12px}
+.alcohol-type-grid button{
+  height:38px;border-radius:9px;border:1px solid var(--line);background:#f8faf9;color:#72857d;
+  font-size:11px;cursor:pointer
+}
+.alcohol-type-grid button.on{border-color:rgba(119,96,143,.3);background:rgba(119,96,143,.08);color:#71557f}
+.alcohol-form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.alcohol-form-row .todo-form-input{margin-bottom:12px}
+.alcohol-form-preview{
+  margin:1px 0 13px;padding:11px 12px;border-radius:11px;background:#f6f3f7;border:1px solid rgba(119,96,143,.1)
+}
+.alcohol-form-preview b{display:block;font:600 19px var(--font-mono);color:#65506f}
+.alcohol-form-preview span{display:block;margin-top:4px;font-size:9.5px;color:#978d9b}
+.alcohol-feedback-total{margin:1px 0 11px;padding:12px;border-radius:11px;background:#f6f3f7;text-align:center}
+.alcohol-feedback-total b{display:block;font:600 27px var(--font-ui);color:#654e72}
+.alcohol-feedback-total span{display:block;margin-top:4px;font-size:10px;color:#938798}
+.alcohol-feedback-tip{padding:12px 13px;border-radius:11px;background:#fbf7f3;border:1px solid rgba(178,123,83,.12)}
+.alcohol-feedback-tip b{font-size:10px;letter-spacing:.1em;color:#a37050}
+.alcohol-feedback-tip span{display:block;margin-top:6px;font-size:11px;line-height:1.65;color:#77685e}
+.alcohol-day-row{display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:1px solid var(--line2)}
+.alcohol-day-row:last-child{border-bottom:0}
+.alcohol-day-row span{flex:1;min-width:0}
+.alcohol-day-row b{display:block;font-size:12px;color:#4d5f58}
+.alcohol-day-row small{display:block;margin-top:3px;font-size:9.5px;color:#98a4a0}
+.alcohol-day-row strong{font:600 11px var(--font-mono);color:#755d80}
+.alcohol-day-row button{border:0;background:transparent;color:#b28d8d;font-size:9.5px;cursor:pointer}

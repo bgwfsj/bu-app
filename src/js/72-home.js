@@ -22,6 +22,13 @@ function renderDashboard(){
       '今天 ' + todayMeals.length + ' 顿 · 最近 ' + mealTypeMeta(lastMeal.type).name :
       '记录今天吃了什么');
   }
+  if (alcoholData) {
+    var alcoholToday = alcoholRecordsForDate(new Date());
+    var alcoholTotal = alcoholToday.reduce(function(sum, record){ return sum + record.alcoholGrams; }, 0);
+    setTxt('home-alcohol-copy', alcoholToday.length ?
+      '今天 ' + alcoholTotal.toFixed(1) + 'g 酒精' :
+      '今天还没有记录');
+  }
   if (S && S.quitDate) setTxt('home-quit-copy', '已经坚持 ' + Math.floor((Date.now() - S.quitDate) / 86400000) + ' 天');
   if (todoData) {
     var pending = pendingTodoCount();

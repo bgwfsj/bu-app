@@ -318,10 +318,9 @@ body[data-page="home"]::before{
 .home-card.reminder-card .home-icon{background:rgba(232,141,58,.09);color:#b36b28}
 .home-card b{display:block;font-size:16px;font-weight:500;color:#173029;letter-spacing:.04em}
 .home-card small{display:block;font-size:9.5px;line-height:1.45;color:#8b9ba2;margin-top:5px}
-.home-brand-card{
-  cursor:default;background:rgba(255,255,255,.68)
-}
-.home-grid:not([data-layout="classic"]) .home-brand-card{display:none!important}
+.home-card.alcohol-card::after{background:rgba(127,103,151,.055)}
+.home-card.alcohol-card .home-icon{background:rgba(127,103,151,.09);color:#77608f}
+.home-grid:not([data-layout="classic"]) .alcohol-card{display:none!important}
 }
 
 /* ---------- 首页拼图布局 ---------- */
@@ -985,6 +984,113 @@ body[data-page="meals"]::before{
 .meal-tip-card span{font-size:12px;line-height:1.7;color:#53685f}
 .meal-feedback-note{margin:10px 0 14px!important;font-size:9.5px!important;color:#9ca7a3!important;line-height:1.6!important}
 
+/* 37-alcohol.css */
+/* ---------- 酒记 ---------- */
+body[data-page="alcohol"]::before{
+  background:
+    radial-gradient(70% 42% at 30% -5%,rgba(123,86,148,.13),transparent 68%),
+    radial-gradient(52% 38% at 92% 102%,rgba(188,137,84,.08),transparent 70%);
+}
+.alcohol-top-actions{display:flex;align-items:center;gap:7px}
+.alcohol-top-date{font:10px var(--font-mono);color:#99a5a6}
+.alcohol-supply{
+  height:27px;padding:0 9px;border-radius:8px;border:1px solid rgba(119,96,143,.16);
+  background:rgba(255,255,255,.72);color:#756581;font-size:10px;letter-spacing:.08em;cursor:pointer
+}
+.alcohol-hero{margin-bottom:14px}
+.alcohol-month-total{
+  margin-top:8px;color:#29242d
+}
+.alcohol-month-total small{margin:0 0 0 5px;color:#8d7b91}
+.alcohol-month-label{margin-top:6px;font-size:10.5px;letter-spacing:.08em;color:#9b8c9f}
+.alcohol-add{
+  flex:0 0 auto;width:100%;height:46px;border-radius:13px;border:1px solid rgba(105,78,124,.48);
+  background:linear-gradient(135deg,#5c4b66,#7f647e);color:#fff;font-size:13px;letter-spacing:.18em;cursor:pointer
+}
+.alcohol-today-card{
+  flex:0 0 auto;margin:12px 0 16px;padding:13px;border-radius:14px;
+  border:1px solid var(--line2);background:rgba(255,255,255,.78)
+}
+.alcohol-today-number{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding-bottom:11px;border-bottom:1px solid var(--line2)}
+.alcohol-today-number>span{font-size:12px;letter-spacing:.1em;color:#756978}
+.alcohol-today-number b{font:500 27px var(--font-mono);line-height:1;color:#604e68}
+.alcohol-today-number b span{font:inherit}
+.alcohol-today-number b small{font-size:11px;color:#998c9f}
+.alcohol-knowledge{display:flex;flex-direction:column;gap:8px;padding-top:11px}
+.alcohol-knowledge div{display:grid;grid-template-columns:38px 1fr;gap:8px;align-items:start}
+.alcohol-knowledge span{font-size:9.5px;line-height:1.55;letter-spacing:.08em;color:#9b6f78}
+.alcohol-knowledge p{margin:0;font-size:10.5px;line-height:1.62;color:#7c7280}
+.alcohol-today{flex:0 0 auto;margin-bottom:16px}
+.alcohol-section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.alcohol-section-head h3{margin:0;font-size:13px;font-weight:500;letter-spacing:.08em;color:#596d68}
+.alcohol-section-head small{font-size:10px;color:#9ca8a5}
+.alcohol-list{display:flex;flex-direction:column;gap:6px}
+.alcohol-record{
+  display:grid;grid-template-columns:42px minmax(0,1fr) auto;align-items:center;gap:9px;
+  padding:9px 11px;border-radius:12px;border:1px solid var(--line2);background:rgba(255,255,255,.82)
+}
+.alcohol-record-time{font:500 11px var(--font-mono);color:#8c9795}
+.alcohol-record-main{min-width:0}
+.alcohol-record-main b{display:block;font-size:12.5px;color:#4a4d4f;font-weight:500}
+.alcohol-record-main small{display:block;margin-top:3px;font-size:9.5px;color:#9a9fa0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.alcohol-record strong{font:600 12px var(--font-mono);color:#755d80;white-space:nowrap}
+.alcohol-empty{padding:22px 10px;text-align:center;border:1px dashed var(--line);border-radius:12px;color:#99a5a3;font-size:11px;line-height:1.65}
+.alcohol-calendar-card{
+  flex:0 0 auto;margin:2px 0 10px;padding:11px 10px 12px;border:1px solid var(--line2);
+  border-radius:13px;background:rgba(255,255,255,.72)
+}
+.alcohol-calendar-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+.alcohol-calendar-head b{font-size:11.5px;font-weight:500;color:#5e716b;letter-spacing:.06em}
+.alcohol-calendar-head button{
+  width:28px;height:27px;border:1px solid var(--line2);border-radius:8px;background:rgba(255,255,255,.7);
+  color:#8c9b96;font-size:16px;cursor:pointer
+}
+.alcohol-calendar-head button:disabled{opacity:.28;cursor:default}
+.alcohol-calendar-week,.alcohol-calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.alcohol-calendar-week{margin-bottom:5px;text-align:center;font-size:9px;color:#a4afab}
+.alcohol-cal-blank,.alcohol-cal-day{min-height:36px}
+.alcohol-cal-day{
+  position:relative;display:flex;align-items:center;justify-content:center;border-radius:8px;
+  color:#71827c;font-size:10px;border:1px solid transparent
+}
+.alcohol-cal-day.has-record{background:rgba(119,96,143,.055);color:#65546f;cursor:pointer}
+.alcohol-cal-day.today{border-color:rgba(13,32,45,.13)}
+.alcohol-cal-day i{
+  position:absolute;bottom:4px;left:50%;transform:translateX(-50%);
+  width:4px;height:4px;border-radius:50%;background:#977b9e;box-shadow:0 0 0 2px rgba(151,123,158,.09)
+}
+.alcohol-calendar-legend{
+  display:flex;align-items:center;gap:5px;margin-top:9px;padding-top:8px;border-top:1px solid var(--line2);
+  font-size:8.5px;color:#98a4a0
+}
+.alcohol-calendar-legend i{width:5px;height:5px;border-radius:50%;background:#977b9e}
+.alcohol-type-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:5px 0 12px}
+.alcohol-type-grid button{
+  height:38px;border-radius:9px;border:1px solid var(--line);background:#f8faf9;color:#72857d;
+  font-size:11px;cursor:pointer
+}
+.alcohol-type-grid button.on{border-color:rgba(119,96,143,.3);background:rgba(119,96,143,.08);color:#71557f}
+.alcohol-form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.alcohol-form-row .todo-form-input{margin-bottom:12px}
+.alcohol-form-preview{
+  margin:1px 0 13px;padding:11px 12px;border-radius:11px;background:#f6f3f7;border:1px solid rgba(119,96,143,.1)
+}
+.alcohol-form-preview b{display:block;font:600 19px var(--font-mono);color:#65506f}
+.alcohol-form-preview span{display:block;margin-top:4px;font-size:9.5px;color:#978d9b}
+.alcohol-feedback-total{margin:1px 0 11px;padding:12px;border-radius:11px;background:#f6f3f7;text-align:center}
+.alcohol-feedback-total b{display:block;font:600 27px var(--font-ui);color:#654e72}
+.alcohol-feedback-total span{display:block;margin-top:4px;font-size:10px;color:#938798}
+.alcohol-feedback-tip{padding:12px 13px;border-radius:11px;background:#fbf7f3;border:1px solid rgba(178,123,83,.12)}
+.alcohol-feedback-tip b{font-size:10px;letter-spacing:.1em;color:#a37050}
+.alcohol-feedback-tip span{display:block;margin-top:6px;font-size:11px;line-height:1.65;color:#77685e}
+.alcohol-day-row{display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:1px solid var(--line2)}
+.alcohol-day-row:last-child{border-bottom:0}
+.alcohol-day-row span{flex:1;min-width:0}
+.alcohol-day-row b{display:block;font-size:12px;color:#4d5f58}
+.alcohol-day-row small{display:block;margin-top:3px;font-size:9.5px;color:#98a4a0}
+.alcohol-day-row strong{font:600 11px var(--font-mono);color:#755d80}
+.alcohol-day-row button{border:0;background:transparent;color:#b28d8d;font-size:9.5px;cursor:pointer}
+
 /* 40-fitness.css */
 /* ---------- 训练首页 ---------- */
 body[data-page="fitness"]::before{
@@ -1465,10 +1571,10 @@ body[data-page="fitness"]::before{
           <span class="home-icon">账</span><b>记账</b>
           <small id="home-ledger-copy">本月还没有记录</small>
         </button>
-        <div class="home-card home-brand-card" aria-hidden="true">
-          <span class="home-icon">补</span><b>补充</b>
-          <small>给今天留一点空白</small>
-        </div>
+        <button class="home-card alcohol-card" data-action="goPage" data-args="[8]">
+          <span class="home-icon">酒</span><b>酒记</b>
+          <small id="home-alcohol-copy">今天还没有记录</small>
+        </button>
         <button class="home-card reminder-card" data-action="goPage" data-args="[7]">
           <span class="home-icon">醒</span><b>提醒</b>
           <small id="home-reminder-copy">没有独立提醒</small>
@@ -1491,7 +1597,7 @@ body[data-page="fitness"]::before{
       <div class="settings-group">
         <div class="settings-group-title">数据</div>
         <button class="settings-row" data-action="exportAppBackup">
-          <span><b>导出完整备份</b><small>训练、喝水、戒烟、待办、提醒和记账</small></span><em>导出 ›</em>
+          <span><b>导出完整备份</b><small>训练、喝水、三餐、酒记、戒烟、待办、提醒和记账</small></span><em>导出 ›</em>
         </button>
         <button class="settings-row" data-action="chooseAppBackup">
           <span><b>恢复完整备份</b><small>使用之前导出的 JSON 备份文件</small></span><em>选择文件 ›</em>
@@ -1875,6 +1981,50 @@ body[data-page="fitness"]::before{
       <p class="reminder-hint" id="reminder-hint">提醒只保存在这台设备上。</p>
     </section>
 
+    <!-- ================= 酒记 ================= -->
+    <section class="page" id="p-alcohol">
+      <div class="top">
+        <div class="brand"><span class="led"></span>酒记</div>
+        <div class="alcohol-top-actions">
+          <span class="alcohol-top-date" id="alcohol-top-date"></span>
+          <button class="alcohol-supply" type="button" data-action="goPage" data-args="[0]" aria-label="回到首页">补给</button>
+        </div>
+      </div>
+      <div class="section-hero alcohol-hero">
+        <div class="section-kicker">本月饮酒</div>
+        <h1 class="section-title">喝到哪，记到哪</h1>
+        <div class="ledger-total alcohol-month-total"><span id="alcohol-month-grams">0.0</span><small>g</small></div>
+        <div class="alcohol-month-label">本月累计纯酒精</div>
+      </div>
+      <button class="alcohol-add" type="button" data-action="openAlcoholRecordForm">干杯</button>
+      <section class="alcohol-today-card">
+        <div class="alcohol-today-number">
+          <span>今日饮酒量</span>
+          <b><span id="alcohol-today-grams">0.0</span><small> g</small></b>
+        </div>
+        <div class="alcohol-knowledge">
+          <div><span>计算</span><p>纯酒精 = 饮用量 × 酒精度数 × 0.789</p></div>
+          <div><span>参考</span><p>330 ml、4.5% 的啤酒，约含 11.7 g 纯酒精。</p></div>
+          <div><span>对比</span><p>同样 50 ml，52° 白酒的纯酒精约为 4.5% 啤酒的 11.6 倍。</p></div>
+          <div><span>提醒</span><p>空腹饮酒吸收更快；酒精是一类致癌物，不存在对所有人都绝对安全的饮酒量。</p></div>
+        </div>
+      </section>
+      <section class="alcohol-today">
+        <div class="alcohol-section-head"><h3>今日记录</h3></div>
+        <div class="alcohol-list" id="alcohol-list"></div>
+      </section>
+      <section class="alcohol-calendar-card">
+        <div class="alcohol-calendar-head">
+          <button type="button" data-action="changeAlcoholCalendarMonth" data-args="[-1]" aria-label="上个月">‹</button>
+          <b id="alcohol-calendar-title"></b>
+          <button type="button" data-action="changeAlcoholCalendarMonth" data-args="[1]" aria-label="下个月">›</button>
+        </div>
+        <div class="alcohol-calendar-week"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div>
+        <div class="alcohol-calendar-grid" id="alcohol-calendar-grid"></div>
+        <div class="alcohol-calendar-legend"><i></i>有饮酒记录，点日期查看</div>
+      </section>
+    </section>
+
     <!-- ================= 记账 ================= -->
     <section class="page" id="p-ledger">
       <div class="top">
@@ -1995,6 +2145,7 @@ body[data-page="fitness"]::before{
     <button data-page-index="4" data-action="goPage" data-args="[4]" aria-label="戒烟"><span>戒</span></button>
     <button data-page-index="5" data-action="goPage" data-args="[5]" aria-label="待办"><span>记</span></button>
     <button data-page-index="6" data-action="goPage" data-args="[6]" aria-label="记账"><span>账</span></button>
+    <button data-page-index="8" data-action="goPage" data-args="[8]" aria-label="酒记"><span>酒</span></button>
     <button data-page-index="7" data-action="goPage" data-args="[7]" aria-label="提醒"><span>醒</span></button>
   </nav>
 
@@ -2017,6 +2168,7 @@ var TKEY = 'todo_app_v1';          // 每日待办与提醒设置
 var RKEY = 'reminder_app_v1';      // 独立提醒
 var LKEY = 'ledger_app_v1';        // 多账本收支记录
 var MKEY = 'meals_app_v1';         // 三餐记录
+var ALKEY = 'alcohol_app_v1';      // 饮酒记录
 var LOLDKEY = 'event-ledger-v2';   // 原独立记账 App 的旧存档，只读迁移
 var HOME_LAYOUT_KEY = 'bu_home_layout_v1';
 
@@ -2060,6 +2212,9 @@ var ledgerRecordMode = 'preview';
 var ledgerTreeOpen = false;
 var mealData = null;
 var mealCalendarOffset = 0;
+var alcoholData = null;
+var alcoholCalendarOffset = 0;
+var alcoholDraftType = 'beer';
 var homeLayoutMode = 'classic';
 var homeLayoutResizeBound = false;
 var workoutFrameId = 0;
@@ -2152,6 +2307,12 @@ var APP_ACTION_NAMES = {
   enableTodoReminder: true,
   disableTodoReminder: true,
   recordMealNow: true,
+  openAlcoholRecordForm: true,
+  pickAlcoholType: true,
+  saveAlcoholRecord: true,
+  deleteAlcoholRecord: true,
+  changeAlcoholCalendarMonth: true,
+  openAlcoholDay: true,
   openMealMenu: true,
   openMealBackfill: true,
   saveMealBackfill: true,
@@ -2342,7 +2503,7 @@ function resolveAppConfirm(confirmed){
 }
 
 var APP_BACKUP_FORMAT = 'bu-app-backup';
-var APP_BACKUP_VERSION = 4;
+var APP_BACKUP_VERSION = 5;
 
 function appBackupPayload(){
   return JSON.parse(JSON.stringify({
@@ -2357,6 +2518,7 @@ function appBackupPayload(){
       reminders: reminderData || null,
       ledger: ledgerData || null,
       meals: mealData || null,
+      alcohol: alcoholData || null,
       settings: { homeLayout: homeLayoutMode }
     }
   }));
@@ -2456,7 +2618,7 @@ function receiveAppBackup(text){
     return;
   }
   appConfirm(
-    '恢复备份会覆盖这台设备现有的训练、喝水、三餐、戒烟、待办、提醒、记账和首页样式设置。建议先导出一份当前备份。',
+    '恢复备份会覆盖这台设备现有的训练、喝水、三餐、酒记、戒烟、待办、提醒、记账和首页样式设置。建议先导出一份当前备份。',
     function(){
       storeSet('bu_pre_restore_v1', appBackupPayload());
       storeSet(AKEY, payload.data.quit || { quitDate: 0 });
@@ -2466,6 +2628,7 @@ function receiveAppBackup(text){
       storeSet(RKEY, payload.data.reminders || null);
       storeSet(LKEY, payload.data.ledger || null);
       storeSet(MKEY, payload.data.meals || null);
+      storeSet(ALKEY, payload.data.alcohol || null);
       if (payload.data.settings && payload.data.settings.homeLayout) {
         storeSet(HOME_LAYOUT_KEY, payload.data.settings.homeLayout);
       }
@@ -2482,6 +2645,7 @@ byId('mask').addEventListener('click', closeSheet);
    应用版本记录
    ============================================================ */
 var APP_CHANGELOG = [
+  { version: '6.0.8', date: '2026-11-11', changes: ['新增“酒记”：可记录酒种、酒精度数和饮用量，自动计算纯酒精克数。', '酒记页面显示本月累计和今日饮酒量，并提供酒精摄入知识；每次记录后显示本次摄入量和健康提示。', '月历标记有饮酒记录的日期，可查看、删除当天记录；完整备份升级为 v5 并包含酒记数据。', '功能页顺序调整为：训练、喝水、三餐、戒烟、待办、记账、酒记、提醒，底栏与左右滑动保持一致。'] },
   { version: '6.0.7', date: '2026-11-10', changes: ['周、月、年提醒在非提醒日现在默认显示划线状态。', '到提醒日恢复普通显示，当天确认完成后再划线；每天和一次性提醒保持原逻辑。'] },
   { version: '6.0.6', date: '2026-11-10', changes: ['修复每周、每月、每年提醒在非提醒日仍显示当天划线的问题。', '完成记录现在只保留当天；渲染提醒列表时会清除非今天的完成键，仅在规则命中今天且当天已确认时划线。'] },
   { version: '6.0.5', date: '2026-11-10', changes: ['修复首页提醒卡在纵向 Flex 布局中被压缩到接近零高度、只剩上下边框形成红线的问题。', '首页提醒卡现在禁止收缩，有提醒时保持完整高度，无提醒时继续完全隐藏。'] },
@@ -3295,13 +3459,15 @@ function setQuitFromInput(){
 /* ============================================================
    7. 页面切换
    ============================================================ */
+var FUNCTION_PAGE_SEQUENCE = [1, 2, 3, 4, 5, 6, 8, 7];
+
 function goPage(i){
   settingsOpen = false;
   ledgerSettingsOpen = false;
-  page = i < 0 ? 0 : (i > 7 ? 7 : i);
-  var pages = ['home', 'fitness', 'water', 'meals', 'quit', 'todo', 'ledger', 'reminder'];
+  page = i < 0 ? 0 : (i > 8 ? 8 : i);
+  var pages = ['home', 'fitness', 'water', 'meals', 'quit', 'todo', 'ledger', 'reminder', 'alcohol'];
   document.body.dataset.page = pages[page];
-  var sections = ['p-home', 'p-fitness', 'p-water', 'p-meals', 'p-quit', 'p-todo', 'p-ledger', 'p-reminder'];
+  var sections = ['p-home', 'p-fitness', 'p-water', 'p-meals', 'p-quit', 'p-todo', 'p-ledger', 'p-reminder', 'p-alcohol'];
   each(sections, function(id, index){
     var section = byId(id);
     if (!section) return;
@@ -3326,6 +3492,7 @@ function goPage(i){
   if (page === 3) renderMealPage();
   if (page === 6) renderLedgerPage();
   if (page === 7 && reminderData) renderReminderPage();
+  if (page === 8) renderAlcoholPage();
   if (page === 0) renderDashboard();
 }
 
@@ -3396,8 +3563,14 @@ function moveByHorizontalSwipe(dx){
   if (page === 0 || settingsOpen || ledgerSettingsOpen) {
     return;
   }
-  if (dx < 0) goPage(page === 7 ? 1 : page + 1);
-  else goPage(page === 1 ? 7 : page - 1);
+  moveByFunctionOrder(dx < 0 ? 1 : -1);
+}
+
+function moveByFunctionOrder(step){
+  var index = FUNCTION_PAGE_SEQUENCE.indexOf(page);
+  if (index < 0) return;
+  var next = (index + step + FUNCTION_PAGE_SEQUENCE.length) % FUNCTION_PAGE_SEQUENCE.length;
+  goPage(FUNCTION_PAGE_SEQUENCE[next]);
 }
 
 function targetOwnsHorizontalGesture(target){
@@ -3431,10 +3604,10 @@ document.addEventListener('keydown', function(e){
   if (settingsOpen || ledgerSettingsOpen) return;
   if (e.key === 'ArrowRight') {
     if (page === 0) goPage(1);
-    else goPage(page === 7 ? 1 : page + 1);
+    else moveByFunctionOrder(1);
   }
   if (e.key === 'ArrowLeft' && page > 0) {
-    goPage(page === 1 ? 7 : page - 1);
+    moveByFunctionOrder(-1);
   }
 });
 document.addEventListener('visibilitychange', function(){
@@ -4274,6 +4447,280 @@ function deleteMealRecord(id){
 function initMeals(){
   loadMealState();
   renderMealPage();
+}
+
+/* 54-alcohol.js */
+/* ============================================================
+   5.4 酒记
+   ============================================================ */
+var ALCOHOL_TYPES = [
+  { id: 'beer', name: '啤酒', abv: 4.5 },
+  { id: 'wine', name: '红酒', abv: 12 },
+  { id: 'baijiu', name: '白酒', abv: 52 },
+  { id: 'whisky', name: '洋酒', abv: 40 },
+  { id: 'cocktail', name: '鸡尾酒', abv: 10 },
+  { id: 'other', name: '其他', abv: 5 }
+];
+var ETHANOL_DENSITY = 0.789;
+var ALCOHOL_HEALTH_TIPS = [
+  '酒精被列为一类致癌物，不存在对所有人都绝对安全的饮酒量。',
+  '酒精不能帮助睡眠，它会让后半夜的睡眠更碎、更浅。',
+  '饮酒后不要驾车，也不要在饮酒后操作机械。',
+  '如果正在服药、孕期或哺乳期，或存在肝脏疾病，应避免饮酒并咨询专业人员。',
+  '少喝一点、慢一点，并搭配食物和饮水，比短时间大量饮酒更稳妥。'
+];
+var alcoholViewDate = '';
+
+function alcoholDefaultState(){
+  return { schemaVersion: 1, records: [] };
+}
+
+function alcoholTypeMeta(type){
+  for (var i = 0; i < ALCOHOL_TYPES.length; i++) {
+    if (ALCOHOL_TYPES[i].id === type) return ALCOHOL_TYPES[i];
+  }
+  return ALCOHOL_TYPES[0];
+}
+
+function alcoholDateKey(date){
+  return date.getFullYear() + '-' + pad2(date.getMonth() + 1) + '-' + pad2(date.getDate());
+}
+
+function alcoholGramsFor(volumeMl, abv){
+  return Math.round(Math.max(0, volumeMl) * Math.max(0, abv) / 100 * ETHANOL_DENSITY * 100) / 100;
+}
+
+function normalizeAlcoholState(data){
+  var out = alcoholDefaultState();
+  each(Array.isArray(data && data.records) ? data.records : [], function(record){
+    if (!record || typeof record.id !== 'string') return;
+    var type = alcoholTypeMeta(record.type);
+    var abv = Number(record.abv);
+    var volume = Number(record.volumeMl);
+    if (!isFinite(abv) || abv <= 0 || abv > 95 || !isFinite(volume) || volume <= 0 || volume > 3000) return;
+    var created = record.createdAt ? new Date(record.createdAt) : null;
+    var when = created && !isNaN(created.getTime()) ? created : new Date();
+    out.records.push({
+      id: record.id,
+      type: type.id,
+      typeName: String(record.typeName || type.name),
+      abv: Math.round(abv * 10) / 10,
+      volumeMl: Math.round(volume),
+      alcoholGrams: alcoholGramsFor(volume, abv),
+      date: /^\d{4}-\d{2}-\d{2}$/.test(String(record.date || '')) ? record.date : alcoholDateKey(when),
+      time: /^\d{2}:\d{2}$/.test(String(record.time || '')) ? record.time : (pad2(when.getHours()) + ':' + pad2(when.getMinutes())),
+      createdAt: when.toISOString()
+    });
+  });
+  out.records.sort(function(a, b){ return String(a.createdAt).localeCompare(String(b.createdAt)); });
+  return out;
+}
+
+function loadAlcoholState(){
+  alcoholData = normalizeAlcoholState(storeGet(ALKEY, null));
+  saveAlcoholState();
+}
+
+function saveAlcoholState(){
+  if (!alcoholData) alcoholData = alcoholDefaultState();
+  alcoholData.schemaVersion = 1;
+  storeSet(ALKEY, alcoholData);
+}
+
+function alcoholRecordsForDate(date){
+  var key = typeof date === 'string' ? date : alcoholDateKey(date);
+  return alcoholData.records.filter(function(record){ return record.date === key; });
+}
+
+function alcoholTotals(records){
+  var grams = 0;
+  each(records || [], function(record){ grams += Number(record.alcoholGrams) || 0; });
+  return { grams: Math.round(grams * 100) / 100 };
+}
+
+function alcoholRecordHtml(record, showDate){
+  var typeName = record.typeName || alcoholTypeMeta(record.type).name;
+  return '<div class="alcohol-record"><span class="alcohol-record-time">' +
+    escHtml(showDate ? record.date.slice(5) + ' ' + record.time : record.time) + '</span>' +
+    '<span class="alcohol-record-main"><b>' + escHtml(typeName) + ' · ' + record.volumeMl + ' ml · ' +
+    record.abv + '%</b><small>约 ' + record.alcoholGrams.toFixed(1) + ' g 纯酒精</small></span>' +
+    '<strong>' + record.alcoholGrams.toFixed(1) + 'g</strong></div>';
+}
+
+function renderAlcoholCalendar(){
+  var grid = byId('alcohol-calendar-grid');
+  if (!grid) return;
+  var now = new Date();
+  var month = new Date(now.getFullYear(), now.getMonth() + alcoholCalendarOffset, 1);
+  var year = month.getFullYear(), monthIndex = month.getMonth();
+  var firstOffset = (month.getDay() + 6) % 7;
+  var days = new Date(year, monthIndex + 1, 0).getDate();
+  setTxt('alcohol-calendar-title', year + '年' + (monthIndex + 1) + '月');
+  var next = document.querySelector('[data-action="changeAlcoholCalendarMonth"][data-args="[1]"]');
+  if (next) {
+    next.disabled = alcoholCalendarOffset >= 0;
+    next.style.opacity = next.disabled ? '.28' : '';
+  }
+  var html = '';
+  for (var blank = 0; blank < firstOffset; blank++) html += '<span class="alcohol-cal-blank"></span>';
+  for (var dayNum = 1; dayNum <= days; dayNum++) {
+    var day = new Date(year, monthIndex, dayNum);
+    var key = alcoholDateKey(day);
+    var records = alcoholRecordsForDate(day);
+    var classes = 'alcohol-cal-day' + (records.length ? ' has-record' : '') +
+      (key === wTodayStr() ? ' today' : '');
+    html += records.length ?
+      '<button type="button" class="' + classes + '"' + actionAttrs('openAlcoholDay', [key]) + '>' +
+        dayNum + '<i></i></button>' :
+      '<span class="' + classes + '">' + dayNum + '</span>';
+  }
+  grid.innerHTML = html;
+}
+
+function renderAlcoholPage(){
+  if (!alcoholData) return;
+  var now = new Date();
+  var today = alcoholRecordsForDate(now).slice().sort(function(a, b){
+    return String(b.createdAt).localeCompare(String(a.createdAt));
+  });
+  var totals = alcoholTotals(today);
+  var monthPrefix = now.getFullYear() + '-' + pad2(now.getMonth() + 1);
+  var monthTotals = alcoholTotals(alcoholData.records.filter(function(record){
+    return String(record.date).indexOf(monthPrefix) === 0;
+  }));
+  setTxt('alcohol-top-date', (now.getMonth() + 1) + '月' + now.getDate() + '日 · 周' +
+    ['日', '一', '二', '三', '四', '五', '六'][now.getDay()]);
+  setTxt('alcohol-month-grams', monthTotals.grams.toFixed(1));
+  setTxt('alcohol-today-grams', totals.grams.toFixed(1));
+  byId('alcohol-list').innerHTML = today.length ? today.map(function(record){
+    return alcoholRecordHtml(record, false);
+  }).join('') : '<div class="alcohol-empty">今天还没有饮酒记录<br>如果喝了，记一杯；如果没喝，也很好。</div>';
+  renderAlcoholCalendar();
+  renderDashboard();
+}
+
+function alcoholFormTypeGrid(){
+  return ALCOHOL_TYPES.map(function(type){
+    return '<button type="button" class="' + (alcoholDraftType === type.id ? 'on' : '') + '"' +
+      actionAttrs('pickAlcoholType', [type.id]) + '>' + type.name + '</button>';
+  }).join('');
+}
+
+function updateAlcoholFormPreview(){
+  var abv = parseFloat(byId('alcohol-abv') ? byId('alcohol-abv').value : '') || 0;
+  var volume = parseFloat(byId('alcohol-volume') ? byId('alcohol-volume').value : '') || 0;
+  var grams = alcoholGramsFor(volume, abv);
+  setTxt('alcohol-form-grams', '约 ' + grams.toFixed(1) + ' g 纯酒精');
+}
+
+function openAlcoholRecordForm(){
+  var meta = alcoholTypeMeta(alcoholDraftType);
+  openSheet(
+    '<h3>记一杯</h3>' +
+    '<p>选择酒种，确认度数和饮用量，纯酒精克数会自动计算。</p>' +
+    '<label class="todo-form-label">酒种</label><div class="alcohol-type-grid" id="alcohol-type-grid">' +
+      alcoholFormTypeGrid() + '</div>' +
+    '<div class="alcohol-form-row"><div><label class="todo-form-label">酒精度数 %</label>' +
+      '<input class="todo-form-input" id="alcohol-abv" type="number" inputmode="decimal" min="0.1" max="95" step="0.1" value="' + meta.abv + '"></div>' +
+      '<div><label class="todo-form-label">饮用量 ml</label>' +
+      '<input class="todo-form-input" id="alcohol-volume" type="number" inputmode="numeric" min="1" max="3000" step="10" value="330"></div></div>' +
+    '<div class="alcohol-form-preview"><b id="alcohol-form-grams">约 0.0 g 纯酒精</b>' +
+      '<span>只记录纯酒精克数</span></div>' +
+    '<div class="row"><button class="ghost"' + actionAttrs('closeSheet') + '>取消</button>' +
+    '<button class="primary"' + actionAttrs('saveAlcoholRecord') + '>记录</button></div>'
+  );
+  byId('alcohol-abv').addEventListener('input', updateAlcoholFormPreview);
+  byId('alcohol-volume').addEventListener('input', updateAlcoholFormPreview);
+  updateAlcoholFormPreview();
+}
+
+function pickAlcoholType(type){
+  var meta = alcoholTypeMeta(type);
+  alcoholDraftType = meta.id;
+  var grid = byId('alcohol-type-grid');
+  if (grid) grid.innerHTML = alcoholFormTypeGrid();
+  var abv = byId('alcohol-abv');
+  if (abv) abv.value = meta.abv;
+  updateAlcoholFormPreview();
+}
+
+function saveAlcoholRecord(){
+  var meta = alcoholTypeMeta(alcoholDraftType);
+  var abv = parseFloat(byId('alcohol-abv').value);
+  var volume = parseInt(byId('alcohol-volume').value, 10);
+  if (!isFinite(abv) || abv <= 0 || abv > 95) { toast('请输入有效度数'); return; }
+  if (!isFinite(volume) || volume <= 0 || volume > 3000) { toast('请输入有效饮用量'); return; }
+  var now = new Date();
+  var record = {
+    id: 'alcohol_' + now.getTime().toString(36),
+    type: meta.id,
+    typeName: meta.name,
+    abv: Math.round(abv * 10) / 10,
+    volumeMl: volume,
+    alcoholGrams: alcoholGramsFor(volume, abv),
+    date: alcoholDateKey(now),
+    time: pad2(now.getHours()) + ':' + pad2(now.getMinutes()),
+    createdAt: now.toISOString()
+  };
+  alcoholData.records.push(record);
+  saveAlcoholState();
+  renderAlcoholPage();
+  var todayTotals = alcoholTotals(alcoholRecordsForDate(now));
+  var tip = ALCOHOL_HEALTH_TIPS[(now.getDate() + now.getHours() + alcoholData.records.length) % ALCOHOL_HEALTH_TIPS.length];
+  openSheet(
+    '<h3>已记录 · ' + escHtml(record.typeName) + '</h3>' +
+    '<p>' + record.volumeMl + ' ml · ' + record.abv + '% · ' + record.time + '</p>' +
+    '<div class="alcohol-feedback-total"><b>' + record.alcoholGrams.toFixed(1) + ' g</b>' +
+      '<span>本次纯酒精</span></div>' +
+    '<div class="alcohol-feedback-total"><b>' + todayTotals.grams.toFixed(1) + ' g</b>' +
+      '<span>今日累计纯酒精</span></div>' +
+    '<div class="alcohol-feedback-tip"><b>健康提示</b><span>' + escHtml(tip) + '</span></div>' +
+    '<div class="row"><button class="primary" style="flex:1"' + actionAttrs('closeSheet') + '>知道了</button></div>'
+  );
+  toast('已记录 ' + record.typeName);
+}
+
+function deleteAlcoholRecord(id){
+  var record = alcoholData.records.filter(function(item){ return item.id === id; })[0];
+  if (!record) return;
+  appConfirm('删除这条 ' + record.typeName + ' 饮酒记录？', function(){
+    alcoholData.records = alcoholData.records.filter(function(item){ return item.id !== id; });
+    saveAlcoholState();
+    renderAlcoholPage();
+    if (alcoholViewDate) openAlcoholDay(alcoholViewDate);
+    toast('饮酒记录已删除');
+  }, { title: '删除酒记', confirmLabel: '删除' });
+}
+
+function changeAlcoholCalendarMonth(delta){
+  alcoholCalendarOffset = Math.min(0, alcoholCalendarOffset + (Number(delta) || 0));
+  renderAlcoholCalendar();
+}
+
+function openAlcoholDay(date){
+  var records = alcoholRecordsForDate(date).slice().sort(function(a, b){
+    return String(b.createdAt).localeCompare(String(a.createdAt));
+  });
+  var totals = alcoholTotals(records);
+  alcoholViewDate = date;
+  openSheet(
+    '<h3>' + escHtml(date) + '</h3>' +
+    '<div class="alcohol-feedback-total"><b>' + totals.grams.toFixed(1) + ' g</b>' +
+      '<span>当日纯酒精累计</span></div>' +
+    (records.length ? records.map(function(record){
+      return '<div class="alcohol-day-row"><span><b>' + escHtml(record.typeName) + ' · ' +
+        record.volumeMl + ' ml · ' + record.abv + '%</b><small>' + record.time +
+        ' · 约 ' + record.alcoholGrams.toFixed(1) + ' g</small></span><strong>' +
+        record.alcoholGrams.toFixed(1) + 'g</strong><button' +
+        actionAttrs('deleteAlcoholRecord', [record.id]) + '>删除</button></div>';
+    }).join('') : '<div class="alcohol-empty">这一天没有饮酒记录</div>') +
+    '<div class="row"><button class="ghost" style="flex:1"' + actionAttrs('closeSheet') + '>关闭</button></div>'
+  );
+}
+
+function initAlcohol(){
+  loadAlcoholState();
+  renderAlcoholPage();
 }
 
 /* 60-fitness.js */
@@ -6233,6 +6680,13 @@ function renderDashboard(){
     setTxt('home-meal-copy', todayMeals.length ?
       '今天 ' + todayMeals.length + ' 顿 · 最近 ' + mealTypeMeta(lastMeal.type).name :
       '记录今天吃了什么');
+  }
+  if (alcoholData) {
+    var alcoholToday = alcoholRecordsForDate(new Date());
+    var alcoholTotal = alcoholToday.reduce(function(sum, record){ return sum + record.alcoholGrams; }, 0);
+    setTxt('home-alcohol-copy', alcoholToday.length ?
+      '今天 ' + alcoholTotal.toFixed(1) + 'g 酒精' :
+      '今天还没有记录');
   }
   if (S && S.quitDate) setTxt('home-quit-copy', '已经坚持 ' + Math.floor((Date.now() - S.quitDate) / 86400000) + ' 天');
   if (todoData) {
@@ -8512,6 +8966,7 @@ function boot(){
   renderQuit();
   initWater();
   initMeals();
+  initAlcohol();
   initTodo();
   initReminder();
   initLedger();
@@ -8533,6 +8988,7 @@ function boot(){
     if (todoData && page === 5) renderTodoPage();
     if (mealData && page === 3) renderMealPage();
     if (reminderData && page === 7) renderReminderPage();
+    if (alcoholData && page === 8) renderAlcoholPage();
     checkTodoReminder();
   }, 30000);
 }

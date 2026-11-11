@@ -1,13 +1,15 @@
 /* ============================================================
    7. 页面切换
    ============================================================ */
+var FUNCTION_PAGE_SEQUENCE = [1, 2, 3, 4, 5, 6, 8, 7];
+
 function goPage(i){
   settingsOpen = false;
   ledgerSettingsOpen = false;
-  page = i < 0 ? 0 : (i > 7 ? 7 : i);
-  var pages = ['home', 'fitness', 'water', 'meals', 'quit', 'todo', 'ledger', 'reminder'];
+  page = i < 0 ? 0 : (i > 8 ? 8 : i);
+  var pages = ['home', 'fitness', 'water', 'meals', 'quit', 'todo', 'ledger', 'reminder', 'alcohol'];
   document.body.dataset.page = pages[page];
-  var sections = ['p-home', 'p-fitness', 'p-water', 'p-meals', 'p-quit', 'p-todo', 'p-ledger', 'p-reminder'];
+  var sections = ['p-home', 'p-fitness', 'p-water', 'p-meals', 'p-quit', 'p-todo', 'p-ledger', 'p-reminder', 'p-alcohol'];
   each(sections, function(id, index){
     var section = byId(id);
     if (!section) return;
@@ -32,6 +34,7 @@ function goPage(i){
   if (page === 3) renderMealPage();
   if (page === 6) renderLedgerPage();
   if (page === 7 && reminderData) renderReminderPage();
+  if (page === 8) renderAlcoholPage();
   if (page === 0) renderDashboard();
 }
 
@@ -102,8 +105,14 @@ function moveByHorizontalSwipe(dx){
   if (page === 0 || settingsOpen || ledgerSettingsOpen) {
     return;
   }
-  if (dx < 0) goPage(page === 7 ? 1 : page + 1);
-  else goPage(page === 1 ? 7 : page - 1);
+  moveByFunctionOrder(dx < 0 ? 1 : -1);
+}
+
+function moveByFunctionOrder(step){
+  var index = FUNCTION_PAGE_SEQUENCE.indexOf(page);
+  if (index < 0) return;
+  var next = (index + step + FUNCTION_PAGE_SEQUENCE.length) % FUNCTION_PAGE_SEQUENCE.length;
+  goPage(FUNCTION_PAGE_SEQUENCE[next]);
 }
 
 function targetOwnsHorizontalGesture(target){
@@ -137,10 +146,10 @@ document.addEventListener('keydown', function(e){
   if (settingsOpen || ledgerSettingsOpen) return;
   if (e.key === 'ArrowRight') {
     if (page === 0) goPage(1);
-    else goPage(page === 7 ? 1 : page + 1);
+    else moveByFunctionOrder(1);
   }
   if (e.key === 'ArrowLeft' && page > 0) {
-    goPage(page === 1 ? 7 : page - 1);
+    moveByFunctionOrder(-1);
   }
 });
 document.addEventListener('visibilitychange', function(){
