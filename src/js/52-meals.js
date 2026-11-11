@@ -306,7 +306,7 @@ function paintMealCountdown(){
 
 function mealEntryHtml(record){
   var meta = mealTypeMeta(record.type);
-  return '<div class="meal-entry" data-type="' + meta.id + '">' +
+  return '<div class="meal-entry" data-type="' + meta.id + '" data-regular="' + (record.regular ? 'true' : 'false') + '">' +
     '<span class="meal-entry-time">' + escHtml(record.time) + '</span>' +
     '<span class="meal-entry-dot"></span>' +
     '<span class="meal-entry-main"><b>' + escHtml(meta.name) +

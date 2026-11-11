@@ -69,12 +69,8 @@ body[data-page="meals"]::before{
   background:rgba(255,255,255,.82)
 }
 .meal-entry-time{font:500 11px var(--font-mono);color:#8d9994}
-.meal-entry-dot{width:6px;height:6px;border-radius:50%;background:#c79662;box-shadow:0 0 0 3px rgba(199,150,98,.09)}
-.meal-entry[data-type="breakfast"] .meal-entry-dot{background:#d5a05e}
-.meal-entry[data-type="lunch"] .meal-entry-dot{background:#79a078}
-.meal-entry[data-type="tea"] .meal-entry-dot{background:#8aa2b5}
-.meal-entry[data-type="dinner"] .meal-entry-dot{background:#809b85}
-.meal-entry[data-type="late"] .meal-entry-dot{background:#7e8799}
+.meal-entry-dot{width:6px;height:6px;border-radius:50%;background:#d2a744;box-shadow:0 0 0 3px rgba(210,167,68,.1)}
+.meal-entry[data-regular="true"] .meal-entry-dot{background:#48ac7c;box-shadow:0 0 0 3px rgba(72,172,124,.1)}
 .meal-entry-main{min-width:0}
 .meal-entry-main b{display:block;font-size:12.5px;font-weight:500;color:#435851}
 .meal-entry-main b i{

@@ -376,6 +376,8 @@ async function run() {
       closeSheet();
       var stored = JSON.parse(localStorage.getItem('meals_app_v1'));
       var rowCount = byId('meal-list').querySelectorAll('.meal-entry').length;
+      var regularDot = byId('meal-list').querySelector('.meal-entry[data-regular="true"] .meal-entry-dot');
+      var irregularDots = byId('meal-extra-list').querySelectorAll('.meal-entry[data-regular="false"] .meal-entry-dot');
       var typeStripCount = byId('meal-type-strip').querySelectorAll('.meal-type-chip').length;
       var extraBox = byId('meal-extra-box');
       var extraCount = byId('meal-extra-list').querySelectorAll('.meal-entry').length;
@@ -439,6 +441,9 @@ async function run() {
         backfillTitle: backfillTitle,
         storedRecords: stored.records.length,
         rowCount: rowCount,
+        regularDotColor: regularDot ? getComputedStyle(regularDot).backgroundColor : '',
+        irregularDotCount: irregularDots.length,
+        irregularDotColor: irregularDots.length ? getComputedStyle(irregularDots[0]).backgroundColor : '',
         typeStripCount: typeStripCount,
         extraBoxHidden: extraBox.hidden,
         extraBoxOpen: extraBox.open,
@@ -502,6 +507,9 @@ async function run() {
     assert.equal(meals.backfillTitle, '补记 · 晚餐 · 18:00');
     assert.equal(meals.storedRecords, 4);
     assert.equal(meals.rowCount, 1);
+    assert.equal(meals.regularDotColor, 'rgb(72, 172, 124)');
+    assert.equal(meals.irregularDotCount, 2);
+    assert.equal(meals.irregularDotColor, 'rgb(210, 167, 68)');
     assert.equal(meals.typeStripCount, 3);
     assert.equal(meals.extraBoxHidden, false);
     assert.equal(meals.extraBoxOpen, false);
@@ -743,8 +751,8 @@ async function run() {
       cleanupConfirmOpened: true,
       cleanupCalls: 1,
       aboutOpened: true,
-      changelogCount: 69,
-      aboutVersion: '6.0.10',
+      changelogCount: 70,
+      aboutVersion: '6.0.11',
       updateBackupExposed: true,
       updateCalls: 1,
       handledBack: true,
