@@ -151,6 +151,7 @@ var APP_ACTION_NAMES = {
   openAlcoholRecordForm: true,
   openAlcoholMenu: true,
   openAlcoholBackfillForm: true,
+  openAlcoholRecoveryStages: true,
   pickAlcoholType: true,
   saveAlcoholRecord: true,
   saveAlcoholBackfill: true,

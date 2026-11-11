@@ -17,6 +17,15 @@ var ALCOHOL_HEALTH_TIPS = [
   '如果正在服药、孕期或哺乳期，或存在肝脏疾病，应避免饮酒并咨询专业人员。',
   '少喝一点、慢一点，并搭配食物和饮水，比短时间大量饮酒更稳妥。'
 ];
+var ALCOHOL_RECOVERY_STAGES = [
+  { ms: 20 * 60 * 1000, label: '20 分钟后', text: '心率与循环逐渐从饮酒后的波动中平稳下来。' },
+  { ms: 12 * 60 * 60 * 1000, label: '12 小时后', text: '血液酒精通常已明显下降，补水和休息仍是重点。' },
+  { ms: 24 * 60 * 60 * 1000, label: '1 天后', text: '身体逐步补回水分，睡眠与精力可能开始恢复。' },
+  { ms: 3 * 24 * 60 * 60 * 1000, label: '3 天后', text: '睡眠节律、注意力和水分状态常开始改善。' },
+  { ms: 7 * 24 * 60 * 60 * 1000, label: '1 周后', text: '睡眠质量与白天精力通常更稳定。' },
+  { ms: 28 * 24 * 60 * 60 * 1000, label: '4 周后', text: '肝脏脂肪与血压等指标可能出现改善趋势。' },
+  { ms: 84 * 24 * 60 * 60 * 1000, label: '12 周后', text: '多项代谢指标可能进一步改善。' }
+];
 var alcoholViewDate = '';
 
 function alcoholDefaultState(){
@@ -87,6 +96,101 @@ function alcoholTotals(records){
   return { grams: Math.round(grams * 100) / 100 };
 }
 
+function latestAlcoholRecord(){
+  if (!alcoholData) return null;
+  var latest = null, latestTime = -Infinity;
+  each(alcoholData.records || [], function(record){
+    var time = new Date(record.createdAt).getTime();
+    if (isFinite(time) && time > latestTime) {
+      latest = record;
+      latestTime = time;
+    }
+  });
+  return latest;
+}
+
+function alcoholDurationText(ms, compact){
+  var seconds = Math.max(0, Math.floor(Number(ms) / 1000));
+  if (seconds < 60) return compact ? seconds + ' 秒' : Math.max(0, seconds) + ' 秒';
+  var minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return minutes + ' 分';
+  var hours = Math.floor(minutes / 60);
+  if (hours < 24) return hours + ' 小时 ' + (minutes % 60) + ' 分';
+  var days = Math.floor(hours / 24);
+  return days + ' 天 ' + (hours % 24) + ' 小时';
+}
+
+function renderAlcoholSobriety(){
+  var duration = byId('alcohol-sober-duration');
+  if (!duration) return;
+  var latest = latestAlcoholRecord();
+  if (!latest) {
+    setTxt('alcohol-sober-duration', '还没有记录');
+    setTxt('alcohol-sober-stage', '等待第一次记录');
+    setTxt('alcohol-sober-copy', '记录一次饮酒后，这里会从那个时间点开始计时。');
+    setTxt('alcohol-sober-next-title', '身体恢复节点');
+    setTxt('alcohol-sober-next', ALCOHOL_RECOVERY_STAGES[0].label + ' · ' + ALCOHOL_RECOVERY_STAGES[0].text);
+    var emptyBar = byId('alcohol-sober-progress');
+    if (emptyBar) emptyBar.style.width = '0%';
+    return;
+  }
+  var elapsed = Math.max(0, Date.now() - new Date(latest.createdAt).getTime());
+  var currentIdx = -1;
+  for (var i = 0; i < ALCOHOL_RECOVERY_STAGES.length; i++) {
+    if (elapsed >= ALCOHOL_RECOVERY_STAGES[i].ms) currentIdx = i;
+  }
+  var current = currentIdx >= 0 ? ALCOHOL_RECOVERY_STAGES[currentIdx] : {
+    label: '刚刚停下',
+    text: '先补水、休息，观察身体反应；不要继续饮酒。'
+  };
+  var next = ALCOHOL_RECOVERY_STAGES[currentIdx + 1];
+  setTxt('alcohol-sober-duration', alcoholDurationText(elapsed, false));
+  setTxt('alcohol-sober-stage', current.label);
+  setTxt('alcohol-sober-copy', current.text);
+  if (next) {
+    setTxt('alcohol-sober-next-title', '下一节点 · 还差 ' + alcoholDurationText(next.ms - elapsed, true));
+    setTxt('alcohol-sober-next', next.label + ' · ' + next.text);
+  } else {
+    setTxt('alcohol-sober-next-title', '全部恢复节点已走过');
+    setTxt('alcohol-sober-next', '继续保持，把睡眠、饮食和运动留给身体慢慢修复。');
+  }
+  var startMs = currentIdx >= 0 ? ALCOHOL_RECOVERY_STAGES[currentIdx].ms : 0;
+  var endMs = next ? next.ms : ALCOHOL_RECOVERY_STAGES[ALCOHOL_RECOVERY_STAGES.length - 1].ms;
+  var pct = next ? Math.min(1, Math.max(0, (elapsed - startMs) / (endMs - startMs))) : 1;
+  var bar = byId('alcohol-sober-progress');
+  if (bar) bar.style.width = (pct * 100).toFixed(1) + '%';
+}
+
+function openAlcoholRecoveryStages(){
+  var latest = latestAlcoholRecord();
+  var elapsed = latest ? Math.max(0, Date.now() - new Date(latest.createdAt).getTime()) : 0;
+  var currentIdx = -1;
+  if (latest) {
+    for (var i = 0; i < ALCOHOL_RECOVERY_STAGES.length; i++) {
+      if (elapsed >= ALCOHOL_RECOVERY_STAGES[i].ms) currentIdx = i;
+    }
+  }
+  var rows = ALCOHOL_RECOVERY_STAGES.map(function(stage, index){
+    var state = currentIdx >= 0 && index < currentIdx ? 'past' :
+      (index === currentIdx ? 'now' : 'future');
+    var status = state === 'past' ? '已走过' :
+      (state === 'now' ? '当前' :
+        (latest ? '还差 ' + alcoholDurationText(stage.ms - elapsed, true) : '记录后开始'));
+    return '<div class="alcohol-stage-row ' + state + '">' +
+      '<div><b>' + escHtml(stage.label) + '</b><small>' + escHtml(status) + '</small></div>' +
+      '<p>' + escHtml(stage.text) + '</p></div>';
+  }).join('');
+  openSheet(
+    '<h3>身体恢复状态</h3>' +
+    '<p>' + (latest ?
+      '距离上次饮酒 ' + escHtml(alcoholDurationText(elapsed, false)) + '。' :
+      '记录一次饮酒后，恢复节点会开始计时。') + '</p>' +
+    '<div class="alcohol-stage-list">' + rows + '</div>' +
+    '<p class="alcohol-sobriety-note">恢复速度受饮酒量、体重、睡眠和饮食影响；这些节点用于了解常见方向，不构成医疗建议。</p>' +
+    '<div class="row"><button class="primary" style="flex:1"' + actionAttrs('closeSheet') + '>知道了</button></div>'
+  );
+}
+
 function alcoholRecordHtml(record, showDate){
   var typeName = record.typeName || alcoholTypeMeta(record.type).name;
   return '<div class="alcohol-record"><span class="alcohol-record-time">' +
@@ -145,6 +249,7 @@ function renderAlcoholPage(){
   byId('alcohol-list').innerHTML = today.length ? today.map(function(record){
     return alcoholRecordHtml(record, false);
   }).join('') : '<div class="alcohol-empty">今天还没有饮酒记录<br>如果喝了，记一杯；如果没喝，也很好。</div>';
+  renderAlcoholSobriety();
   renderAlcoholCalendar();
   renderDashboard();
 }

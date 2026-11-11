@@ -16,6 +16,41 @@ body[data-page="alcohol"]::before{
   flex:0 0 auto;width:100%;height:46px;border-radius:13px;border:1px solid rgba(105,78,124,.48);
   background:linear-gradient(135deg,#5c4b66,#7f647e);color:#fff;font-size:13px;letter-spacing:.18em;cursor:pointer
 }
+.alcohol-sobriety{
+  flex:0 0 auto;margin:11px 0 14px;padding:13px 14px;border-radius:14px;
+  border:1px solid rgba(119,96,143,.14);background:rgba(255,255,255,.74)
+}
+.alcohol-sobriety-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.alcohol-sobriety-head span{font-size:10.5px;letter-spacing:.1em;color:#8f8193}
+.alcohol-sobriety-head b{font:500 15px var(--font-mono);color:#5d4d65;text-align:right}
+.alcohol-sobriety-stage{margin-top:10px;padding-top:10px;border-top:1px solid var(--line2)}
+.alcohol-sobriety-stage>b{display:block;font-size:12.5px;font-weight:500;letter-spacing:.06em;color:#6b556f}
+.alcohol-sobriety-stage p{margin:4px 0 0;font-size:10.5px;line-height:1.62;color:#8b7d8f}
+.alcohol-sobriety-next{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-top:11px}
+.alcohol-sobriety-next span{flex:0 0 auto;font-size:9.5px;letter-spacing:.07em;color:#a094a3}
+.alcohol-sobriety-next b{font-size:10.5px;line-height:1.55;font-weight:500;color:#78697d;text-align:right}
+.alcohol-sobriety-track{height:3px;margin-top:9px;border-radius:3px;background:rgba(119,96,143,.09);overflow:hidden}
+.alcohol-sobriety-track i{
+  display:block;width:0;height:100%;border-radius:3px;
+  background:linear-gradient(90deg,#9d7ca7,#d0a899);transition:width .6s ease
+}
+.alcohol-stage-link{
+  margin:9px 0 0;padding:3px 0;border:0;background:transparent;
+  color:#80688a;font-size:10px;letter-spacing:.07em;cursor:pointer
+}
+.alcohol-stage-link::after{content:'›';margin-left:5px}
+.alcohol-stage-list{display:flex;flex-direction:column;gap:6px;margin:10px 0 12px}
+.alcohol-stage-row{
+  display:grid;grid-template-columns:82px 1fr;gap:10px;align-items:start;
+  padding:9px 10px;border-radius:10px;background:#f8f7f9;border:1px solid transparent
+}
+.alcohol-stage-row.now{background:#f3eef5;border-color:rgba(119,96,143,.16)}
+.alcohol-stage-row.past{opacity:.62}
+.alcohol-stage-row b{display:block;font-size:11.5px;font-weight:500;color:#66566d}
+.alcohol-stage-row small{display:block;margin-top:3px;font-size:9px;color:#a094a2}
+.alcohol-stage-row.now small{color:#7d6486}
+.alcohol-stage-row p{margin:0;font-size:10.5px;line-height:1.62;color:#847a86}
+.alcohol-sobriety-note{margin:8px 0 0;font-size:9px;line-height:1.55;color:#a196a3}
 .alcohol-today-card{
   flex:0 0 auto;margin:12px 0 16px;padding:13px;border-radius:14px;
   border:1px solid var(--line2);background:rgba(255,255,255,.78)
@@ -26,14 +61,24 @@ body[data-page="alcohol"]::before{
 .alcohol-today-number b span{font:inherit}
 .alcohol-today-number b small{font-size:11px;color:#998c9f}
 .alcohol-knowledge{display:flex;flex-direction:column;gap:8px;padding-top:11px}
-.alcohol-knowledge div{display:grid;grid-template-columns:38px 1fr;gap:8px;align-items:start}
+.alcohol-knowledge div{display:grid;grid-template-columns:58px 1fr;gap:8px;align-items:start}
 .alcohol-knowledge span{font-size:9.5px;line-height:1.55;letter-spacing:.08em;color:#9b6f78}
 .alcohol-knowledge p{margin:0;font-size:10.5px;line-height:1.62;color:#7c7280}
-.alcohol-today{flex:0 0 auto;margin-bottom:16px}
-.alcohol-section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
-.alcohol-section-head h3{margin:0;font-size:13px;font-weight:500;letter-spacing:.08em;color:#596d68}
-.alcohol-section-head small{font-size:10px;color:#9ca8a5}
-.alcohol-list{display:flex;flex-direction:column;gap:6px}
+.alcohol-knowledge-note{margin:10px 0 0;padding-top:9px;border-top:1px solid var(--line2);font-size:9px;line-height:1.6;color:#a096a1}
+.alcohol-today{
+  flex:0 0 auto;margin:0 0 16px;border:1px solid var(--line2);border-radius:13px;
+  background:rgba(255,255,255,.72);overflow:hidden
+}
+.alcohol-today>summary{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;list-style:none;
+  padding:10px 12px;cursor:pointer;font-size:13px;letter-spacing:.08em;color:#596d68
+}
+.alcohol-today>summary::-webkit-details-marker{display:none}
+.alcohol-today>summary::marker{content:''}
+.alcohol-today>summary i{font-style:normal;font-size:12px;color:#9aa7a3;transition:transform .2s}
+.alcohol-today[open]>summary i{transform:rotate(180deg)}
+.alcohol-list{display:flex;flex-direction:column;gap:6px;padding:0 8px 9px;border-top:1px solid var(--line2)}
+.alcohol-list .alcohol-record:first-child{margin-top:8px}
 .alcohol-record{
   display:grid;grid-template-columns:42px minmax(0,1fr) auto;align-items:center;gap:9px;
   padding:9px 11px;border-radius:12px;border:1px solid var(--line2);background:rgba(255,255,255,.82)

@@ -529,6 +529,7 @@ async function run() {
       var active = byId('p-alcohol').classList.contains('on') &&
         document.body.dataset.page === 'alcohol';
       var pagerLabel = byId('page-pager').querySelector('button.on').textContent.trim();
+      var todayCollapsed = !byId('alcohol-today-records').open;
       var calculated = alcoholGramsFor(500, 4.5);
       openAlcoholRecordForm();
       pickAlcoholType('beer');
@@ -541,6 +542,13 @@ async function run() {
       var feedbackHasWarning = byId('sheet').querySelectorAll('.alcohol-feedback-tip').length === 1;
       closeSheet();
       var stored = JSON.parse(localStorage.getItem(ALKEY));
+      var knowledgeText = byId('p-alcohol').querySelector('.alcohol-knowledge').textContent;
+      var soberDuration = byId('alcohol-sober-duration').textContent.trim();
+      var soberStage = byId('alcohol-sober-stage').textContent.trim();
+      var soberProgress = parseFloat(byId('alcohol-sober-progress').style.width) || 0;
+      openAlcoholRecoveryStages();
+      var recoveryStageRows = byId('sheet').querySelectorAll('.alcohol-stage-row').length;
+      closeSheet();
       var today = new Date();
       var todayKey = alcoholDateKey(today);
       var monthPrefix = todayKey.slice(0, 7);
@@ -576,6 +584,7 @@ async function run() {
       return {
         active: active,
         pagerLabel: pagerLabel,
+        todayCollapsed: todayCollapsed,
         calculated: calculated,
         preview: preview,
         feedbackHasTip: feedbackHasWarning && feedback.indexOf('纯酒精') >= 0,
@@ -585,6 +594,13 @@ async function run() {
         monthSummary: byId('alcohol-month-grams').textContent.trim(),
         monthGrams: monthGrams,
         knowledgeRows: byId('p-alcohol').querySelectorAll('.alcohol-knowledge div').length,
+        knowledgeHasBodyEffect: knowledgeText.indexOf('反应速度') >= 0 &&
+          knowledgeText.indexOf('急性酒精中毒') >= 0,
+        soberDuration: soberDuration,
+        soberStage: soberStage,
+        soberProgress: soberProgress,
+        recoveryStageRows: recoveryStageRows,
+        recoveryStagesLabel: byId('p-alcohol').querySelector('[data-action="openAlcoholRecoveryStages"]').textContent.trim(),
         menuLabel: byId('p-alcohol').querySelector('[data-action="openAlcoholMenu"]').textContent.trim(),
         menuBackfillLabel: menuBackfillLabel,
         listRows: byId('alcohol-list').querySelectorAll('.alcohol-record').length,
@@ -600,6 +616,7 @@ async function run() {
     })()`);
     assert.equal(alcohol.active, true);
     assert.equal(alcohol.pagerLabel, '酒');
+    assert.equal(alcohol.todayCollapsed, true);
     assert.equal(alcohol.calculated, 17.75);
     assert.equal(alcohol.preview, '约 17.8 g 纯酒精');
     assert.equal(alcohol.feedbackHasTip, true);
@@ -609,6 +626,12 @@ async function run() {
     assert.equal(alcohol.monthSummary, '17.8');
     assert.equal(alcohol.monthGrams, 17.75);
     assert.equal(alcohol.knowledgeRows, 4);
+    assert.equal(alcohol.knowledgeHasBodyEffect, true);
+    assert.notEqual(alcohol.soberDuration, '还没有记录');
+    assert.equal(alcohol.soberStage, '刚刚停下');
+    assert.ok(alcohol.soberProgress >= 0);
+    assert.equal(alcohol.recoveryStageRows, 7);
+    assert.equal(alcohol.recoveryStagesLabel, '查看全部身体状态');
     assert.equal(alcohol.menuLabel, '⋯');
     assert.equal(alcohol.menuBackfillLabel, '补记饮酒记录');
     assert.equal(alcohol.listRows, 1);
@@ -720,8 +743,8 @@ async function run() {
       cleanupConfirmOpened: true,
       cleanupCalls: 1,
       aboutOpened: true,
-      changelogCount: 68,
-      aboutVersion: '6.0.9',
+      changelogCount: 69,
+      aboutVersion: '6.0.10',
       updateBackupExposed: true,
       updateCalls: 1,
       handledBack: true,

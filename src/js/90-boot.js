@@ -48,6 +48,7 @@ function boot(){
   setInterval(function(){
     paintLiveTimers();
     paintMealCountdown();
+    if (page === 8) renderAlcoholSobriety();
   }, 1000);
   // 跨天检查（喝水）
   setInterval(function(){

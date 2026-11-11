@@ -34,7 +34,11 @@ function goPage(i){
   if (page === 3) renderMealPage();
   if (page === 6) renderLedgerPage();
   if (page === 7 && reminderData) renderReminderPage();
-  if (page === 8) renderAlcoholPage();
+  if (page === 8) {
+    var alcoholTodayRecords = byId('alcohol-today-records');
+    if (alcoholTodayRecords) alcoholTodayRecords.open = false;
+    renderAlcoholPage();
+  }
   if (page === 0) renderDashboard();
 }
 

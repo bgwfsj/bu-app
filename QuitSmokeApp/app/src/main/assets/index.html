@@ -1003,6 +1003,41 @@ body[data-page="alcohol"]::before{
   flex:0 0 auto;width:100%;height:46px;border-radius:13px;border:1px solid rgba(105,78,124,.48);
   background:linear-gradient(135deg,#5c4b66,#7f647e);color:#fff;font-size:13px;letter-spacing:.18em;cursor:pointer
 }
+.alcohol-sobriety{
+  flex:0 0 auto;margin:11px 0 14px;padding:13px 14px;border-radius:14px;
+  border:1px solid rgba(119,96,143,.14);background:rgba(255,255,255,.74)
+}
+.alcohol-sobriety-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.alcohol-sobriety-head span{font-size:10.5px;letter-spacing:.1em;color:#8f8193}
+.alcohol-sobriety-head b{font:500 15px var(--font-mono);color:#5d4d65;text-align:right}
+.alcohol-sobriety-stage{margin-top:10px;padding-top:10px;border-top:1px solid var(--line2)}
+.alcohol-sobriety-stage>b{display:block;font-size:12.5px;font-weight:500;letter-spacing:.06em;color:#6b556f}
+.alcohol-sobriety-stage p{margin:4px 0 0;font-size:10.5px;line-height:1.62;color:#8b7d8f}
+.alcohol-sobriety-next{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-top:11px}
+.alcohol-sobriety-next span{flex:0 0 auto;font-size:9.5px;letter-spacing:.07em;color:#a094a3}
+.alcohol-sobriety-next b{font-size:10.5px;line-height:1.55;font-weight:500;color:#78697d;text-align:right}
+.alcohol-sobriety-track{height:3px;margin-top:9px;border-radius:3px;background:rgba(119,96,143,.09);overflow:hidden}
+.alcohol-sobriety-track i{
+  display:block;width:0;height:100%;border-radius:3px;
+  background:linear-gradient(90deg,#9d7ca7,#d0a899);transition:width .6s ease
+}
+.alcohol-stage-link{
+  margin:9px 0 0;padding:3px 0;border:0;background:transparent;
+  color:#80688a;font-size:10px;letter-spacing:.07em;cursor:pointer
+}
+.alcohol-stage-link::after{content:'›';margin-left:5px}
+.alcohol-stage-list{display:flex;flex-direction:column;gap:6px;margin:10px 0 12px}
+.alcohol-stage-row{
+  display:grid;grid-template-columns:82px 1fr;gap:10px;align-items:start;
+  padding:9px 10px;border-radius:10px;background:#f8f7f9;border:1px solid transparent
+}
+.alcohol-stage-row.now{background:#f3eef5;border-color:rgba(119,96,143,.16)}
+.alcohol-stage-row.past{opacity:.62}
+.alcohol-stage-row b{display:block;font-size:11.5px;font-weight:500;color:#66566d}
+.alcohol-stage-row small{display:block;margin-top:3px;font-size:9px;color:#a094a2}
+.alcohol-stage-row.now small{color:#7d6486}
+.alcohol-stage-row p{margin:0;font-size:10.5px;line-height:1.62;color:#847a86}
+.alcohol-sobriety-note{margin:8px 0 0;font-size:9px;line-height:1.55;color:#a196a3}
 .alcohol-today-card{
   flex:0 0 auto;margin:12px 0 16px;padding:13px;border-radius:14px;
   border:1px solid var(--line2);background:rgba(255,255,255,.78)
@@ -1013,14 +1048,24 @@ body[data-page="alcohol"]::before{
 .alcohol-today-number b span{font:inherit}
 .alcohol-today-number b small{font-size:11px;color:#998c9f}
 .alcohol-knowledge{display:flex;flex-direction:column;gap:8px;padding-top:11px}
-.alcohol-knowledge div{display:grid;grid-template-columns:38px 1fr;gap:8px;align-items:start}
+.alcohol-knowledge div{display:grid;grid-template-columns:58px 1fr;gap:8px;align-items:start}
 .alcohol-knowledge span{font-size:9.5px;line-height:1.55;letter-spacing:.08em;color:#9b6f78}
 .alcohol-knowledge p{margin:0;font-size:10.5px;line-height:1.62;color:#7c7280}
-.alcohol-today{flex:0 0 auto;margin-bottom:16px}
-.alcohol-section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
-.alcohol-section-head h3{margin:0;font-size:13px;font-weight:500;letter-spacing:.08em;color:#596d68}
-.alcohol-section-head small{font-size:10px;color:#9ca8a5}
-.alcohol-list{display:flex;flex-direction:column;gap:6px}
+.alcohol-knowledge-note{margin:10px 0 0;padding-top:9px;border-top:1px solid var(--line2);font-size:9px;line-height:1.6;color:#a096a1}
+.alcohol-today{
+  flex:0 0 auto;margin:0 0 16px;border:1px solid var(--line2);border-radius:13px;
+  background:rgba(255,255,255,.72);overflow:hidden
+}
+.alcohol-today>summary{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;list-style:none;
+  padding:10px 12px;cursor:pointer;font-size:13px;letter-spacing:.08em;color:#596d68
+}
+.alcohol-today>summary::-webkit-details-marker{display:none}
+.alcohol-today>summary::marker{content:''}
+.alcohol-today>summary i{font-style:normal;font-size:12px;color:#9aa7a3;transition:transform .2s}
+.alcohol-today[open]>summary i{transform:rotate(180deg)}
+.alcohol-list{display:flex;flex-direction:column;gap:6px;padding:0 8px 9px;border-top:1px solid var(--line2)}
+.alcohol-list .alcohol-record:first-child{margin-top:8px}
 .alcohol-record{
   display:grid;grid-template-columns:42px minmax(0,1fr) auto;align-items:center;gap:9px;
   padding:9px 11px;border-radius:12px;border:1px solid var(--line2);background:rgba(255,255,255,.82)
@@ -1993,22 +2038,40 @@ body[data-page="fitness"]::before{
         <div class="alcohol-month-label">本月累计纯酒精</div>
       </div>
       <button class="alcohol-add" type="button" data-action="openAlcoholRecordForm">干杯</button>
+      <section class="alcohol-sobriety" aria-live="polite">
+        <div class="alcohol-sobriety-head">
+          <span>距离上次饮酒</span>
+          <b id="alcohol-sober-duration">还没有记录</b>
+        </div>
+        <div class="alcohol-sobriety-stage">
+          <b id="alcohol-sober-stage">等待第一次记录</b>
+          <p id="alcohol-sober-copy">记录一次饮酒后，这里会从那个时间点开始计时。</p>
+        </div>
+        <div class="alcohol-sobriety-next">
+          <span id="alcohol-sober-next-title">身体恢复节点</span>
+          <b id="alcohol-sober-next">20 分钟后 · 心率与循环逐步平稳</b>
+        </div>
+        <div class="alcohol-sobriety-track"><i id="alcohol-sober-progress"></i></div>
+        <button class="alcohol-stage-link" type="button" data-action="openAlcoholRecoveryStages">查看全部身体状态</button>
+        <p class="alcohol-sobriety-note">恢复速度受饮酒量、体重、睡眠和饮食影响，这里展示的是常见恢复方向。</p>
+      </section>
       <section class="alcohol-today-card">
         <div class="alcohol-today-number">
           <span>今日饮酒量</span>
           <b><span id="alcohol-today-grams">0.0</span><small> g</small></b>
         </div>
         <div class="alcohol-knowledge">
-          <div><span>计算</span><p>纯酒精 = 饮用量 × 酒精度数 × 0.789</p></div>
-          <div><span>参考</span><p>330 ml、4.5% 的啤酒，约含 11.7 g 纯酒精。</p></div>
-          <div><span>对比</span><p>同样 50 ml，52° 白酒的纯酒精约为 4.5% 啤酒的 11.6 倍。</p></div>
-          <div><span>提醒</span><p>空腹饮酒吸收更快；酒精是一类致癌物，不存在对所有人都绝对安全的饮酒量。</p></div>
+          <div><span>10–20g</span><p>可能开始放松，但反应速度和判断力已经在下降。</p></div>
+          <div><span>20–40g</span><p>协调、语言控制和距离判断更容易受到影响。</p></div>
+          <div><span>40–60g</span><p>恶心、步态不稳与记忆受损的风险进一步增加。</p></div>
+          <div><span>60g 以上</span><p>急性酒精中毒风险明显上升，应停止饮酒并留意意识状态。</p></div>
         </div>
+        <p class="alcohol-knowledge-note">以上是单次摄入量的粗略参考，实际感受会因体重、进食、代谢和饮酒速度而不同。</p>
       </section>
-      <section class="alcohol-today">
-        <div class="alcohol-section-head"><h3>今日记录</h3></div>
+      <details class="alcohol-today" id="alcohol-today-records">
+        <summary><span>今日记录</span><i>⌄</i></summary>
         <div class="alcohol-list" id="alcohol-list"></div>
-      </section>
+      </details>
       <section class="alcohol-calendar-card">
         <div class="alcohol-calendar-head">
           <button type="button" data-action="changeAlcoholCalendarMonth" data-args="[-1]" aria-label="上个月">‹</button>
@@ -2306,6 +2369,7 @@ var APP_ACTION_NAMES = {
   openAlcoholRecordForm: true,
   openAlcoholMenu: true,
   openAlcoholBackfillForm: true,
+  openAlcoholRecoveryStages: true,
   pickAlcoholType: true,
   saveAlcoholRecord: true,
   saveAlcoholBackfill: true,
@@ -2644,6 +2708,7 @@ byId('mask').addEventListener('click', closeSheet);
    应用版本记录
    ============================================================ */
 var APP_CHANGELOG = [
+  { version: '6.0.10', date: '2026-11-11', changes: ['酒记新增“距离上次饮酒”计时、身体恢复阶段和下一节点进度条。', '今日饮酒卡片改为展示不同单次纯酒精摄入量可能带来的身体影响。', '新增“查看全部身体状态”，可查看所有恢复节点、当前状态和剩余时间。', '今日饮酒记录改为默认折叠。'] },
   { version: '6.0.9', date: '2026-11-11', changes: ['酒记右上角新增“⋯”菜单，可进入“补记饮酒记录”选择过去的日期和时间补录。', '补记会校验时间不能晚于当前时刻，并在记录列表、当日详情和月历中正常显示。'] },
   { version: '6.0.8', date: '2026-11-11', changes: ['新增“酒记”：可记录酒种、酒精度数和饮用量，自动计算纯酒精克数。', '酒记页面显示本月累计和今日饮酒量，并提供酒精摄入知识；每次记录后显示本次摄入量和健康提示。', '月历标记有饮酒记录的日期，可查看、删除当天记录；完整备份升级为 v5 并包含酒记数据。', '功能页顺序调整为：训练、喝水、三餐、戒烟、待办、记账、酒记、提醒，底栏与左右滑动保持一致。'] },
   { version: '6.0.7', date: '2026-11-10', changes: ['周、月、年提醒在非提醒日现在默认显示划线状态。', '到提醒日恢复普通显示，当天确认完成后再划线；每天和一次性提醒保持原逻辑。'] },
@@ -3492,7 +3557,11 @@ function goPage(i){
   if (page === 3) renderMealPage();
   if (page === 6) renderLedgerPage();
   if (page === 7 && reminderData) renderReminderPage();
-  if (page === 8) renderAlcoholPage();
+  if (page === 8) {
+    var alcoholTodayRecords = byId('alcohol-today-records');
+    if (alcoholTodayRecords) alcoholTodayRecords.open = false;
+    renderAlcoholPage();
+  }
   if (page === 0) renderDashboard();
 }
 
@@ -4469,6 +4538,15 @@ var ALCOHOL_HEALTH_TIPS = [
   '如果正在服药、孕期或哺乳期，或存在肝脏疾病，应避免饮酒并咨询专业人员。',
   '少喝一点、慢一点，并搭配食物和饮水，比短时间大量饮酒更稳妥。'
 ];
+var ALCOHOL_RECOVERY_STAGES = [
+  { ms: 20 * 60 * 1000, label: '20 分钟后', text: '心率与循环逐渐从饮酒后的波动中平稳下来。' },
+  { ms: 12 * 60 * 60 * 1000, label: '12 小时后', text: '血液酒精通常已明显下降，补水和休息仍是重点。' },
+  { ms: 24 * 60 * 60 * 1000, label: '1 天后', text: '身体逐步补回水分，睡眠与精力可能开始恢复。' },
+  { ms: 3 * 24 * 60 * 60 * 1000, label: '3 天后', text: '睡眠节律、注意力和水分状态常开始改善。' },
+  { ms: 7 * 24 * 60 * 60 * 1000, label: '1 周后', text: '睡眠质量与白天精力通常更稳定。' },
+  { ms: 28 * 24 * 60 * 60 * 1000, label: '4 周后', text: '肝脏脂肪与血压等指标可能出现改善趋势。' },
+  { ms: 84 * 24 * 60 * 60 * 1000, label: '12 周后', text: '多项代谢指标可能进一步改善。' }
+];
 var alcoholViewDate = '';
 
 function alcoholDefaultState(){
@@ -4539,6 +4617,101 @@ function alcoholTotals(records){
   return { grams: Math.round(grams * 100) / 100 };
 }
 
+function latestAlcoholRecord(){
+  if (!alcoholData) return null;
+  var latest = null, latestTime = -Infinity;
+  each(alcoholData.records || [], function(record){
+    var time = new Date(record.createdAt).getTime();
+    if (isFinite(time) && time > latestTime) {
+      latest = record;
+      latestTime = time;
+    }
+  });
+  return latest;
+}
+
+function alcoholDurationText(ms, compact){
+  var seconds = Math.max(0, Math.floor(Number(ms) / 1000));
+  if (seconds < 60) return compact ? seconds + ' 秒' : Math.max(0, seconds) + ' 秒';
+  var minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return minutes + ' 分';
+  var hours = Math.floor(minutes / 60);
+  if (hours < 24) return hours + ' 小时 ' + (minutes % 60) + ' 分';
+  var days = Math.floor(hours / 24);
+  return days + ' 天 ' + (hours % 24) + ' 小时';
+}
+
+function renderAlcoholSobriety(){
+  var duration = byId('alcohol-sober-duration');
+  if (!duration) return;
+  var latest = latestAlcoholRecord();
+  if (!latest) {
+    setTxt('alcohol-sober-duration', '还没有记录');
+    setTxt('alcohol-sober-stage', '等待第一次记录');
+    setTxt('alcohol-sober-copy', '记录一次饮酒后，这里会从那个时间点开始计时。');
+    setTxt('alcohol-sober-next-title', '身体恢复节点');
+    setTxt('alcohol-sober-next', ALCOHOL_RECOVERY_STAGES[0].label + ' · ' + ALCOHOL_RECOVERY_STAGES[0].text);
+    var emptyBar = byId('alcohol-sober-progress');
+    if (emptyBar) emptyBar.style.width = '0%';
+    return;
+  }
+  var elapsed = Math.max(0, Date.now() - new Date(latest.createdAt).getTime());
+  var currentIdx = -1;
+  for (var i = 0; i < ALCOHOL_RECOVERY_STAGES.length; i++) {
+    if (elapsed >= ALCOHOL_RECOVERY_STAGES[i].ms) currentIdx = i;
+  }
+  var current = currentIdx >= 0 ? ALCOHOL_RECOVERY_STAGES[currentIdx] : {
+    label: '刚刚停下',
+    text: '先补水、休息，观察身体反应；不要继续饮酒。'
+  };
+  var next = ALCOHOL_RECOVERY_STAGES[currentIdx + 1];
+  setTxt('alcohol-sober-duration', alcoholDurationText(elapsed, false));
+  setTxt('alcohol-sober-stage', current.label);
+  setTxt('alcohol-sober-copy', current.text);
+  if (next) {
+    setTxt('alcohol-sober-next-title', '下一节点 · 还差 ' + alcoholDurationText(next.ms - elapsed, true));
+    setTxt('alcohol-sober-next', next.label + ' · ' + next.text);
+  } else {
+    setTxt('alcohol-sober-next-title', '全部恢复节点已走过');
+    setTxt('alcohol-sober-next', '继续保持，把睡眠、饮食和运动留给身体慢慢修复。');
+  }
+  var startMs = currentIdx >= 0 ? ALCOHOL_RECOVERY_STAGES[currentIdx].ms : 0;
+  var endMs = next ? next.ms : ALCOHOL_RECOVERY_STAGES[ALCOHOL_RECOVERY_STAGES.length - 1].ms;
+  var pct = next ? Math.min(1, Math.max(0, (elapsed - startMs) / (endMs - startMs))) : 1;
+  var bar = byId('alcohol-sober-progress');
+  if (bar) bar.style.width = (pct * 100).toFixed(1) + '%';
+}
+
+function openAlcoholRecoveryStages(){
+  var latest = latestAlcoholRecord();
+  var elapsed = latest ? Math.max(0, Date.now() - new Date(latest.createdAt).getTime()) : 0;
+  var currentIdx = -1;
+  if (latest) {
+    for (var i = 0; i < ALCOHOL_RECOVERY_STAGES.length; i++) {
+      if (elapsed >= ALCOHOL_RECOVERY_STAGES[i].ms) currentIdx = i;
+    }
+  }
+  var rows = ALCOHOL_RECOVERY_STAGES.map(function(stage, index){
+    var state = currentIdx >= 0 && index < currentIdx ? 'past' :
+      (index === currentIdx ? 'now' : 'future');
+    var status = state === 'past' ? '已走过' :
+      (state === 'now' ? '当前' :
+        (latest ? '还差 ' + alcoholDurationText(stage.ms - elapsed, true) : '记录后开始'));
+    return '<div class="alcohol-stage-row ' + state + '">' +
+      '<div><b>' + escHtml(stage.label) + '</b><small>' + escHtml(status) + '</small></div>' +
+      '<p>' + escHtml(stage.text) + '</p></div>';
+  }).join('');
+  openSheet(
+    '<h3>身体恢复状态</h3>' +
+    '<p>' + (latest ?
+      '距离上次饮酒 ' + escHtml(alcoholDurationText(elapsed, false)) + '。' :
+      '记录一次饮酒后，恢复节点会开始计时。') + '</p>' +
+    '<div class="alcohol-stage-list">' + rows + '</div>' +
+    '<p class="alcohol-sobriety-note">恢复速度受饮酒量、体重、睡眠和饮食影响；这些节点用于了解常见方向，不构成医疗建议。</p>' +
+    '<div class="row"><button class="primary" style="flex:1"' + actionAttrs('closeSheet') + '>知道了</button></div>'
+  );
+}
+
 function alcoholRecordHtml(record, showDate){
   var typeName = record.typeName || alcoholTypeMeta(record.type).name;
   return '<div class="alcohol-record"><span class="alcohol-record-time">' +
@@ -4597,6 +4770,7 @@ function renderAlcoholPage(){
   byId('alcohol-list').innerHTML = today.length ? today.map(function(record){
     return alcoholRecordHtml(record, false);
   }).join('') : '<div class="alcohol-empty">今天还没有饮酒记录<br>如果喝了，记一杯；如果没喝，也很好。</div>';
+  renderAlcoholSobriety();
   renderAlcoholCalendar();
   renderDashboard();
 }
@@ -9060,6 +9234,7 @@ function boot(){
   setInterval(function(){
     paintLiveTimers();
     paintMealCountdown();
+    if (page === 8) renderAlcoholSobriety();
   }, 1000);
   // 跨天检查（喝水）
   setInterval(function(){
