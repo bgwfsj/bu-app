@@ -554,6 +554,25 @@ async function run() {
       openAlcoholDay(todayKey);
       var dayRows = byId('sheet').querySelectorAll('.alcohol-day-row').length;
       closeSheet();
+      var past = new Date();
+      past.setDate(past.getDate() - 40);
+      var pastKey = alcoholDateKey(past);
+      openAlcoholBackfillForm();
+      byId('alcohol-backfill-date').value = pastKey;
+      byId('alcohol-backfill-time').value = '20:15';
+      pickAlcoholType('wine');
+      byId('alcohol-abv').value = '12';
+      byId('alcohol-volume').value = '200';
+      saveAlcoholBackfill();
+      var backfillFeedback = byId('sheet').textContent;
+      closeSheet();
+      openAlcoholMenu();
+      var menuBackfillLabel = byId('sheet').querySelector('[data-action="openAlcoholBackfillForm"] b').textContent.trim();
+      closeSheet();
+      var storedAfterBackfill = JSON.parse(localStorage.getItem(ALKEY));
+      var backfilled = storedAfterBackfill.records.filter(function(record){
+        return record.backfill && record.date === pastKey;
+      })[0];
       return {
         active: active,
         pagerLabel: pagerLabel,
@@ -566,10 +585,16 @@ async function run() {
         monthSummary: byId('alcohol-month-grams').textContent.trim(),
         monthGrams: monthGrams,
         knowledgeRows: byId('p-alcohol').querySelectorAll('.alcohol-knowledge div').length,
-        supplyLabel: byId('p-alcohol').querySelector('[data-action="goPage"][data-args="[0]"]').textContent.trim(),
+        menuLabel: byId('p-alcohol').querySelector('[data-action="openAlcoholMenu"]').textContent.trim(),
+        menuBackfillLabel: menuBackfillLabel,
         listRows: byId('alcohol-list').querySelectorAll('.alcohol-record').length,
         calendarFound: !!calendarRow,
         dayRows: dayRows,
+        backfillStored: !!backfilled,
+        backfillType: backfilled && backfilled.type,
+        backfillTime: backfilled && backfilled.time,
+        backfillGrams: backfilled && backfilled.alcoholGrams,
+        backfillFeedback: backfillFeedback.indexOf('已补记') >= 0,
         homeCopy: byId('home-alcohol-copy').textContent.trim()
       };
     })()`);
@@ -584,10 +609,16 @@ async function run() {
     assert.equal(alcohol.monthSummary, '17.8');
     assert.equal(alcohol.monthGrams, 17.75);
     assert.equal(alcohol.knowledgeRows, 4);
-    assert.equal(alcohol.supplyLabel, '补给');
+    assert.equal(alcohol.menuLabel, '⋯');
+    assert.equal(alcohol.menuBackfillLabel, '补记饮酒记录');
     assert.equal(alcohol.listRows, 1);
     assert.equal(alcohol.calendarFound, true);
     assert.equal(alcohol.dayRows, 1);
+    assert.equal(alcohol.backfillStored, true);
+    assert.equal(alcohol.backfillType, 'wine');
+    assert.equal(alcohol.backfillTime, '20:15');
+    assert.equal(alcohol.backfillGrams, 18.94);
+    assert.equal(alcohol.backfillFeedback, true);
     assert.equal(alcohol.homeCopy, '今天 17.8g 酒精');
 
     const settingsPage = await evaluate(cdp, `(function(){
@@ -689,8 +720,8 @@ async function run() {
       cleanupConfirmOpened: true,
       cleanupCalls: 1,
       aboutOpened: true,
-      changelogCount: 67,
-      aboutVersion: '6.0.8',
+      changelogCount: 68,
+      aboutVersion: '6.0.9',
       updateBackupExposed: true,
       updateCalls: 1,
       handledBack: true,
@@ -1753,12 +1784,12 @@ async function run() {
     assert.equal(restored.reminderArchived, 1);
     assert.equal(restored.ledgerRecords, 118);
     assert.equal(restored.mealRecords, 4);
-    assert.equal(restored.alcoholRecords, 1);
+    assert.equal(restored.alcoholRecords, 2);
     assert.ok(restored.quitDate > 0);
     assert.equal(restored.previousGoal, 2345);
     assert.equal(restored.previousReminders, 5);
     assert.equal(restored.previousMeals, 4);
-    assert.equal(restored.previousAlcohol, 1);
+    assert.equal(restored.previousAlcohol, 2);
     assert.equal(restored.previousHomeLayout, 'facet');
     assert.equal(restored.previousReminderArchived, 1);
     assert.equal(restored.previousTodoArchived, 2);

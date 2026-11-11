@@ -57,7 +57,8 @@ function normalizeAlcoholState(data){
       alcoholGrams: alcoholGramsFor(volume, abv),
       date: /^\d{4}-\d{2}-\d{2}$/.test(String(record.date || '')) ? record.date : alcoholDateKey(when),
       time: /^\d{2}:\d{2}$/.test(String(record.time || '')) ? record.time : (pad2(when.getHours()) + ':' + pad2(when.getMinutes())),
-      createdAt: when.toISOString()
+      createdAt: when.toISOString(),
+      backfill: !!record.backfill
     });
   });
   out.records.sort(function(a, b){ return String(a.createdAt).localeCompare(String(b.createdAt)); });
@@ -91,7 +92,8 @@ function alcoholRecordHtml(record, showDate){
   return '<div class="alcohol-record"><span class="alcohol-record-time">' +
     escHtml(showDate ? record.date.slice(5) + ' ' + record.time : record.time) + '</span>' +
     '<span class="alcohol-record-main"><b>' + escHtml(typeName) + ' · ' + record.volumeMl + ' ml · ' +
-    record.abv + '%</b><small>约 ' + record.alcoholGrams.toFixed(1) + ' g 纯酒精</small></span>' +
+    record.abv + '%</b><small>约 ' + record.alcoholGrams.toFixed(1) + ' g 纯酒精' +
+    (record.backfill ? ' · 补记' : '') + '</small></span>' +
     '<strong>' + record.alcoholGrams.toFixed(1) + 'g</strong></div>';
 }
 
@@ -182,6 +184,45 @@ function openAlcoholRecordForm(){
   updateAlcoholFormPreview();
 }
 
+function openAlcoholBackfillForm(){
+  var meta = alcoholTypeMeta(alcoholDraftType);
+  var now = new Date();
+  openSheet(
+    '<h3>补记饮酒</h3>' +
+    '<p>选择过去的日期和时间，再记录酒种、度数与饮用量。</p>' +
+    '<div class="alcohol-form-row"><div><label class="todo-form-label">日期</label>' +
+      '<input class="todo-form-input" id="alcohol-backfill-date" type="date" value="' + wTodayStr() + '" max="' + wTodayStr() + '"></div>' +
+      '<div><label class="todo-form-label">时间</label>' +
+      '<input class="todo-form-input" id="alcohol-backfill-time" type="time" value="' + pad2(now.getHours()) + ':' + pad2(now.getMinutes()) + '"></div></div>' +
+    '<label class="todo-form-label">酒种</label><div class="alcohol-type-grid" id="alcohol-type-grid">' +
+      alcoholFormTypeGrid() + '</div>' +
+    '<div class="alcohol-form-row"><div><label class="todo-form-label">酒精度数 %</label>' +
+      '<input class="todo-form-input" id="alcohol-abv" type="number" inputmode="decimal" min="0.1" max="95" step="0.1" value="' + meta.abv + '"></div>' +
+      '<div><label class="todo-form-label">饮用量 ml</label>' +
+      '<input class="todo-form-input" id="alcohol-volume" type="number" inputmode="numeric" min="1" max="3000" step="10" value="330"></div></div>' +
+    '<div class="alcohol-form-preview"><b id="alcohol-form-grams">约 0.0 g 纯酒精</b>' +
+      '<span>只记录纯酒精克数</span></div>' +
+    '<div class="row"><button class="ghost"' + actionAttrs('closeSheet') + '>取消</button>' +
+    '<button class="primary"' + actionAttrs('saveAlcoholBackfill') + '>补记</button></div>'
+  );
+  byId('alcohol-abv').addEventListener('input', updateAlcoholFormPreview);
+  byId('alcohol-volume').addEventListener('input', updateAlcoholFormPreview);
+  updateAlcoholFormPreview();
+}
+
+function openAlcoholMenu(){
+  openSheet(
+    '<h3>酒记</h3>' +
+    '<p>补录之前喝过的酒，记录仍会出现在对应日期和月历里。</p>' +
+    '<div class="settings-group alcohol-menu-group">' +
+      '<button class="settings-row" data-action="openAlcoholBackfillForm">' +
+        '<span><b>补记饮酒记录</b><small>选择过去的日期和时间</small></span><em>补记 ›</em>' +
+      '</button>' +
+    '</div>' +
+    '<div class="row"><button class="ghost" style="flex:1"' + actionAttrs('closeSheet') + '>取消</button></div>'
+  );
+}
+
 function pickAlcoholType(type){
   var meta = alcoholTypeMeta(type);
   alcoholDraftType = meta.id;
@@ -192,40 +233,81 @@ function pickAlcoholType(type){
   updateAlcoholFormPreview();
 }
 
-function saveAlcoholRecord(){
+function createAlcoholRecord(dateValue, timeValue, backfill){
   var meta = alcoholTypeMeta(alcoholDraftType);
   var abv = parseFloat(byId('alcohol-abv').value);
   var volume = parseInt(byId('alcohol-volume').value, 10);
-  if (!isFinite(abv) || abv <= 0 || abv > 95) { toast('请输入有效度数'); return; }
-  if (!isFinite(volume) || volume <= 0 || volume > 3000) { toast('请输入有效饮用量'); return; }
-  var now = new Date();
+  if (!isFinite(abv) || abv <= 0 || abv > 95) { toast('请输入有效度数'); return null; }
+  if (!isFinite(volume) || volume <= 0 || volume > 3000) { toast('请输入有效饮用量'); return null; }
+  var when;
+  if (dateValue || timeValue) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dateValue) || !/^\d{2}:\d{2}$/.test(timeValue)) {
+      toast('请选择补记日期和时间');
+      return null;
+    }
+    var dateParts = dateValue.split('-'), timeParts = timeValue.split(':');
+    when = new Date(Number(dateParts[0]), Number(dateParts[1]) - 1, Number(dateParts[2]),
+      Number(timeParts[0]), Number(timeParts[1]), 0, 0);
+    if (isNaN(when.getTime()) || when.getTime() > Date.now() + 60000) {
+      toast('不能补记未来的时间');
+      return null;
+    }
+  } else {
+    when = new Date();
+  }
   var record = {
-    id: 'alcohol_' + now.getTime().toString(36),
+    id: 'alcohol_' + when.getTime().toString(36) + '_' + Math.random().toString(36).slice(2, 6),
     type: meta.id,
     typeName: meta.name,
     abv: Math.round(abv * 10) / 10,
     volumeMl: volume,
     alcoholGrams: alcoholGramsFor(volume, abv),
-    date: alcoholDateKey(now),
-    time: pad2(now.getHours()) + ':' + pad2(now.getMinutes()),
-    createdAt: now.toISOString()
+    date: alcoholDateKey(when),
+    time: pad2(when.getHours()) + ':' + pad2(when.getMinutes()),
+    createdAt: when.toISOString(),
+    backfill: !!backfill
   };
   alcoholData.records.push(record);
   saveAlcoholState();
+  if (backfill) {
+    var currentMonth = new Date();
+    var targetMonth = new Date(when.getFullYear(), when.getMonth(), 1);
+    var currentMonthStart = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+    alcoholCalendarOffset = Math.min(0,
+      (targetMonth.getFullYear() - currentMonthStart.getFullYear()) * 12 +
+      targetMonth.getMonth() - currentMonthStart.getMonth());
+  }
   renderAlcoholPage();
-  var todayTotals = alcoholTotals(alcoholRecordsForDate(now));
-  var tip = ALCOHOL_HEALTH_TIPS[(now.getDate() + now.getHours() + alcoholData.records.length) % ALCOHOL_HEALTH_TIPS.length];
+  return record;
+}
+
+function showAlcoholRecordFeedback(record){
+  var when = new Date(record.createdAt);
+  var dayTotals = alcoholTotals(alcoholRecordsForDate(record.date));
+  var tip = ALCOHOL_HEALTH_TIPS[(when.getDate() + when.getHours() + alcoholData.records.length) % ALCOHOL_HEALTH_TIPS.length];
   openSheet(
-    '<h3>已记录 · ' + escHtml(record.typeName) + '</h3>' +
-    '<p>' + record.volumeMl + ' ml · ' + record.abv + '% · ' + record.time + '</p>' +
+    '<h3>' + (record.backfill ? '已补记' : '已记录') + ' · ' + escHtml(record.typeName) + '</h3>' +
+    '<p>' + escHtml(record.date) + ' · ' + record.volumeMl + ' ml · ' + record.abv + '% · ' + record.time + '</p>' +
     '<div class="alcohol-feedback-total"><b>' + record.alcoholGrams.toFixed(1) + ' g</b>' +
       '<span>本次纯酒精</span></div>' +
-    '<div class="alcohol-feedback-total"><b>' + todayTotals.grams.toFixed(1) + ' g</b>' +
-      '<span>今日累计纯酒精</span></div>' +
+    '<div class="alcohol-feedback-total"><b>' + dayTotals.grams.toFixed(1) + ' g</b>' +
+      '<span>当日累计纯酒精</span></div>' +
     '<div class="alcohol-feedback-tip"><b>健康提示</b><span>' + escHtml(tip) + '</span></div>' +
     '<div class="row"><button class="primary" style="flex:1"' + actionAttrs('closeSheet') + '>知道了</button></div>'
   );
-  toast('已记录 ' + record.typeName);
+  toast((record.backfill ? '已补记 ' : '已记录 ') + record.typeName);
+}
+
+function saveAlcoholRecord(){
+  var record = createAlcoholRecord(null, null, false);
+  if (record) showAlcoholRecordFeedback(record);
+}
+
+function saveAlcoholBackfill(){
+  var dateValue = byId('alcohol-backfill-date').value;
+  var timeValue = byId('alcohol-backfill-time').value;
+  var record = createAlcoholRecord(dateValue, timeValue, true);
+  if (record) showAlcoholRecordFeedback(record);
 }
 
 function deleteAlcoholRecord(id){
@@ -258,7 +340,8 @@ function openAlcoholDay(date){
     (records.length ? records.map(function(record){
       return '<div class="alcohol-day-row"><span><b>' + escHtml(record.typeName) + ' · ' +
         record.volumeMl + ' ml · ' + record.abv + '%</b><small>' + record.time +
-        ' · 约 ' + record.alcoholGrams.toFixed(1) + ' g</small></span><strong>' +
+        ' · 约 ' + record.alcoholGrams.toFixed(1) + ' g' + (record.backfill ? ' · 补记' : '') +
+        '</small></span><strong>' +
         record.alcoholGrams.toFixed(1) + 'g</strong><button' +
         actionAttrs('deleteAlcoholRecord', [record.id]) + '>删除</button></div>';
     }).join('') : '<div class="alcohol-empty">这一天没有饮酒记录</div>') +
