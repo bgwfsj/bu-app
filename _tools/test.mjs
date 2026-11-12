@@ -503,7 +503,7 @@ async function run() {
     assert.equal(meals.intervalGoodGap, 210);
     assert.equal(meals.intervalGoodTitle, '吃得规律');
     assert.equal(meals.intervalShortGap, 45);
-    assert.equal(meals.intervalShortTitle, '时间刚好，间隔略近');
+    assert.equal(meals.intervalShortTitle, '间隔有点近');
     assert.equal(meals.backfillTitle, '补记 · 晚餐 · 18:00');
     assert.equal(meals.storedRecords, 4);
     assert.equal(meals.rowCount, 1);
@@ -751,8 +751,8 @@ async function run() {
       cleanupConfirmOpened: true,
       cleanupCalls: 1,
       aboutOpened: true,
-      changelogCount: 70,
-      aboutVersion: '6.0.11',
+      changelogCount: 71,
+      aboutVersion: '6.0.12',
       updateBackupExposed: true,
       updateCalls: 1,
       handledBack: true,
@@ -1888,3 +1888,4 @@ run().then(
     process.exit(1);
   }
 );
+

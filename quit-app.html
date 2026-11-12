@@ -2704,6 +2704,7 @@ byId('mask').addEventListener('click', closeSheet);
    应用版本记录
    ============================================================ */
 var APP_CHANGELOG = [
+  { version: '6.0.12', date: '2026-11-12', changes: ['三餐的间隔建议改为按具体餐次判断：早餐到午餐常见 4–6 小时、午餐到晚餐常见 4.5–7 小时、午餐到下午茶常见 1.5–3 小时、晚餐到夜宵常见 2–4 小时，隔夜则按一整夜判断，不再使用统一阈值。', '规律判断同时考虑理想就餐时段与上一顿间隔：间隔过近（例如早餐后 2 小时就吃午餐）会标记为不规律，圆点为黄色并提示“间隔有点近”。', '记录弹框会说明两顿之间的常见间隔，旧记录打开后会自动按新规则重新评估。'] },
   { version: '6.0.11', date: '2026-11-11', changes: ['三餐今日记录前的圆点改为按时间判断：理想就餐时段内为绿色，不在理想时段为黄色。', '下午茶、夜宵等不参与正餐规律统计的记录也使用黄色圆点。'] },
   { version: '6.0.10', date: '2026-11-11', changes: ['酒记新增“距离上次饮酒”计时、身体恢复阶段和下一节点进度条。', '今日饮酒卡片改为展示不同单次纯酒精摄入量可能带来的身体影响。', '新增“查看全部身体状态”，可查看所有恢复节点、当前状态和剩余时间。', '今日饮酒记录改为默认折叠。'] },
   { version: '6.0.9', date: '2026-11-11', changes: ['酒记右上角新增“⋯”菜单，可进入“补记饮酒记录”选择过去的日期和时间补录。', '补记会校验时间不能晚于当前时刻，并在记录列表、当日详情和月历中正常显示。'] },
@@ -4040,6 +4041,26 @@ var MEAL_TIPS = {
   ]
 };
 
+var MEAL_GAP_RULES = {
+  'breakfast>lunch':  { short: 210, long: 390, label: '早餐到午餐', range: '4–6 小时' },
+  'breakfast>tea':    { short: 210, long: 480, label: '早餐到下午茶', range: '3–7 小时' },
+  'breakfast>dinner': { short: 330, long: 600, label: '早餐到晚餐', range: '6–10 小时' },
+  'breakfast>late':   { short: 540, long: 960, label: '早餐到夜宵', range: '9–16 小时' },
+  'lunch>tea':        { short: 90,  long: 240, label: '午餐到下午茶', range: '1.5–3 小时' },
+  'lunch>dinner':     { short: 270, long: 480, label: '午餐到晚餐', range: '4.5–7 小时' },
+  'lunch>late':       { short: 420, long: 720, label: '午餐到夜宵', range: '7–12 小时' },
+  'lunch>breakfast':  { short: 780, long: 1260, label: '午餐到早餐', range: '13–20 小时', overnight: true },
+  'tea>dinner':       { short: 120, long: 300, label: '下午茶到晚餐', range: '2–4 小时' },
+  'tea>late':         { short: 240, long: 540, label: '下午茶到夜宵', range: '4–8 小时' },
+  'tea>breakfast':    { short: 600, long: 1080, label: '下午茶到早餐', range: '10–18 小时', overnight: true },
+  'tea>lunch':        { short: 600, long: 1080, label: '下午茶到午餐', range: '10–18 小时', overnight: true },
+  'dinner>late':      { short: 90,  long: 300, label: '晚餐到夜宵', range: '2–4 小时' },
+  'dinner>breakfast': { short: 540, long: 960, label: '晚餐到早餐', range: '10–15 小时', overnight: true },
+  'dinner>lunch':     { short: 780, long: 1260, label: '晚餐到午餐', range: '13–20 小时', overnight: true },
+  'late>breakfast':   { short: 480, long: 900, label: '夜宵到早餐', range: '8–14 小时', overnight: true },
+  'late>lunch':       { short: 720, long: 1200, label: '夜宵到午餐', range: '12–19 小时', overnight: true },
+  'late>dinner':      { short: 660, long: 1260, label: '夜宵到晚餐', range: '11–20 小时', overnight: true }
+};
 function mealDefaultState(){
   return { schemaVersion: 1, records: [] };
 }
@@ -4080,11 +4101,51 @@ function mealRecordDate(record){
   return new Date();
 }
 
-function mealIsRegular(type, date){
+function mealInIdealWindow(type, date){
   var meta = mealTypeMeta(type);
   if (!meta.primary) return false;
   var minutes = date.getHours() * 60 + date.getMinutes();
   return minutes >= meta.idealStart && minutes <= meta.idealEnd;
+}
+
+function mealGapInfo(prevType, curType, gap){
+  var rule = MEAL_GAP_RULES[prevType + '>' + curType];
+  if (!rule) {
+    rule = prevType === curType ?
+      { short: 120, long: 360, label: '同类餐次', range: '2–6 小时', same: true } :
+      { short: 120, long: 480, label: mealTypeMeta(prevType).name + '到' + mealTypeMeta(curType).name, range: '2–8 小时' };
+  }
+  if (gap < rule.short) return { band: 'short', rule: rule };
+  if (gap > rule.long) return { band: 'long', rule: rule };
+  return { band: 'good', rule: rule };
+}
+
+function mealGapText(prevType, curType, gap, info){
+  var rule = info.rule;
+  var prevName = mealTypeMeta(prevType).name;
+  if (rule.same) {
+    if (info.band === 'short') return '同一个' + prevName + '相隔不到 2 小时，可能是重复记录，检查一下。';
+    if (info.band === 'long') return '同一个' + prevName + '又记了一次，相隔约 ' + mealDurationLabel(gap) + '。';
+    return '同一个' + prevName + '相隔约 ' + mealDurationLabel(gap) + '。';
+  }
+  if (info.band === 'short') {
+    return '距上一顿（' + prevName + '）只有 ' + mealDurationLabel(gap) + '，' + rule.label + '常见间隔是 ' + rule.range + '，这次偏近，不饿的话可以晚一点再吃。';
+  }
+  if (info.band === 'long') {
+    return '距上一顿（' + prevName + '）约 ' + mealDurationLabel(gap) + '，比' + rule.label + '常见的 ' + rule.range + '久一些，慢慢吃，别一次吃得太急。';
+  }
+  if (rule.overnight) {
+    return '距上一顿（' + prevName + '）约 ' + mealDurationLabel(gap) + '，经过一整夜，正是' + rule.label + '常见的间隔。';
+  }
+  return '距上一顿（' + prevName + '）约 ' + mealDurationLabel(gap) + '，落在' + rule.label + '常见的 ' + rule.range + '里。';
+}
+
+function mealIsRegular(type, date, previous){
+  if (!mealInIdealWindow(type, date)) return false;
+  var gap = mealGapMinutes(previous, date);
+  if (gap == null) return true;
+  var info = mealGapInfo(previous ? previous.type : null, type, gap);
+  return info.band !== 'short';
 }
 
 function mealDurationLabel(minutes){
@@ -4115,12 +4176,13 @@ function mealPreviousRecord(when, records){
 
 function mealMomentReview(type, date, previous){
   var meta = mealTypeMeta(type);
-  var regular = mealIsRegular(type, date);
   var gap = mealGapMinutes(previous, date);
+  var gapInfo = gap == null ? null : mealGapInfo(previous ? previous.type : null, type, gap);
+  var regular = mealIsRegular(type, date, previous);
   var detail = '';
   if (meta.primary) {
     detail = meta.name + '理想时间是 ' + meta.idealLabel + '，这次在 ' + mealClock(date) +
-      (regular ? '，时间在范围内。' : '，不在理想时段。');
+      (mealInIdealWindow(type, date) ? '，时间在范围内。' : '，不在理想时段。');
   } else if (type === 'tea') {
     detail = '这是一顿下午茶，不计入三顿正餐的规律统计。';
   } else {
@@ -4129,17 +4191,14 @@ function mealMomentReview(type, date, previous){
   if (gap == null) {
     detail += ' 目前还没有更早的用餐记录。';
   } else {
-    var gapText = gap < 120 ? '间隔偏短，下一顿可以按饥饿感适量调整。' :
-      gap > 330 ? '距上一顿有些久，慢一点吃，别一次吃得太急。' :
-      '与上一顿的间隔比较从容。';
-    detail += ' 距上一顿约 ' + mealDurationLabel(gap) + '，' + gapText;
+    detail += ' ' + mealGapText(previous.type, type, gap, gapInfo);
   }
   var title;
   if (type === 'late') title = '夜宵时间';
   else if (type === 'tea') title = '下午加个餐';
-  else if (regular && gap != null && gap < 120) title = '时间刚好，间隔略近';
   else if (regular) title = '吃得规律';
-  else if (gap != null && gap > 330) title = '间隔有些长';
+  else if (gapInfo && gapInfo.band === 'short') title = '间隔有点近';
+  else if (gapInfo && gapInfo.band === 'long') title = '间隔有些久';
   else title = '这次不在理想时段';
   return { tone: regular ? 'good' : 'warn', title: title, detail: detail, regular: regular, gapMinutes: gap };
 }
