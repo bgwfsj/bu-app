@@ -134,6 +134,11 @@ body[data-page="meals"]::before{
   position:relative;display:flex;align-items:center;justify-content:center;border-radius:8px;
   color:#71827c;font-size:10px;border:1px solid transparent
 }
+button.meal-cal-day{
+  appearance:none;-webkit-appearance:none;background:transparent;font:inherit;
+  text-align:center;padding:0;cursor:pointer;width:100%
+}
+button.meal-cal-day:active{background:rgba(13,32,45,.06)}
 .meal-cal-day.today{border-color:rgba(13,32,45,.13)}
 .meal-cal-day b{font-weight:400}
 .meal-cal-status{position:absolute;left:50%;bottom:3px;transform:translateX(-50%);font-style:normal}
@@ -159,6 +164,27 @@ body[data-page="meals"]::before{
 .meal-calendar-legend i.red{background:#d47d72}
 .meal-calendar-legend i.none{width:auto;height:auto;color:#9ba7a3;font-size:9px}
 .meal-calendar-legend i.late{background:#7189b0}
+.meal-day-summary{
+  display:flex;align-items:center;gap:8px;margin:2px 0 12px;
+  color:#8c9b96;font-size:10.5px;letter-spacing:.02em
+}
+.meal-day-summary i{width:7px;height:7px;border-radius:50%;font-style:normal}
+.meal-day-summary i.green{background:#48ac7c}
+.meal-day-summary i.yellow{background:#d2a744}
+.meal-day-summary i.red{background:#d47d72}
+.meal-day-summary i.none{width:auto;height:auto;color:#9ba7a3;font-size:10px;line-height:1;background:transparent}
+.meal-day-row{
+  display:flex;flex-wrap:wrap;align-items:flex-start;gap:3px 9px;
+  padding:11px 13px;margin-bottom:8px;border:1px solid var(--line2);border-radius:12px;background:#fff
+}
+.meal-day-dot{width:7px;height:7px;border-radius:50%;flex:none;margin-top:5px}
+.meal-day-dot.good{background:#48ac7c}
+.meal-day-dot.warn{background:#d2a744}
+.meal-day-main{display:flex;flex-direction:column;gap:3px;flex:1;min-width:0}
+.meal-day-main b{font-size:12.5px;color:#24332e;font-weight:500}
+.meal-day-main b i{font-style:normal;font-size:9px;color:#a48a4e;background:rgba(210,167,68,.12);padding:1px 5px;border-radius:6px;margin-left:6px}
+.meal-day-main small{font-size:10.5px;color:#71827c}
+.meal-day-row p{margin:0;width:100%;padding-left:16px;font-size:10.5px;line-height:1.7;color:#8c9b96}
 .meal-feedback-state{
   display:inline-block;margin:1px 0 4px;padding:4px 8px;border-radius:999px;
   background:rgba(10,168,122,.09);color:#218c6c;font-size:10.5px;letter-spacing:.06em

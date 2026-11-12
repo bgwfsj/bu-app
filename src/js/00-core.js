@@ -162,6 +162,7 @@ var APP_ACTION_NAMES = {
   openMealBackfill: true,
   saveMealBackfill: true,
   changeMealCalendarMonth: true,
+  openMealDay: true,
   deleteMealRecord: true,
   openReminderForm: true,
   setReminderMode: true,

@@ -115,13 +115,18 @@ function mealInIdealWindow(type, date){
   return minutes >= meta.idealStart && minutes <= meta.idealEnd;
 }
 
-function mealGapInfo(prevType, curType, gap){
+function mealGapRule(prevType, curType){
   var rule = MEAL_GAP_RULES[prevType + '>' + curType];
   if (!rule) {
     rule = prevType === curType ?
       { short: 120, long: 360, label: '同类餐次', range: '2–6 小时', same: true } :
       { short: 120, long: 480, label: mealTypeMeta(prevType).name + '到' + mealTypeMeta(curType).name, range: '2–8 小时' };
   }
+  return rule;
+}
+
+function mealGapInfo(prevType, curType, gap){
+  var rule = mealGapRule(prevType, curType);
   if (gap < rule.short) return { band: 'short', rule: rule };
   if (gap > rule.long) return { band: 'long', rule: rule };
   return { band: 'good', rule: rule };
@@ -188,8 +193,12 @@ function mealMomentReview(type, date, previous){
   var regular = mealIsRegular(type, date, previous);
   var detail = '';
   if (meta.primary) {
+    var inWindow = mealInIdealWindow(type, date);
     detail = meta.name + '理想时间是 ' + meta.idealLabel + '，这次在 ' + mealClock(date) +
-      (mealInIdealWindow(type, date) ? '，时间在范围内。' : '，不在理想时段。');
+      (inWindow ? '，时间在范围内。' : '，不在理想时段。');
+    if (!inWindow && gapInfo && gapInfo.band === 'good') {
+      detail += ' 上一顿比较晚，这一顿顺延一些也合理。';
+    }
   } else if (type === 'tea') {
     detail = '这是一顿下午茶，不计入三顿正餐的规律统计。';
   } else {
@@ -206,6 +215,7 @@ function mealMomentReview(type, date, previous){
   else if (regular) title = '吃得规律';
   else if (gapInfo && gapInfo.band === 'short') title = '间隔有点近';
   else if (gapInfo && gapInfo.band === 'long') title = '间隔有些久';
+  else if (gapInfo && gapInfo.band === 'good') title = '时间略晚，间隔合适';
   else title = '这次不在理想时段';
   return { tone: regular ? 'good' : 'warn', title: title, detail: detail, regular: regular, gapMinutes: gap };
 }
@@ -314,25 +324,85 @@ function mealNextTargetAt(when, sourceRecords){
 
 function mealCountdownTargetAt(when, sourceRecords){
   when = when instanceof Date ? when : new Date(when || Date.now());
+  var records = sourceRecords || (mealData ? mealData.records : []);
   var minutes = when.getHours() * 60 + when.getMinutes();
+  var today = mealDateKey(when);
+  var eaten = {};
+  each(records, function(record){
+    if (record.date === today) eaten[record.type] = true;
+  });
+  var previous = mealPreviousRecord(when, records);
+
+  function slotStart(meta){
+    return new Date(when.getFullYear(), when.getMonth(), when.getDate(), 0, meta.idealStart, 0, 0);
+  }
+  function slotEnd(meta){
+    return new Date(when.getFullYear(), when.getMonth(), when.getDate(), 0, meta.idealEnd, 0, 0);
+  }
+  function earliestGood(meta){
+    if (!previous) return slotStart(meta);
+    var byGap = new Date(mealRecordDate(previous).getTime() +
+      mealGapRule(previous.type, meta.id).short * 60000);
+    return byGap.getTime() > slotStart(meta).getTime() ? byGap : slotStart(meta);
+  }
+  function gapReason(meta){
+    var rule = mealGapRule(previous.type, meta.id);
+    return rule.label + '常见间隔是 ' + rule.range;
+  }
+
+  var current = null;
   for (var i = 0; i < MEAL_TYPES.length; i++) {
-    var current = MEAL_TYPES[i];
-    if (!current.primary || minutes < current.idealStart || minutes > current.idealEnd) continue;
-    var start = new Date(when.getFullYear(), when.getMonth(), when.getDate(), 0, current.idealStart, 0, 0);
-    var end = new Date(when.getFullYear(), when.getMonth(), when.getDate(), 0, current.idealEnd, 0, 0);
+    var t = MEAL_TYPES[i];
+    if (!t.primary || minutes < t.idealStart || minutes > t.idealEnd || eaten[t.id]) continue;
+    current = t;
+    break;
+  }
+
+  if (current) {
+    var earliest = earliestGood(current);
+    if (earliest.getTime() <= when.getTime()) {
+      return {
+        type: current.id,
+        name: current.name,
+        target: slotEnd(current),
+        from: slotStart(current),
+        window: '理想 ' + current.idealLabel,
+        hint: '现在正处在' + current.name + '的理想时段，慢慢吃，不必赶时间。',
+        currentWindow: true,
+        intervalWait: false,
+        tomorrow: false
+      };
+    }
     return {
       type: current.id,
       name: current.name,
-      target: end,
-      from: start,
+      target: earliest,
+      from: slotStart(current),
       window: '理想 ' + current.idealLabel,
-      hint: '现在正处在' + current.name + '的理想时段，慢慢吃，不必赶时间。',
-      currentWindow: true,
+      hint: '上一顿刚吃完不久，' + gapReason(current) + '，建议等到 ' +
+        mealClock(earliest) + ' 左右再吃，间隔会更从容。',
+      currentWindow: false,
+      intervalWait: true,
       tomorrow: false
     };
   }
-  var next = mealNextTargetAt(when, sourceRecords);
+
+  var next = mealNextTargetAt(when, records);
+  var target = next.target;
+  var hint = next.hint;
+  if (previous) {
+    var rule = mealGapRule(previous.type, next.type);
+    var byGap = new Date(mealRecordDate(previous).getTime() + rule.short * 60000);
+    if (byGap.getTime() > target.getTime()) {
+      target = byGap;
+      hint = rule.label + '常见间隔是 ' + rule.range + '，建议等到 ' +
+        mealClock(target) + ' 左右再吃，间隔更从容。';
+    }
+  }
+  next.target = target;
+  next.hint = hint;
   next.currentWindow = false;
+  next.intervalWait = false;
   return next;
 }
 
@@ -351,10 +421,11 @@ function paintMealCountdown(){
   var next = mealCountdownTargetAt(now);
   setTxt('meal-top-date', (now.getMonth() + 1) + '月' + now.getDate() + '日 · 周' + ['日', '一', '二', '三', '四', '五', '六'][now.getDay()]);
   setTxt('meal-record-hint', '将记为' + current.name);
-  setTxt('meal-next-label', next.currentWindow ? '距离当前理想就餐时间结束' : '距离下一顿最佳时间');
+  setTxt('meal-next-label', next.currentWindow ? '距离当前理想就餐时间结束' :
+    (next.intervalWait ? '距离' + next.name + '最佳时间' : '距离下一顿最佳时间'));
   setTxt('meal-next-name', next.name);
   setTxt('meal-next-timer', mealCountdownText(next.target.getTime() - now.getTime()));
-  setTxt('meal-next-window', next.window);
+  setTxt('meal-next-window', next.intervalWait ? next.window + ' · 建议 ' + mealClock(next.target) + ' 起' : next.window);
   setTxt('meal-next-hint', next.hint);
   var span = Math.max(1, next.target.getTime() - next.from.getTime());
   var elapsed = Math.max(0, Math.min(span, now.getTime() - next.from.getTime()));
@@ -463,10 +534,11 @@ function renderMealCalendar(){
     var day = new Date(year, monthIndex, dayNum);
     var info = mealDayGrade(day);
     var isToday = mealDateKey(day) === wTodayStr();
-    html += '<span class="meal-cal-day' + (isToday ? ' today' : '') + '">' +
+    html += '<button type="button" class="meal-cal-day' + (isToday ? ' today' : '') + '"' +
+      actionAttrs('openMealDay', [mealDateKey(day)]) + '>' +
       '<b>' + dayNum + '</b>' +
       (info.grade ? '<i class="meal-cal-status ' + info.grade + '">' + (info.grade === 'none' ? '×' : '') + '</i>' : '') +
-      (info.late ? '<i class="meal-cal-late" title="夜宵"></i>' : '') + '</span>';
+      (info.late ? '<i class="meal-cal-late" title="夜宵"></i>' : '') + '</button>';
   }
   grid.innerHTML = html;
 }
@@ -474,6 +546,47 @@ function renderMealCalendar(){
 function changeMealCalendarMonth(delta){
   mealCalendarOffset = Math.min(0, mealCalendarOffset + (Number(delta) || 0));
   renderMealCalendar();
+}
+
+function openMealDay(dateKey){
+  var parts = String(dateKey || '').split('-');
+  if (parts.length !== 3) return;
+  var day = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+  if (isNaN(day.getTime())) return;
+  var all = (mealData ? mealData.records : []).slice().sort(function(a, b){
+    return String(a.createdAt).localeCompare(String(b.createdAt));
+  });
+  var dayRecords = mealRecordsForDate(day).slice().sort(function(a, b){
+    return String(b.createdAt).localeCompare(String(a.createdAt));
+  });
+  var primary = dayRecords.filter(function(record){ return mealTypeMeta(record.type).primary; });
+  var regularCount = primary.filter(function(record){ return record.regular; }).length;
+  var grade = mealDayGrade(day);
+  var rows = dayRecords.map(function(record){
+    var meta = mealTypeMeta(record.type);
+    var prev = null;
+    for (var i = 0; i < all.length; i++) {
+      if (all[i].id === record.id) {
+        if (i > 0) prev = all[i - 1];
+        break;
+      }
+    }
+    var review = mealMomentReview(record.type, mealRecordDate(record), prev);
+    return '<div class="meal-day-row">' +
+      '<span class="meal-day-dot ' + (record.regular ? 'good' : 'warn') + '"></span>' +
+      '<span class="meal-day-main"><b>' + escHtml(meta.name) + ' · ' + escHtml(record.time) +
+        (record.backfill ? '<i>补记</i>' : '') + '</b><small>' + escHtml(review.title) +
+        '</small></span><p>' + escHtml(review.detail) + '</p></div>';
+  }).join('');
+  openSheet(
+    '<h3>' + (day.getMonth() + 1) + '月' + day.getDate() + '日 · 三餐</h3>' +
+    (dayRecords.length ?
+      '<div class="meal-day-summary"><i class="' + (grade.grade === 'none' ? 'none' : grade.grade) + '">' +
+        (grade.grade === 'none' ? '×' : '') + '</i>正餐 ' + primary.length + '/3 · 规律 ' +
+        regularCount + '</div>' : '') +
+    (rows || '<div class="meal-empty">这一天没有三餐记录</div>') +
+    '<div class="row"><button class="ghost" style="flex:1"' + actionAttrs('closeSheet') + '>关闭</button></div>'
+  );
 }
 
 function renderMealPage(){

@@ -6,7 +6,7 @@
 
 - 应用名：补
 - 包名：`com.quitsmoke.app`
-- 当前版本：6.0.12
+- 当前版本：6.0.13
 - 最低 Android：API 24
 - Target SDK：34
 - 仓库：`bgwfsj/bu-app`（公开）

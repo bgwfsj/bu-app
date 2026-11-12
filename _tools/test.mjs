@@ -367,12 +367,30 @@ async function run() {
       var intervalShort = mealMomentReview('lunch', todayAt(11, 30), {
         createdAt: todayAt(10, 45).toISOString()
       });
+      var intervalWaitLunch = mealCountdownTargetAt(new Date(2026, 10, 9, 11, 30), [{
+        type: 'breakfast', createdAt: '2026-11-09T09:00:00'
+      }]);
+      var windowOkLunch = mealCountdownTargetAt(new Date(2026, 10, 9, 12, 30), [{
+        type: 'breakfast', createdAt: '2026-11-09T09:00:00'
+      }]);
+      var intervalDinner = mealCountdownTargetAt(new Date(2026, 10, 9, 15, 0), [{
+        type: 'lunch', createdAt: '2026-11-09T14:00:00'
+      }]);
+      var lateButOk = mealMomentReview('lunch', new Date(2026, 10, 9, 13, 30), {
+        type: 'breakfast', createdAt: '2026-11-09T09:30:00'
+      });
       var backfillDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
       openMealBackfill();
       byId('meal-backfill-date').value = mealDateKey(backfillDay);
       byId('meal-backfill-time').value = '18:00';
       saveMealBackfill();
       var backfillTitle = byId('sheet').querySelector('h3').textContent.trim();
+      closeSheet();
+      openMealDay(wTodayStr());
+      var dayRows = byId('sheet').querySelectorAll('.meal-day-row').length;
+      var dayGoodDots = byId('sheet').querySelectorAll('.meal-day-dot.good').length;
+      var dayWarnDots = byId('sheet').querySelectorAll('.meal-day-dot.warn').length;
+      var dayHasDetail = !!byId('sheet').querySelector('.meal-day-row p');
       closeSheet();
       var stored = JSON.parse(localStorage.getItem('meals_app_v1'));
       var rowCount = byId('meal-list').querySelectorAll('.meal-entry').length;
@@ -397,6 +415,7 @@ async function run() {
       var todayGrade = mealDayGrade(todayAt(12, 0));
       mealCalendarOffset = 0;
       renderMealCalendar();
+      var calendarDayClickable = !!document.querySelector('.meal-cal-day[data-action="openMealDay"]');
       var todayCell = byId('meal-calendar-grid').querySelector('.meal-cal-day.today');
       var calendarRedX = !!todayCell.querySelector('.meal-cal-status.red') &&
         !todayCell.querySelector('.meal-cal-status.none');
@@ -438,6 +457,21 @@ async function run() {
         intervalGoodTitle: intervalGood.title,
         intervalShortGap: intervalShort.gapMinutes,
         intervalShortTitle: intervalShort.title,
+        intervalWaitLunchType: intervalWaitLunch.type,
+        intervalWaitLunchWait: intervalWaitLunch.intervalWait,
+        intervalWaitLunchRemain: intervalWaitLunch.target.getTime() - new Date(2026, 10, 9, 11, 30).getTime(),
+        intervalWaitLunchHint: intervalWaitLunch.hint,
+        windowOkLunchMode: windowOkLunch.currentWindow,
+        windowOkLunchRemain: windowOkLunch.target.getTime() - new Date(2026, 10, 9, 12, 30).getTime(),
+        intervalDinnerRemain: intervalDinner.target.getTime() - new Date(2026, 10, 9, 15, 0).getTime(),
+        intervalDinnerHint: intervalDinner.hint,
+        lateButOkTitle: lateButOk.title,
+        lateButOkRegular: lateButOk.regular,
+        dayRows: dayRows,
+        dayGoodDots: dayGoodDots,
+        dayWarnDots: dayWarnDots,
+        dayHasDetail: dayHasDetail,
+        calendarDayClickable: calendarDayClickable,
         backfillTitle: backfillTitle,
         storedRecords: stored.records.length,
         rowCount: rowCount,
@@ -504,6 +538,21 @@ async function run() {
     assert.equal(meals.intervalGoodTitle, '吃得规律');
     assert.equal(meals.intervalShortGap, 45);
     assert.equal(meals.intervalShortTitle, '间隔有点近');
+    assert.equal(meals.intervalWaitLunchType, 'lunch');
+    assert.equal(meals.intervalWaitLunchWait, true);
+    assert.equal(meals.intervalWaitLunchRemain, 60 * 60000);
+    assert.ok(meals.intervalWaitLunchHint.indexOf('早餐到午餐') >= 0);
+    assert.equal(meals.windowOkLunchMode, true);
+    assert.equal(meals.windowOkLunchRemain, 30 * 60000);
+    assert.equal(meals.intervalDinnerRemain, 3.5 * 3600000);
+    assert.ok(meals.intervalDinnerHint.indexOf('午餐到晚餐') >= 0);
+    assert.equal(meals.lateButOkTitle, '时间略晚，间隔合适');
+    assert.equal(meals.lateButOkRegular, false);
+    assert.ok(meals.dayRows >= 3);
+    assert.ok(meals.dayGoodDots >= 1);
+    assert.ok(meals.dayWarnDots >= 2);
+    assert.equal(meals.dayHasDetail, true);
+    assert.equal(meals.calendarDayClickable, true);
     assert.equal(meals.backfillTitle, '补记 · 晚餐 · 18:00');
     assert.equal(meals.storedRecords, 4);
     assert.equal(meals.rowCount, 1);
@@ -751,8 +800,8 @@ async function run() {
       cleanupConfirmOpened: true,
       cleanupCalls: 1,
       aboutOpened: true,
-      changelogCount: 71,
-      aboutVersion: '6.0.12',
+      changelogCount: 72,
+      aboutVersion: '6.0.13',
       updateBackupExposed: true,
       updateCalls: 1,
       handledBack: true,
