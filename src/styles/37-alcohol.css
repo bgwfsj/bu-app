@@ -17,23 +17,49 @@ body[data-page="alcohol"]::before{
   background:linear-gradient(135deg,#5c4b66,#7f647e);color:#fff;font-size:13px;letter-spacing:.18em;cursor:pointer
 }
 .alcohol-sobriety{
-  flex:0 0 auto;margin:11px 0 14px;padding:13px 14px;border-radius:14px;
-  border:1px solid rgba(119,96,143,.14);background:rgba(255,255,255,.74)
+  flex:0 0 auto;position:relative;overflow:hidden;margin:11px 0 14px;padding:15px 16px 12px;border-radius:18px;
+  border:1px solid rgba(119,96,143,.15);background:linear-gradient(165deg,rgba(255,255,255,.94),rgba(248,244,251,.74))
 }
-.alcohol-sobriety-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
-.alcohol-sobriety-head span{font-size:10.5px;letter-spacing:.1em;color:#8f8193}
-.alcohol-sobriety-head b{font:500 15px var(--font-mono);color:#5d4d65;text-align:right}
-.alcohol-sobriety-stage{margin-top:10px;padding-top:10px;border-top:1px solid var(--line2)}
-.alcohol-sobriety-stage>b{display:block;font-size:12.5px;font-weight:500;letter-spacing:.06em;color:#6b556f}
-.alcohol-sobriety-stage p{margin:4px 0 0;font-size:10.5px;line-height:1.62;color:#8b7d8f}
-.alcohol-sobriety-next{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-top:11px}
-.alcohol-sobriety-next span{flex:0 0 auto;font-size:9.5px;letter-spacing:.07em;color:#a094a3}
-.alcohol-sobriety-next b{font-size:10.5px;line-height:1.55;font-weight:500;color:#78697d;text-align:right}
-.alcohol-sobriety-track{height:3px;margin-top:9px;border-radius:3px;background:rgba(119,96,143,.09);overflow:hidden}
-.alcohol-sobriety-track i{
-  display:block;width:0;height:100%;border-radius:3px;
-  background:linear-gradient(90deg,#9d7ca7,#d0a899);transition:width .6s ease
+.alcohol-sobriety::before{
+  content:'';position:absolute;top:-58px;right:-44px;width:170px;height:170px;border-radius:50%;
+  background:radial-gradient(closest-side,rgba(157,124,167,.15),transparent 72%);pointer-events:none
 }
+.alcohol-sobriety-head{position:relative;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.alcohol-sobriety-label{display:flex;align-items:center;gap:7px;font-size:10.5px;letter-spacing:.1em;color:#8f8193}
+.alcohol-sobriety-label i{
+  width:6px;height:6px;border-radius:50%;background:#9d7ca7;
+  box-shadow:0 0 0 3px rgba(157,124,167,.12),0 0 9px rgba(157,124,167,.5);
+  animation:alcoholPulse 2.6s ease-in-out infinite
+}
+@keyframes alcoholPulse{0%,100%{opacity:1}50%{opacity:.4}}
+.alcohol-sobriety-chip{
+  display:flex;align-items:center;max-width:150px;padding:4px 10px;border-radius:999px;
+  background:rgba(157,124,167,.12);border:1px solid rgba(157,124,167,.18)
+}
+.alcohol-sobriety-chip b{
+  font-size:10px;font-weight:500;letter-spacing:.05em;color:#71557f;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+}
+.alcohol-sobriety-main{position:relative;display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:9px}
+.alcohol-sobriety-dinfo{min-width:0}
+.alcohol-sobriety-duration{
+  display:block;font:600 27px var(--font-mono);line-height:1.16;letter-spacing:.005em;
+  background:linear-gradient(100deg,#65506f,#a0708f 58%,#c0937f);
+  -webkit-background-clip:text;background-clip:text;color:transparent
+}
+.alcohol-sobriety-copy{margin:6px 0 0;font-size:10.5px;line-height:1.6;color:#8b7d8f;max-width:212px}
+.alcohol-sobriety-ring{position:relative;flex:0 0 auto;width:80px;height:80px}
+.alcohol-sobriety-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.alcohol-sobriety-ring circle{fill:none;stroke-width:5;stroke-linecap:round}
+.alcohol-ring-track{stroke:rgba(119,96,143,.10)}
+.alcohol-ring-fill{stroke:url(#alcoholRingGrad);transition:stroke-dashoffset .8s cubic-bezier(.22,.61,.36,1)}
+.alcohol-sobriety-ring-center{position:absolute;inset:0;display:grid;place-content:center;text-align:center;pointer-events:none}
+.alcohol-sobriety-ring-center b{font:600 15px var(--font-mono);line-height:1;color:#6b4e74}
+.alcohol-sobriety-ring-center span{margin-top:3px;font-size:8px;letter-spacing:.06em;color:#a094a3}
+.alcohol-sobriety-next{position:relative;margin-top:11px;padding-top:10px;border-top:1px solid rgba(119,96,143,.09)}
+.alcohol-sobriety-next span{display:block;font-size:9.5px;letter-spacing:.07em;color:#a094a3}
+.alcohol-sobriety-next b{display:block;margin-top:3px;font-size:10.5px;line-height:1.55;font-weight:500;color:#78697d}
+.alcohol-sobriety-note{position:relative;margin:8px 0 0;font-size:9px;line-height:1.55;color:#a196a3}
 .alcohol-stage-link{
   margin:9px 0 0;padding:3px 0;border:0;background:transparent;
   color:#80688a;font-size:10px;letter-spacing:.07em;cursor:pointer
@@ -50,7 +76,6 @@ body[data-page="alcohol"]::before{
 .alcohol-stage-row small{display:block;margin-top:3px;font-size:9px;color:#a094a2}
 .alcohol-stage-row.now small{color:#7d6486}
 .alcohol-stage-row p{margin:0;font-size:10.5px;line-height:1.62;color:#847a86}
-.alcohol-sobriety-note{margin:8px 0 0;font-size:9px;line-height:1.55;color:#a196a3}
 .alcohol-today-card{
   flex:0 0 auto;margin:12px 0 16px;padding:13px;border-radius:14px;
   border:1px solid var(--line2);background:rgba(255,255,255,.78)

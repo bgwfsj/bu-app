@@ -602,7 +602,9 @@ async function run() {
       var knowledgeText = byId('p-alcohol').querySelector('.alcohol-knowledge').textContent;
       var soberDuration = byId('alcohol-sober-duration').textContent.trim();
       var soberStage = byId('alcohol-sober-stage').textContent.trim();
-      var soberProgress = parseFloat(byId('alcohol-sober-progress').style.width) || 0;
+      var soberRing = byId('alcohol-sober-ring');
+      var soberProgress = soberRing ? parseFloat(soberRing.style.strokeDashoffset) || 0 : 0;
+      var soberRingPct = byId('alcohol-sober-ring-pct').textContent.trim();
       openAlcoholRecoveryStages();
       var recoveryStageRows = byId('sheet').querySelectorAll('.alcohol-stage-row').length;
       closeSheet();
@@ -656,6 +658,7 @@ async function run() {
         soberDuration: soberDuration,
         soberStage: soberStage,
         soberProgress: soberProgress,
+        soberRingPct: soberRingPct,
         recoveryStageRows: recoveryStageRows,
         recoveryStagesLabel: byId('p-alcohol').querySelector('[data-action="openAlcoholRecoveryStages"]').textContent.trim(),
         menuLabel: byId('p-alcohol').querySelector('[data-action="openAlcoholMenu"]').textContent.trim(),
@@ -687,6 +690,7 @@ async function run() {
     assert.notEqual(alcohol.soberDuration, '还没有记录');
     assert.equal(alcohol.soberStage, '刚刚停下');
     assert.ok(alcohol.soberProgress >= 0);
+    assert.match(alcohol.soberRingPct, /^\d+%$/);
     assert.equal(alcohol.recoveryStageRows, 7);
     assert.equal(alcohol.recoveryStagesLabel, '查看全部身体状态');
     assert.equal(alcohol.menuLabel, '⋯');
@@ -800,8 +804,8 @@ async function run() {
       cleanupConfirmOpened: true,
       cleanupCalls: 1,
       aboutOpened: true,
-      changelogCount: 73,
-      aboutVersion: '6.0.14',
+      changelogCount: 74,
+      aboutVersion: '6.0.15',
       updateBackupExposed: true,
       updateCalls: 1,
       handledBack: true,

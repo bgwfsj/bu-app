@@ -1026,23 +1026,49 @@ body[data-page="alcohol"]::before{
   background:linear-gradient(135deg,#5c4b66,#7f647e);color:#fff;font-size:13px;letter-spacing:.18em;cursor:pointer
 }
 .alcohol-sobriety{
-  flex:0 0 auto;margin:11px 0 14px;padding:13px 14px;border-radius:14px;
-  border:1px solid rgba(119,96,143,.14);background:rgba(255,255,255,.74)
+  flex:0 0 auto;position:relative;overflow:hidden;margin:11px 0 14px;padding:15px 16px 12px;border-radius:18px;
+  border:1px solid rgba(119,96,143,.15);background:linear-gradient(165deg,rgba(255,255,255,.94),rgba(248,244,251,.74))
 }
-.alcohol-sobriety-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
-.alcohol-sobriety-head span{font-size:10.5px;letter-spacing:.1em;color:#8f8193}
-.alcohol-sobriety-head b{font:500 15px var(--font-mono);color:#5d4d65;text-align:right}
-.alcohol-sobriety-stage{margin-top:10px;padding-top:10px;border-top:1px solid var(--line2)}
-.alcohol-sobriety-stage>b{display:block;font-size:12.5px;font-weight:500;letter-spacing:.06em;color:#6b556f}
-.alcohol-sobriety-stage p{margin:4px 0 0;font-size:10.5px;line-height:1.62;color:#8b7d8f}
-.alcohol-sobriety-next{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-top:11px}
-.alcohol-sobriety-next span{flex:0 0 auto;font-size:9.5px;letter-spacing:.07em;color:#a094a3}
-.alcohol-sobriety-next b{font-size:10.5px;line-height:1.55;font-weight:500;color:#78697d;text-align:right}
-.alcohol-sobriety-track{height:3px;margin-top:9px;border-radius:3px;background:rgba(119,96,143,.09);overflow:hidden}
-.alcohol-sobriety-track i{
-  display:block;width:0;height:100%;border-radius:3px;
-  background:linear-gradient(90deg,#9d7ca7,#d0a899);transition:width .6s ease
+.alcohol-sobriety::before{
+  content:'';position:absolute;top:-58px;right:-44px;width:170px;height:170px;border-radius:50%;
+  background:radial-gradient(closest-side,rgba(157,124,167,.15),transparent 72%);pointer-events:none
 }
+.alcohol-sobriety-head{position:relative;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.alcohol-sobriety-label{display:flex;align-items:center;gap:7px;font-size:10.5px;letter-spacing:.1em;color:#8f8193}
+.alcohol-sobriety-label i{
+  width:6px;height:6px;border-radius:50%;background:#9d7ca7;
+  box-shadow:0 0 0 3px rgba(157,124,167,.12),0 0 9px rgba(157,124,167,.5);
+  animation:alcoholPulse 2.6s ease-in-out infinite
+}
+@keyframes alcoholPulse{0%,100%{opacity:1}50%{opacity:.4}}
+.alcohol-sobriety-chip{
+  display:flex;align-items:center;max-width:150px;padding:4px 10px;border-radius:999px;
+  background:rgba(157,124,167,.12);border:1px solid rgba(157,124,167,.18)
+}
+.alcohol-sobriety-chip b{
+  font-size:10px;font-weight:500;letter-spacing:.05em;color:#71557f;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+}
+.alcohol-sobriety-main{position:relative;display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:9px}
+.alcohol-sobriety-dinfo{min-width:0}
+.alcohol-sobriety-duration{
+  display:block;font:600 27px var(--font-mono);line-height:1.16;letter-spacing:.005em;
+  background:linear-gradient(100deg,#65506f,#a0708f 58%,#c0937f);
+  -webkit-background-clip:text;background-clip:text;color:transparent
+}
+.alcohol-sobriety-copy{margin:6px 0 0;font-size:10.5px;line-height:1.6;color:#8b7d8f;max-width:212px}
+.alcohol-sobriety-ring{position:relative;flex:0 0 auto;width:80px;height:80px}
+.alcohol-sobriety-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.alcohol-sobriety-ring circle{fill:none;stroke-width:5;stroke-linecap:round}
+.alcohol-ring-track{stroke:rgba(119,96,143,.10)}
+.alcohol-ring-fill{stroke:url(#alcoholRingGrad);transition:stroke-dashoffset .8s cubic-bezier(.22,.61,.36,1)}
+.alcohol-sobriety-ring-center{position:absolute;inset:0;display:grid;place-content:center;text-align:center;pointer-events:none}
+.alcohol-sobriety-ring-center b{font:600 15px var(--font-mono);line-height:1;color:#6b4e74}
+.alcohol-sobriety-ring-center span{margin-top:3px;font-size:8px;letter-spacing:.06em;color:#a094a3}
+.alcohol-sobriety-next{position:relative;margin-top:11px;padding-top:10px;border-top:1px solid rgba(119,96,143,.09)}
+.alcohol-sobriety-next span{display:block;font-size:9.5px;letter-spacing:.07em;color:#a094a3}
+.alcohol-sobriety-next b{display:block;margin-top:3px;font-size:10.5px;line-height:1.55;font-weight:500;color:#78697d}
+.alcohol-sobriety-note{position:relative;margin:8px 0 0;font-size:9px;line-height:1.55;color:#a196a3}
 .alcohol-stage-link{
   margin:9px 0 0;padding:3px 0;border:0;background:transparent;
   color:#80688a;font-size:10px;letter-spacing:.07em;cursor:pointer
@@ -1059,7 +1085,6 @@ body[data-page="alcohol"]::before{
 .alcohol-stage-row small{display:block;margin-top:3px;font-size:9px;color:#a094a2}
 .alcohol-stage-row.now small{color:#7d6486}
 .alcohol-stage-row p{margin:0;font-size:10.5px;line-height:1.62;color:#847a86}
-.alcohol-sobriety-note{margin:8px 0 0;font-size:9px;line-height:1.55;color:#a196a3}
 .alcohol-today-card{
   flex:0 0 auto;margin:12px 0 16px;padding:13px;border-radius:14px;
   border:1px solid var(--line2);background:rgba(255,255,255,.78)
@@ -2062,18 +2087,32 @@ body[data-page="fitness"]::before{
       <button class="alcohol-add" type="button" data-action="openAlcoholRecordForm">干杯</button>
       <section class="alcohol-sobriety" aria-live="polite">
         <div class="alcohol-sobriety-head">
-          <span>距离上次饮酒</span>
-          <b id="alcohol-sober-duration">还没有记录</b>
+          <span class="alcohol-sobriety-label"><i></i>距上次饮酒</span>
+          <span class="alcohol-sobriety-chip"><b id="alcohol-sober-stage">等待第一次记录</b></span>
         </div>
-        <div class="alcohol-sobriety-stage">
-          <b id="alcohol-sober-stage">等待第一次记录</b>
-          <p id="alcohol-sober-copy">记录一次饮酒后，这里会从那个时间点开始计时。</p>
+        <div class="alcohol-sobriety-main">
+          <div class="alcohol-sobriety-dinfo">
+            <b class="alcohol-sobriety-duration" id="alcohol-sober-duration">还没有记录</b>
+            <p class="alcohol-sobriety-copy" id="alcohol-sober-copy">记录一次饮酒后，这里会从那个时间点开始计时。</p>
+          </div>
+          <div class="alcohol-sobriety-ring">
+            <svg viewBox="0 0 84 84" aria-hidden="true">
+              <defs>
+                <linearGradient id="alcoholRingGrad" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#9d7ca7"/>
+                  <stop offset="100%" stop-color="#d0a899"/>
+                </linearGradient>
+              </defs>
+              <circle class="alcohol-ring-track" cx="42" cy="42" r="36"/>
+              <circle class="alcohol-ring-fill" id="alcohol-sober-ring" cx="42" cy="42" r="36" stroke-dasharray="226.19" stroke-dashoffset="226.19"/>
+            </svg>
+            <div class="alcohol-sobriety-ring-center"><b id="alcohol-sober-ring-pct">—</b><span>恢复进度</span></div>
+          </div>
         </div>
         <div class="alcohol-sobriety-next">
           <span id="alcohol-sober-next-title">身体恢复节点</span>
           <b id="alcohol-sober-next">20 分钟后 · 心率与循环逐步平稳</b>
         </div>
-        <div class="alcohol-sobriety-track"><i id="alcohol-sober-progress"></i></div>
         <button class="alcohol-stage-link" type="button" data-action="openAlcoholRecoveryStages">查看全部身体状态</button>
         <p class="alcohol-sobriety-note">恢复速度受饮酒量、体重、睡眠和饮食影响，这里展示的是常见恢复方向。</p>
       </section>
@@ -2733,6 +2772,7 @@ byId('mask').addEventListener('click', closeSheet);
    应用版本记录
    ============================================================ */
 var APP_CHANGELOG = [
+  { version: '6.0.15', date: '2026-11-13', changes: ['酒记“距离上次饮酒”卡片重新设计：新增恢复进度圆环、当前阶段药丸和渐变时长数字，整体更轻盈通透，展示的数据不变（总时长、当前阶段、阶段说明、下一节点剩余时间、全部身体状态列表）。'] },
   { version: '6.0.14', date: '2026-11-13', changes: ['提醒新增“工作日”“周末”“自定义日子”三种重复模式：工作日为周一到周五，周末为周六周日，自定义可逐个添加提醒日期。', '工作日、周末、自定义提醒在非提醒日和周/月/年提醒一样默认划线显示，到提醒日恢复。', '提醒与待办互相转换时保留工作日、周末、自定义规则；安卓端闹钟调度同步支持新模式。'] },
   { version: '6.0.13', date: '2026-11-12', changes: ['三餐理想时间倒计时改为结合上一顿实际时间：目标取“理想时段起点”与“上一顿 + 常见最短间隔”中较晚者，并说明两顿之间的常见间隔和建议时间，倒计时与规律判断使用同一套规则，不再互相矛盾。', '三餐日历上的每一天都可以点击查看当天详情：每顿餐次、时间、绿/黄点、规律情况和不规律原因；没有记录的天显示提示。', '点评新增“时间略晚，间隔合适”：因为上一顿较晚而顺延、但间隔合理的记录不再生硬标记为不在理想时段。'] },
   { version: '6.0.12', date: '2026-11-12', changes: ['三餐的间隔建议改为按具体餐次判断：早餐到午餐常见 4–6 小时、午餐到晚餐常见 4.5–7 小时、午餐到下午茶常见 1.5–3 小时、晚餐到夜宵常见 2–4 小时，隔夜则按一整夜判断，不再使用统一阈值。', '规律判断同时考虑理想就餐时段与上一顿间隔：间隔过近（例如早餐后 2 小时就吃午餐）会标记为不规律，圆点为黄色并提示“间隔有点近”。', '记录弹框会说明两顿之间的常见间隔，旧记录打开后会自动按新规则重新评估。'] },
@@ -4845,14 +4885,17 @@ function renderAlcoholSobriety(){
   var duration = byId('alcohol-sober-duration');
   if (!duration) return;
   var latest = latestAlcoholRecord();
+  var ring = byId('alcohol-sober-ring');
+  var ringPct = byId('alcohol-sober-ring-pct');
+  var ringLen = 226.19;
   if (!latest) {
     setTxt('alcohol-sober-duration', '还没有记录');
     setTxt('alcohol-sober-stage', '等待第一次记录');
     setTxt('alcohol-sober-copy', '记录一次饮酒后，这里会从那个时间点开始计时。');
     setTxt('alcohol-sober-next-title', '身体恢复节点');
     setTxt('alcohol-sober-next', ALCOHOL_RECOVERY_STAGES[0].label + ' · ' + ALCOHOL_RECOVERY_STAGES[0].text);
-    var emptyBar = byId('alcohol-sober-progress');
-    if (emptyBar) emptyBar.style.width = '0%';
+    if (ring) ring.style.strokeDashoffset = String(ringLen);
+    if (ringPct) setTxt('alcohol-sober-ring-pct', '—');
     return;
   }
   var elapsed = Math.max(0, Date.now() - new Date(latest.createdAt).getTime());
@@ -4878,8 +4921,8 @@ function renderAlcoholSobriety(){
   var startMs = currentIdx >= 0 ? ALCOHOL_RECOVERY_STAGES[currentIdx].ms : 0;
   var endMs = next ? next.ms : ALCOHOL_RECOVERY_STAGES[ALCOHOL_RECOVERY_STAGES.length - 1].ms;
   var pct = next ? Math.min(1, Math.max(0, (elapsed - startMs) / (endMs - startMs))) : 1;
-  var bar = byId('alcohol-sober-progress');
-  if (bar) bar.style.width = (pct * 100).toFixed(1) + '%';
+  if (ring) ring.style.strokeDashoffset = String(ringLen * (1 - pct));
+  if (ringPct) setTxt('alcohol-sober-ring-pct', Math.round(pct * 100) + '%');
 }
 
 function openAlcoholRecoveryStages(){

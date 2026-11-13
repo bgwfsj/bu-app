@@ -124,14 +124,17 @@ function renderAlcoholSobriety(){
   var duration = byId('alcohol-sober-duration');
   if (!duration) return;
   var latest = latestAlcoholRecord();
+  var ring = byId('alcohol-sober-ring');
+  var ringPct = byId('alcohol-sober-ring-pct');
+  var ringLen = 226.19;
   if (!latest) {
     setTxt('alcohol-sober-duration', '还没有记录');
     setTxt('alcohol-sober-stage', '等待第一次记录');
     setTxt('alcohol-sober-copy', '记录一次饮酒后，这里会从那个时间点开始计时。');
     setTxt('alcohol-sober-next-title', '身体恢复节点');
     setTxt('alcohol-sober-next', ALCOHOL_RECOVERY_STAGES[0].label + ' · ' + ALCOHOL_RECOVERY_STAGES[0].text);
-    var emptyBar = byId('alcohol-sober-progress');
-    if (emptyBar) emptyBar.style.width = '0%';
+    if (ring) ring.style.strokeDashoffset = String(ringLen);
+    if (ringPct) setTxt('alcohol-sober-ring-pct', '—');
     return;
   }
   var elapsed = Math.max(0, Date.now() - new Date(latest.createdAt).getTime());
@@ -157,8 +160,8 @@ function renderAlcoholSobriety(){
   var startMs = currentIdx >= 0 ? ALCOHOL_RECOVERY_STAGES[currentIdx].ms : 0;
   var endMs = next ? next.ms : ALCOHOL_RECOVERY_STAGES[ALCOHOL_RECOVERY_STAGES.length - 1].ms;
   var pct = next ? Math.min(1, Math.max(0, (elapsed - startMs) / (endMs - startMs))) : 1;
-  var bar = byId('alcohol-sober-progress');
-  if (bar) bar.style.width = (pct * 100).toFixed(1) + '%';
+  if (ring) ring.style.strokeDashoffset = String(ringLen * (1 - pct));
+  if (ringPct) setTxt('alcohol-sober-ring-pct', Math.round(pct * 100) + '%');
 }
 
 function openAlcoholRecoveryStages(){

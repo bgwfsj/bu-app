@@ -486,18 +486,32 @@
       <button class="alcohol-add" type="button" data-action="openAlcoholRecordForm">干杯</button>
       <section class="alcohol-sobriety" aria-live="polite">
         <div class="alcohol-sobriety-head">
-          <span>距离上次饮酒</span>
-          <b id="alcohol-sober-duration">还没有记录</b>
+          <span class="alcohol-sobriety-label"><i></i>距上次饮酒</span>
+          <span class="alcohol-sobriety-chip"><b id="alcohol-sober-stage">等待第一次记录</b></span>
         </div>
-        <div class="alcohol-sobriety-stage">
-          <b id="alcohol-sober-stage">等待第一次记录</b>
-          <p id="alcohol-sober-copy">记录一次饮酒后，这里会从那个时间点开始计时。</p>
+        <div class="alcohol-sobriety-main">
+          <div class="alcohol-sobriety-dinfo">
+            <b class="alcohol-sobriety-duration" id="alcohol-sober-duration">还没有记录</b>
+            <p class="alcohol-sobriety-copy" id="alcohol-sober-copy">记录一次饮酒后，这里会从那个时间点开始计时。</p>
+          </div>
+          <div class="alcohol-sobriety-ring">
+            <svg viewBox="0 0 84 84" aria-hidden="true">
+              <defs>
+                <linearGradient id="alcoholRingGrad" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#9d7ca7"/>
+                  <stop offset="100%" stop-color="#d0a899"/>
+                </linearGradient>
+              </defs>
+              <circle class="alcohol-ring-track" cx="42" cy="42" r="36"/>
+              <circle class="alcohol-ring-fill" id="alcohol-sober-ring" cx="42" cy="42" r="36" stroke-dasharray="226.19" stroke-dashoffset="226.19"/>
+            </svg>
+            <div class="alcohol-sobriety-ring-center"><b id="alcohol-sober-ring-pct">—</b><span>恢复进度</span></div>
+          </div>
         </div>
         <div class="alcohol-sobriety-next">
           <span id="alcohol-sober-next-title">身体恢复节点</span>
           <b id="alcohol-sober-next">20 分钟后 · 心率与循环逐步平稳</b>
         </div>
-        <div class="alcohol-sobriety-track"><i id="alcohol-sober-progress"></i></div>
         <button class="alcohol-stage-link" type="button" data-action="openAlcoholRecoveryStages">查看全部身体状态</button>
         <p class="alcohol-sobriety-note">恢复速度受饮酒量、体重、睡眠和饮食影响，这里展示的是常见恢复方向。</p>
       </section>
