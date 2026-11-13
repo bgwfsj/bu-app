@@ -182,6 +182,38 @@ public final class StandaloneReminderScheduler {
                 return candidate.getTimeInMillis();
             }
 
+            if ("weekdays".equals(mode) || "weekends".equals(mode)) {
+                Calendar candidate = (Calendar) current.clone();
+                candidate.set(Calendar.HOUR_OF_DAY, hour);
+                candidate.set(Calendar.MINUTE, minute);
+                candidate.set(Calendar.SECOND, 0);
+                candidate.set(Calendar.MILLISECOND, 0);
+                for (int i = 0; i < 8; i++) {
+                    int jsDay = candidate.get(Calendar.DAY_OF_WEEK) - 1;
+                    boolean hits = "weekdays".equals(mode) ? (jsDay >= 1 && jsDay <= 5) :
+                        (jsDay == 0 || jsDay == 6);
+                    if (hits && candidate.getTimeInMillis() > now) return candidate.getTimeInMillis();
+                    candidate.add(Calendar.DAY_OF_YEAR, 1);
+                }
+                return -1;
+            }
+
+            if ("custom".equals(mode)) {
+                JSONArray dates = item.optJSONArray("dates");
+                if (dates != null) {
+                    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US);
+                    format.setLenient(false);
+                    for (int i = 0; i < dates.length(); i++) {
+                        String date = dates.optString(i, "");
+                        try {
+                            Date parsed = format.parse(date + " " + time);
+                            if (parsed.getTime() > now) return parsed.getTime();
+                        } catch (Exception ignored) {}
+                    }
+                }
+                return -1;
+            }
+
             if ("monthly".equals(mode)) {
                 int wantedDay = Math.max(1, Math.min(31, item.optInt("day", 1)));
                 Calendar month = Calendar.getInstance();

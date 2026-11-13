@@ -66,7 +66,7 @@
 .reminder-setting-row small{display:block;font-size:var(--fs-caption);line-height:1.55;color:#93a2a7;margin-top:4px}
 .reminder-setting-row button{height:31px;padding:0 11px;border-radius:9px;border:1px solid rgba(10,168,122,.22);background:rgba(10,168,122,.06);color:#09805e;font-size:var(--fs-meta);cursor:pointer;white-space:nowrap}
 .reminder-setting-row button.off{border-color:var(--line);background:#f5f7f8;color:#8c9a9f}
-.reminder-mode-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:13px}
+.reminder-mode-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:13px}
 .reminder-mode-grid button{height:38px;border-radius:9px;border:1px solid var(--line);background:#f8faf9;color:#71858b;font-size:11.5px;cursor:pointer}
 .reminder-mode-grid button.on{border-color:rgba(10,168,122,.30);background:rgba(10,168,122,.08);color:#087e5d}
 .reminder-weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:13px}

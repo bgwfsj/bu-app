@@ -167,6 +167,8 @@ var APP_ACTION_NAMES = {
   openReminderForm: true,
   setReminderMode: true,
   setReminderWeekday: true,
+  addReminderDraftDate: true,
+  removeReminderDraftDate: true,
   refreshReminderYearDays: true,
   saveReminder: true,
   editReminder: true,

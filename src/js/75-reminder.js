@@ -1,11 +1,13 @@
 /* ============================================================
    8.65 独立提醒
    ============================================================ */
-var REMINDER_MODES = ['once', 'daily', 'weekly', 'monthly', 'yearly'];
+var REMINDER_MODES = ['once', 'daily', 'weekdays', 'weekends', 'custom', 'weekly', 'monthly', 'yearly'];
 var REMINDER_WEEKDAYS = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
 var REMINDER_MODE_NAMES = {
-  once: '仅一次', daily: '每天', weekly: '每周', monthly: '每月', yearly: '每年'
+  once: '仅一次', daily: '每天', weekdays: '工作日', weekends: '周末', custom: '自定义',
+  weekly: '每周', monthly: '每月', yearly: '每年'
 };
+var reminderDraftDates = [];
 
 function reminderDefaultState(){
   return {
@@ -50,6 +52,12 @@ function normalizeReminderItem(item){
     var weekday = parseInt(item.weekday, 10);
     if (isNaN(weekday) || weekday < 0 || weekday > 6) return null;
     out.weekday = weekday;
+  }
+  if (out.mode === 'custom') {
+    var dates = Array.isArray(item.dates) ? item.dates.filter(function(date){
+      return /^\d{4}-\d{2}-\d{2}$/.test(String(date));
+    }) : [];
+    out.dates = dates;
   }
   if (out.mode === 'monthly' || out.mode === 'yearly') {
     var day = parseInt(item.day, 10);
@@ -128,6 +136,24 @@ function reminderNextDate(item, from){
     weekly.setDate(weekly.getDate() + delta);
     return weekly;
   }
+  if (item.mode === 'weekdays' || item.mode === 'weekends') {
+    var dayCandidate = reminderAtTime(new Date(now), item.time);
+    for (var i = 0; i < 8; i++) {
+      var weekday = dayCandidate.getDay();
+      var hits = item.mode === 'weekdays' ? (weekday >= 1 && weekday <= 5) :
+        (weekday === 0 || weekday === 6);
+      if (hits && dayCandidate.getTime() > now.getTime()) return dayCandidate;
+      dayCandidate.setDate(dayCandidate.getDate() + 1);
+    }
+  }
+  if (item.mode === 'custom') {
+    var dates = (item.dates || []).slice().sort();
+    for (var i = 0; i < dates.length; i++) {
+      var custom = new Date(dates[i] + 'T' + item.time + ':00');
+      if (!isNaN(custom.getTime()) && custom.getTime() > now.getTime()) return custom;
+    }
+    return null;
+  }
   if (item.mode === 'monthly') {
     for (var i = 0; i < 24; i++) {
       var ym = new Date(now.getFullYear(), now.getMonth() + i, 1);
@@ -157,6 +183,9 @@ function reminderShortDate(date){
 function reminderRuleText(item){
   if (item.mode === 'once') return '仅一次 · ' + item.date;
   if (item.mode === 'daily') return '每天';
+  if (item.mode === 'weekdays') return '工作日';
+  if (item.mode === 'weekends') return '周末';
+  if (item.mode === 'custom') return '自定义 · ' + (item.dates || []).length + ' 个日期';
   if (item.mode === 'weekly') return '每周' + REMINDER_WEEKDAYS[item.weekday].slice(1);
   if (item.mode === 'monthly') return '每月 ' + item.day + ' 日';
   return '每年 ' + item.month + ' 月 ' + item.day + ' 日';
@@ -175,6 +204,11 @@ function reminderOccursOnDate(item, date){
   var day = date.getDate();
   if (item.mode === 'once') return item.date === year + '-' + pad2(month) + '-' + pad2(day);
   if (item.mode === 'daily') return true;
+  if (item.mode === 'weekdays') return date.getDay() >= 1 && date.getDay() <= 5;
+  if (item.mode === 'weekends') return date.getDay() === 0 || date.getDay() === 6;
+  if (item.mode === 'custom') {
+    return (item.dates || []).indexOf(year + '-' + pad2(month) + '-' + pad2(day)) >= 0;
+  }
   if (item.mode === 'weekly') return item.weekday === date.getDay();
   if (item.mode === 'monthly') {
     return day === Math.min(item.day, reminderDaysInMonth(year, month));
@@ -476,6 +510,7 @@ function openReminderForm(id){
   if (!existing) editingReminderId = null;
   reminderDraftMode = existing ? existing.mode : 'once';
   reminderDraftWeekday = existing && existing.mode === 'weekly' ? existing.weekday : new Date().getDay();
+  reminderDraftDates = existing && existing.mode === 'custom' ? (existing.dates || []).slice() : [];
   var today = new Date();
   var onceDate = existing && existing.mode === 'once' ? existing.date : reminderDefaultDate();
   var monthlyDay = existing && (existing.mode === 'monthly' || existing.mode === 'yearly') ? existing.day : today.getDate();
@@ -490,6 +525,9 @@ function openReminderForm(id){
     '<div class="reminder-mode-grid" id="reminder-mode-buttons">' +
       '<button type="button" data-reminder-mode="once"' + actionAttrs('setReminderMode', ['once']) + '>仅一次</button>' +
       '<button type="button" data-reminder-mode="daily"' + actionAttrs('setReminderMode', ['daily']) + '>每天</button>' +
+      '<button type="button" data-reminder-mode="weekdays"' + actionAttrs('setReminderMode', ['weekdays']) + '>工作日</button>' +
+      '<button type="button" data-reminder-mode="weekends"' + actionAttrs('setReminderMode', ['weekends']) + '>周末</button>' +
+      '<button type="button" data-reminder-mode="custom"' + actionAttrs('setReminderMode', ['custom']) + '>自定义</button>' +
       '<button type="button" data-reminder-mode="weekly"' + actionAttrs('setReminderMode', ['weekly']) + '>每周</button>' +
       '<button type="button" data-reminder-mode="monthly"' + actionAttrs('setReminderMode', ['monthly']) + '>每月</button>' +
       '<button type="button" data-reminder-mode="yearly"' + actionAttrs('setReminderMode', ['yearly']) + '>每年</button>' +
@@ -506,6 +544,10 @@ function openReminderForm(id){
             actionAttrs('setReminderWeekday', [day]) + '>' + label.slice(1) + '</button>';
         }).join('') +
       '</div></div>' +
+    '<div id="reminder-custom-wrap" style="display:none"><label class="todo-form-label">选择提醒的日期</label>' +
+      '<div class="new-exercise"><input id="reminder-custom-date" type="date" value="' + wTodayStr() + '">' +
+        '<button type="button"' + actionAttrs('addReminderDraftDate') + '>添加日期</button></div>' +
+      '<div class="todo-custom-dates" id="reminder-custom-dates"></div></div>' +
     '<div id="reminder-monthly-wrap"><label class="todo-form-label">每月第几天</label>' +
       '<select class="reminder-single-select" id="reminder-month-day">' +
         reminderOptions(1, 31, monthlyDay) + '</select>' +
@@ -534,8 +576,16 @@ function renderReminderEditorState(){
   });
   byId('reminder-once-wrap').style.display = reminderDraftMode === 'once' ? '' : 'none';
   byId('reminder-weekly-wrap').style.display = reminderDraftMode === 'weekly' ? '' : 'none';
+  byId('reminder-custom-wrap').style.display = reminderDraftMode === 'custom' ? '' : 'none';
   byId('reminder-monthly-wrap').style.display = reminderDraftMode === 'monthly' ? '' : 'none';
   byId('reminder-yearly-wrap').style.display = reminderDraftMode === 'yearly' ? '' : 'none';
+  var datesBox = byId('reminder-custom-dates');
+  if (datesBox) {
+    datesBox.innerHTML = reminderDraftDates.length ? reminderDraftDates.map(function(date){
+      return '<span>' + date + '<button type="button"' + actionAttrs('removeReminderDraftDate', [date]) +
+        ' aria-label="移除日期">×</button></span>';
+    }).join('') : '<span>还没有添加日期</span>';
+  }
 }
 
 function setReminderMode(mode){
@@ -548,6 +598,21 @@ function setReminderWeekday(day){
   day = parseInt(day, 10);
   if (day < 0 || day > 6) return;
   reminderDraftWeekday = day;
+  renderReminderEditorState();
+}
+
+function addReminderDraftDate(){
+  var input = byId('reminder-custom-date');
+  var date = input && input.value;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(date || ''))) return;
+  if (reminderDraftDates.indexOf(date) >= 0) { toast('这个日期已经在列表里'); return; }
+  reminderDraftDates.push(date);
+  reminderDraftDates.sort();
+  renderReminderEditorState();
+}
+
+function removeReminderDraftDate(date){
+  reminderDraftDates = reminderDraftDates.filter(function(d){ return d !== date; });
   renderReminderEditorState();
 }
 
@@ -580,6 +645,9 @@ function saveReminder(){
     if (once.getTime() <= Date.now()) { toast('这一次的提醒时间已经过去'); return; }
   } else if (item.mode === 'weekly') {
     item.weekday = reminderDraftWeekday;
+  } else if (item.mode === 'custom') {
+    if (!reminderDraftDates.length) { toast('请至少添加一个提醒日期'); return; }
+    item.dates = reminderDraftDates.slice();
   } else if (item.mode === 'monthly') {
     item.day = parseInt(byId('reminder-month-day').value, 10);
   } else if (item.mode === 'yearly') {
@@ -669,6 +737,7 @@ function convertReminderToTodo(id){
   };
   if (item.mode === 'once') todo.date = item.date;
   if (item.mode === 'weekly') todo.weekday = item.weekday;
+  if (item.mode === 'custom') todo.dates = (item.dates || []).slice();
   if (item.mode === 'monthly' || item.mode === 'yearly') todo.day = item.day;
   if (item.mode === 'yearly') todo.month = item.month;
   reminderData.items = reminderData.items.filter(function(saved){ return saved.id !== id; });
@@ -697,6 +766,7 @@ function reminderNativeItem(item){
   };
   if (item.mode === 'once') out.date = item.date;
   if (item.mode === 'weekly') out.weekday = item.weekday;
+  if (item.mode === 'custom') out.dates = (item.dates || []).slice();
   if (item.mode === 'monthly' || item.mode === 'yearly') out.day = item.day;
   if (item.mode === 'yearly') out.month = item.month;
   return out;

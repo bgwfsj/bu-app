@@ -800,8 +800,8 @@ async function run() {
       cleanupConfirmOpened: true,
       cleanupCalls: 1,
       aboutOpened: true,
-      changelogCount: 72,
-      aboutVersion: '6.0.13',
+      changelogCount: 73,
+      aboutVersion: '6.0.14',
       updateBackupExposed: true,
       updateCalls: 1,
       handledBack: true,
@@ -1082,6 +1082,10 @@ async function run() {
           var tomorrow = new Date(Date.now() + 86400000);
           byId('reminder-date').value = tomorrow.getFullYear() + '-' + pad2(tomorrow.getMonth() + 1) + '-' + pad2(tomorrow.getDate());
         }
+        if (mode === 'custom') {
+          var customDay = new Date(Date.now() + 2 * 86400000);
+          reminderDraftDates = [customDay.getFullYear() + '-' + pad2(customDay.getMonth() + 1) + '-' + pad2(customDay.getDate())];
+        }
         if (mode === 'weekly') setReminderWeekday(new Date().getDay());
         if (mode === 'monthly') byId('reminder-month-day').value = '15';
         if (mode === 'yearly') {
@@ -1093,10 +1097,23 @@ async function run() {
       }
       add('once');
       add('daily');
+      add('weekdays');
+      add('weekends');
+      add('custom');
       add('weekly');
       add('monthly');
       add('yearly');
       var weekly = reminderData.items.filter(function(item){ return item.mode === 'weekly'; })[0];
+      var weekdaysItem = reminderData.items.filter(function(item){ return item.mode === 'weekdays'; })[0];
+      var weekendsItem = reminderData.items.filter(function(item){ return item.mode === 'weekends'; })[0];
+      var customItem = reminderData.items.filter(function(item){ return item.mode === 'custom'; })[0];
+      var weekdaysNext = reminderNextDate(weekdaysItem);
+      var weekendsNext = reminderNextDate(weekendsItem);
+      var customNext = reminderNextDate(customItem);
+      var weekdaysOnWeekend = reminderOccursOnDate(weekdaysItem, new Date(2026, 10, 14));
+      var weekendsOnSaturday = reminderOccursOnDate(weekendsItem, new Date(2026, 10, 14));
+      var weekdaysOnMonday = reminderOccursOnDate(weekdaysItem, new Date(2026, 10, 16));
+      var customOccursOnNext = !!customNext && reminderOccursOnDate(customItem, new Date(customNext));
       var reminderEditButtonsRemoved = byId('reminder-list').querySelectorAll('.reminder-edit').length === 0;
       var weeklyRow = byId('reminder-list').querySelector('[data-drag-id="' + weekly.id + '"]');
       weeklyRow.click();
@@ -1267,6 +1284,15 @@ async function run() {
         modes: reminderData.items.map(function(item){ return item.mode; }).sort(),
         title: edited && edited.title,
         dailyRule: dailyItem && reminderRuleText(dailyItem),
+        weekdaysRule: weekdaysItem && reminderRuleText(weekdaysItem),
+        weekendsRule: weekendsItem && reminderRuleText(weekendsItem),
+        customRule: customItem && reminderRuleText(customItem),
+        weekdaysNextWeekday: !!weekdaysNext && weekdaysNext.getDay() >= 1 && weekdaysNext.getDay() <= 5,
+        weekendsNextWeekend: !!weekendsNext && (weekendsNext.getDay() === 0 || weekendsNext.getDay() === 6),
+        customOccursOnNext: customOccursOnNext,
+        weekdaysOnWeekend: weekdaysOnWeekend,
+        weekendsOnSaturday: weekendsOnSaturday,
+        weekdaysOnMonday: weekdaysOnMonday,
         snoozedRowStillNormal: snoozedRowStillNormal,
         completedTodayStruck: completedTodayStruck,
         restoredTomorrow: restoredTomorrow,
@@ -1313,10 +1339,19 @@ async function run() {
         reminderArchiveEditable: byId('reminder-archive-list').querySelectorAll('[data-action="editReminder"]').length > 0
       };
     })()`);
-    assert.equal(reminders.count, 5);
-    assert.deepEqual(reminders.modes, ['daily', 'monthly', 'once', 'weekly', 'yearly']);
+    assert.equal(reminders.count, 8);
+    assert.deepEqual(reminders.modes, ['custom', 'daily', 'monthly', 'once', 'weekdays', 'weekends', 'weekly', 'yearly']);
     assert.equal(reminders.title, '提醒-每周（已编辑）');
     assert.equal(reminders.dailyRule, '每天');
+    assert.equal(reminders.weekdaysRule, '工作日');
+    assert.equal(reminders.weekendsRule, '周末');
+    assert.equal(reminders.customRule, '自定义 · 1 个日期');
+    assert.equal(reminders.weekdaysNextWeekday, true);
+    assert.equal(reminders.weekendsNextWeekend, true);
+    assert.equal(reminders.customOccursOnNext, true);
+    assert.equal(reminders.weekdaysOnWeekend, false);
+    assert.equal(reminders.weekendsOnSaturday, true);
+    assert.equal(reminders.weekdaysOnMonday, true);
     assert.equal(reminders.snoozedRowStillNormal, true);
     assert.equal(reminders.completedTodayStruck, true);
     assert.equal(reminders.restoredTomorrow, true);
@@ -1324,7 +1359,7 @@ async function run() {
     assert.equal(reminders.staleCompletionRemoved, true);
     assert.equal(reminders.allHaveNext, true);
     assert.equal(reminders.orderValid, true);
-    assert.equal(reminders.stored, 5);
+    assert.equal(reminders.stored, 8);
     assert.equal(reminders.futureNoticeHidden, true);
     assert.equal(reminders.futureNoticeCleared, true);
     assert.equal(reminders.homeNoticeVisible, true);
@@ -1346,7 +1381,7 @@ async function run() {
     assert.equal(reminders.oldOnceStaysActive, true);
     assert.equal(reminders.permanentlyRemoved, true);
     assert.equal(reminders.archiveCount, '1 条');
-    assert.deepEqual(reminders.activeGroupLabels, ['仅一次', '每天', '每周', '每月', '每年']);
+    assert.deepEqual(reminders.activeGroupLabels, ['仅一次', '每天', '工作日', '周末', '自定义', '每周', '每月', '每年']);
     assert.deepEqual(reminders.archiveGroupLabels, ['仅一次']);
     assert.equal(reminders.activeGroupCollapsed, true);
     assert.equal(reminders.archiveGroupCollapsed, true);
@@ -1502,7 +1537,8 @@ async function run() {
         todoCreated: todoCreated,
         customCreatedCount: customCreatedCount,
         customCreatedMode: customCreatedReminder && customCreatedReminder.mode,
-        customCreatedDate: customCreatedReminder && customCreatedReminder.date
+        customCreatedDatesKept: !!customCreatedReminder &&
+          (customCreatedReminder.dates || []).length === 2
       };
     })()`);
     assert.deepEqual(conversions, {
@@ -1511,8 +1547,8 @@ async function run() {
       reminderArchived: true,
       todoCreated: true,
       customCreatedCount: 1,
-      customCreatedMode: 'once',
-      customCreatedDate: customTomorrowStr
+      customCreatedMode: 'custom',
+      customCreatedDatesKept: true
     });
 
     const typography = await evaluate(cdp, `(function(){
@@ -1860,14 +1896,14 @@ async function run() {
     assert.equal(restored.fitnessSessions, 1);
     assert.equal(restored.todoItems, 2);
     assert.equal(restored.todoArchived, 2);
-    assert.equal(restored.reminderItems, 5);
+    assert.equal(restored.reminderItems, 8);
     assert.equal(restored.reminderArchived, 1);
     assert.equal(restored.ledgerRecords, 118);
     assert.equal(restored.mealRecords, 4);
     assert.equal(restored.alcoholRecords, 2);
     assert.ok(restored.quitDate > 0);
     assert.equal(restored.previousGoal, 2345);
-    assert.equal(restored.previousReminders, 5);
+    assert.equal(restored.previousReminders, 8);
     assert.equal(restored.previousMeals, 4);
     assert.equal(restored.previousAlcohol, 2);
     assert.equal(restored.previousHomeLayout, 'facet');

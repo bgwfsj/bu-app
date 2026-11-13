@@ -446,26 +446,16 @@ function convertTodoToReminder(id){
   var time = reminderDefaultTime();
   var mode = item.repeat;
   var extra = {};
-  var simplified = false;
   if (item.repeat === 'once') {
     extra.date = item.date;
   } else if (item.repeat === 'weekly') {
     extra.weekday = item.weekday;
+  } else if (item.repeat === 'custom') {
+    extra.dates = (item.dates || []).slice();
   } else if (item.repeat === 'monthly') {
     extra.day = item.day;
   } else if (item.repeat === 'yearly') {
     extra = { month: item.month, day: item.day };
-  } else if (item.repeat === 'weekdays' || item.repeat === 'weekends' || item.repeat === 'custom') {
-    var start = todoDateObject(wTodayStr()), nextDate = '';
-    for (var offset = 0; offset < 370; offset++) {
-      var candidate = new Date(start.getFullYear(), start.getMonth(), start.getDate() + offset);
-      var date = candidate.getFullYear() + '-' + pad2(candidate.getMonth() + 1) + '-' + pad2(candidate.getDate());
-      if (todoMatchesDate(item, date)) { nextDate = date; break; }
-    }
-    if (!nextDate) { toast('这条待办没有可转换的未来日期'); return; }
-    mode = 'once';
-    extra.date = nextDate;
-    simplified = true;
   }
   var reminder = Object.assign({
     id: 'reminder_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 5),
@@ -484,7 +474,7 @@ function convertTodoToReminder(id){
   renderTodoPage();
   renderReminderPage();
   syncTodoReminder();
-  toast('已转为 1 条提醒' + (simplified ? '（取最近日期）' : ''));
+  toast('已转为 1 条提醒');
 }
 
 function openReminderSettings(){
