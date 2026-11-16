@@ -804,8 +804,8 @@ async function run() {
       cleanupConfirmOpened: true,
       cleanupCalls: 1,
       aboutOpened: true,
-      changelogCount: 75,
-      aboutVersion: '6.0.16',
+      changelogCount: 76,
+      aboutVersion: '6.0.17',
       updateBackupExposed: true,
       updateCalls: 1,
       handledBack: true,
@@ -924,6 +924,14 @@ async function run() {
       startWorkoutFromPlan('plan_default');
       var duplicateSession = activeWorkout();
       var duplicatePlanItems = duplicateSession.plan.filter(function(item){ return item.exerciseId === 'back'; });
+      var chestId = duplicateSession.plan[0].itemId;
+      for (var ci = 0; ci < 4; ci++) completeWorkoutSet(chestId);
+      var activeExNames = Array.prototype.map.call(byId('active-ex-list').querySelectorAll('.fit-ex'), function(el){
+        return el.querySelector('.fit-ex-head b').textContent.trim();
+      });
+      var activeExDone = Array.prototype.map.call(byId('active-ex-list').querySelectorAll('.fit-ex.done .fit-ex-head b'), function(el){
+        return el.textContent.trim();
+      });
       completeWorkoutSet(duplicatePlanItems[0].itemId);
       var firstDuplicateDone = recordsForPlanItem(duplicateSession, duplicatePlanItems[0]).length;
       var secondDuplicateDone = recordsForPlanItem(duplicateSession, duplicatePlanItems[1]).length;
@@ -942,7 +950,11 @@ async function run() {
         reorderSaved: savedOrder[0] === initialOrder[1] && savedOrder[1] === initialOrder[0],
         duplicateCount: duplicateCount,
         duplicateIdsUnique: duplicateItems.length === 2 && duplicateItems[0].itemId !== duplicateItems[1].itemId,
-        duplicateRecordsIndependent: firstDuplicateDone === 1 && secondDuplicateDone === 0
+        duplicateRecordsIndependent: firstDuplicateDone === 1 && secondDuplicateDone === 0,
+        doneAtBottom: activeExDone.length === 1 &&
+          activeExNames[activeExNames.length - 1] === activeExDone[0] &&
+          activeExNames[0] === duplicateSession.plan[1].name,
+        incompleteFirst: activeExNames[0] === duplicateSession.plan[1].name
       };
     })()`);
     assert.equal(workout.error, undefined);
@@ -960,6 +972,8 @@ async function run() {
     assert.equal(workout.duplicateCount, 2);
     assert.equal(workout.duplicateIdsUnique, true);
     assert.equal(workout.duplicateRecordsIndependent, true);
+    assert.equal(workout.doneAtBottom, true, 'workout order: ' + JSON.stringify(workout));
+    assert.equal(workout.incompleteFirst, true);
 
     const calendarDots = await evaluate(cdp, `(function(){
       var sample = document.createElement('button');
@@ -1073,6 +1087,44 @@ async function run() {
     assert.equal(todoEdit.editButtonsRemoved, true);
     assert.ok(todoEdit.clickableRows > 0);
     assert.equal(todoEdit.archiveEditable, false);
+
+    const todoReminderSkip = await evaluate(cdp, `(function(){
+      var today = wTodayStr();
+      var savedItems = todoData.items;
+      todoData.items = [
+        { id: 'r1', title: '提醒甲', repeat: 'daily', createdDate: today, done: false, doneDates: {} }
+      ];
+      todoData.reminder.enabled = true;
+      var now = new Date();
+      todoData.reminder.hour = now.getHours();
+      todoData.reminder.minute = now.getMinutes();
+      todoData.reminder.lastNotified = '';
+      saveTodoState();
+      var notifiedCount = 0;
+      var prevNotification = window.Notification;
+      window.Notification = function(){ notifiedCount++; };
+      window.Notification.permission = 'granted';
+      toggleTodo('r1');
+      checkTodoReminder();
+      var skipWhenAllDone = notifiedCount === 0;
+      var lastNotifiedAfterSkip = todoData.reminder.lastNotified === today;
+      toggleTodo('r1');
+      todoData.reminder.lastNotified = '';
+      saveTodoState();
+      checkTodoReminder();
+      var notifyWhenPending = notifiedCount === 1;
+      window.Notification = prevNotification;
+      todoData.items = savedItems;
+      saveTodoState();
+      return {
+        skipWhenAllDone: skipWhenAllDone,
+        lastNotifiedAfterSkip: lastNotifiedAfterSkip,
+        notifyWhenPending: notifyWhenPending
+      };
+    })()`);
+    assert.equal(todoReminderSkip.skipWhenAllDone, true);
+    assert.equal(todoReminderSkip.lastNotifiedAfterSkip, true);
+    assert.equal(todoReminderSkip.notifyWhenPending, true);
 
     const reminders = await evaluate(cdp, `(function(){
       reminderData = reminderDefaultState();

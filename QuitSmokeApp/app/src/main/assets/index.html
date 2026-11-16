@@ -2772,6 +2772,7 @@ byId('mask').addEventListener('click', closeSheet);
    应用版本记录
    ============================================================ */
 var APP_CHANGELOG = [
+  { version: '6.0.17', date: '2026-11-16', changes: ['待办：当天的待办全部完成后，到点不再发每日提醒；取消某一项后提醒会自动恢复。', '训练：训练中已全部完成的动作自动置底，未完成和正在做的排在上面；“调整本次训练”列表同样生效。'] },
   { version: '6.0.16', date: '2026-11-13', changes: ['酒记恢复进度圆环下方的标注改为“下一阶段”，更直观地说明环内百分比表示距下一恢复阶段还差多少。'] },
   { version: '6.0.15', date: '2026-11-13', changes: ['酒记“距离上次饮酒”卡片重新设计：新增恢复进度圆环、当前阶段药丸和渐变时长数字，整体更轻盈通透，展示的数据不变（总时长、当前阶段、阶段说明、下一节点剩余时间、全部身体状态列表）。'] },
   { version: '6.0.14', date: '2026-11-13', changes: ['提醒新增“工作日”“周末”“自定义日子”三种重复模式：工作日为周一到周五，周末为周六周日，自定义可逐个添加提醒日期。', '工作日、周末、自定义提醒在非提醒日和周/月/年提醒一样默认划线显示，到提醒日恢复。', '提醒与待办互相转换时保留工作日、周末、自定义规则；安卓端闹钟调度同步支持新模式。'] },
@@ -5488,6 +5489,14 @@ function completedTasks(session){
   return done;
 }
 
+function planItemDone(session, item){
+  var records = recordsForPlanItem(session, item);
+  if (planItemType(item) === 'duration') {
+    return records.some(function(r){ return r.kind === 'duration' || r.durationMs > 0; });
+  }
+  return records.filter(function(r){ return r.kind !== 'duration'; }).length >= item.sets;
+}
+
 function workoutIsComplete(session){
   return completedTasks(session) >= workoutPlanTotals(session.plan).tasks;
 }
@@ -5592,11 +5601,14 @@ function renderActiveWorkout(){
   setTxt('workout-count', countText.join(' · '));
   byId('workout-progress').style.setProperty('--fit-progress', pct.toFixed(2) + '%');
 
+  var planItems = active.plan.slice().sort(function(a, b){
+    return (planItemDone(active, a) ? 1 : 0) - (planItemDone(active, b) ? 1 : 0);
+  });
   var html = '';
-  each(active.plan, function(item){
+  each(planItems, function(item){
     var records = recordsForPlanItem(active, item);
     var type = planItemType(item);
-    var isDone, detail, times = '', action;
+    var isDone = planItemDone(active, item), detail, times = '', action;
     if (type === 'duration') {
       var timedRecord = records.filter(function(r){ return r.kind === 'duration' || r.durationMs > 0; })[0];
       isDone = !!timedRecord;
@@ -6272,7 +6284,10 @@ function openActiveWorkoutEditor(){
   if (!active) return;
   var available = fit.exercises;
   var html = '<h3>调整本次训练</h3><p>可以临时增加或删除动作，也可以增减组数和目标时长。</p><div class="plan-list">';
-  each(active.plan, function(item){
+  var planItems = active.plan.slice().sort(function(a, b){
+    return (planItemDone(active, a) ? 1 : 0) - (planItemDone(active, b) ? 1 : 0);
+  });
+  each(planItems, function(item){
     var type = planItemType(item);
     var done = activeItemDoneCount(active, item);
     var records = recordsForPlanItem(active, item);
@@ -7131,10 +7146,11 @@ function checkTodoReminder(){
   if (now.getHours() !== r.hour || now.getMinutes() !== r.minute) return;
   r.lastNotified = today;
   saveTodoState();
+  var count = pendingTodoCount();
+  if (count <= 0) return; // 全部完成，到点不再提醒
   if ('Notification' in window && Notification.permission === 'granted') {
-    var count = pendingTodoCount();
     new Notification('补 · 今晚的待办', {
-      body: count ? '还有 ' + count + ' 项没有完成' : '今天的待办都完成了',
+      body: '还有 ' + count + ' 项没有完成',
       tag: 'todo-daily'
     });
   }

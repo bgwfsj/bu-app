@@ -261,6 +261,14 @@ function completedTasks(session){
   return done;
 }
 
+function planItemDone(session, item){
+  var records = recordsForPlanItem(session, item);
+  if (planItemType(item) === 'duration') {
+    return records.some(function(r){ return r.kind === 'duration' || r.durationMs > 0; });
+  }
+  return records.filter(function(r){ return r.kind !== 'duration'; }).length >= item.sets;
+}
+
 function workoutIsComplete(session){
   return completedTasks(session) >= workoutPlanTotals(session.plan).tasks;
 }
@@ -365,11 +373,14 @@ function renderActiveWorkout(){
   setTxt('workout-count', countText.join(' · '));
   byId('workout-progress').style.setProperty('--fit-progress', pct.toFixed(2) + '%');
 
+  var planItems = active.plan.slice().sort(function(a, b){
+    return (planItemDone(active, a) ? 1 : 0) - (planItemDone(active, b) ? 1 : 0);
+  });
   var html = '';
-  each(active.plan, function(item){
+  each(planItems, function(item){
     var records = recordsForPlanItem(active, item);
     var type = planItemType(item);
-    var isDone, detail, times = '', action;
+    var isDone = planItemDone(active, item), detail, times = '', action;
     if (type === 'duration') {
       var timedRecord = records.filter(function(r){ return r.kind === 'duration' || r.durationMs > 0; })[0];
       isDone = !!timedRecord;
@@ -1045,7 +1056,10 @@ function openActiveWorkoutEditor(){
   if (!active) return;
   var available = fit.exercises;
   var html = '<h3>调整本次训练</h3><p>可以临时增加或删除动作，也可以增减组数和目标时长。</p><div class="plan-list">';
-  each(active.plan, function(item){
+  var planItems = active.plan.slice().sort(function(a, b){
+    return (planItemDone(active, a) ? 1 : 0) - (planItemDone(active, b) ? 1 : 0);
+  });
+  each(planItems, function(item){
     var type = planItemType(item);
     var done = activeItemDoneCount(active, item);
     var records = recordsForPlanItem(active, item);

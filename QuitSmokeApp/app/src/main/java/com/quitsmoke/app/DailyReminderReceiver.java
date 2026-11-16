@@ -33,6 +33,11 @@ public class DailyReminderReceiver extends BroadcastReceiver {
         int pending = prefs.getInt(ReminderScheduler.KEY_PENDING, 0);
         String savedDate = prefs.getString(ReminderScheduler.KEY_DATE, "");
         String today = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA).format(new Date());
+        if (savedDate.equals(today) && pending <= 0) {
+            // 今天的待办已全部完成，到点不再提醒
+            ReminderScheduler.schedule(context);
+            return;
+        }
         String body = savedDate.equals(today) && pending > 0
             ? "还有 " + pending + " 项没有完成"
             : "打开补，看看今天还有什么要补";

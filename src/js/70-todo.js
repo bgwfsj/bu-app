@@ -567,10 +567,11 @@ function checkTodoReminder(){
   if (now.getHours() !== r.hour || now.getMinutes() !== r.minute) return;
   r.lastNotified = today;
   saveTodoState();
+  var count = pendingTodoCount();
+  if (count <= 0) return; // 全部完成，到点不再提醒
   if ('Notification' in window && Notification.permission === 'granted') {
-    var count = pendingTodoCount();
     new Notification('补 · 今晚的待办', {
-      body: count ? '还有 ' + count + ' 项没有完成' : '今天的待办都完成了',
+      body: '还有 ' + count + ' 项没有完成',
       tag: 'todo-daily'
     });
   }
