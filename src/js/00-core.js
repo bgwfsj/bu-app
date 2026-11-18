@@ -216,7 +216,9 @@ var APP_ACTION_NAMES = {
   editLedgerTag: true,
   deleteLedgerTag: true,
   saveLedgerTagEdit: true,
-  addLedgerTag: true
+  addLedgerTag: true,
+  setClockView: true,
+  openSetQuitDate: true
 };
 
 function actionAttrs(name, args, eventName){

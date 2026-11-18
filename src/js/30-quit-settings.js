@@ -29,7 +29,37 @@ function doBreak(){
   toast('已重置，从现在重新开始');
 }
 
-byId('btn-set').addEventListener('click', function(){
+byId('btn-set').addEventListener('click', openQuitMenu);
+
+/* 戒烟右上角 ⋮：时间皮肤 + 设置起始时间 */
+function openQuitMenu(){
+  var cur = VIEWS.indexOf(S.view) < 0 ? 'round' : S.view;
+  var skinRows = '';
+  for (var i = 0; i < VIEWS.length; i++) {
+    var v = VIEWS[i];
+    skinRows += '<button class="settings-row"' + actionAttrs('setClockView', [v]) + '>' +
+      '<span><b>' + (VIEW_NAMES[v] || v) + '</b></span>' +
+      '<em>' + (v === cur ? '当前' : '') + '</em></button>';
+  }
+  openSheet(
+    '<h3>戒烟设置</h3>' +
+    '<p>换一种倒计时的样子，或者调整开始时间。</p>' +
+    '<div class="settings-group"><div class="settings-group-title">时间皮肤</div>' + skinRows + '</div>' +
+    '<div class="settings-group"><div class="settings-group-title">计时</div>' +
+    '<button class="settings-row" data-action="openSetQuitDate">' +
+      '<span><b>设置戒烟起始时间</b><small>仅用于修正倒计时起点，不影响其他数据</small></span><em>设置 ›</em></button>' +
+    '</div>' +
+    '<div class="row"><button class="ghost" style="flex:1"' + actionAttrs('closeSheet') + '>关闭</button></div>'
+  );
+}
+
+function setClockView(v){
+  setView(v);
+  closeSheet();
+  toast('已切换为「' + (VIEW_NAMES[v] || v) + '」');
+}
+
+function openSetQuitDate(){
   openSheet(
     '<h3>设置戒烟起始时间</h3>' +
     '<p>仅用于修正倒计时起点，不会影响其他数据。</p>' +
@@ -37,7 +67,7 @@ byId('btn-set').addEventListener('click', function(){
     '<div class="row"><button class="ghost"' + actionAttrs('closeSheet') + '>取消</button>' +
     '<button class="primary"' + actionAttrs('saveSetDate') + '>保存</button></div>'
   );
-});
+}
 
 function toLocalInput(ms){
   var d = new Date(ms);

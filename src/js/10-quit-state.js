@@ -62,7 +62,7 @@ function renderQuit(){
     byId('next-t').textContent = STAGES[0].d;
     byId('next-v').textContent = '--';
     byId('barfill').style.width = '0%';
-    setClockProgress(0);
+    applyClockProgress(0);
     if (lastStageIdx !== -1) { lastStageIdx = -1; renderStageList(-1); }
     return;
   }
@@ -121,12 +121,12 @@ function renderQuit(){
     var span = next.ms - curMs;
     var pct = span > 0 ? Math.min(1, Math.max(0, (ms - curMs) / span)) : 0;
     byId('barfill').style.width = (pct * 100).toFixed(2) + '%';
-    setClockProgress(pct);
+    setClockDayProgress(now);
   } else {
     byId('next-t').textContent = '全部阶段已达成，身体已接近从不吸烟者水平';
     byId('next-v').textContent = '已完成';
     byId('barfill').style.width = '100%';
-    setClockProgress(1);
+    setClockDayProgress(now);
   }
 
   if (idx !== lastStageIdx) {
@@ -181,7 +181,16 @@ function setTxt(id, v){
   if (el && el.textContent !== v) el.textContent = v;
 }
 
-function setClockProgress(pct){
+/* 环形/轨迹皮肤：从戒烟那一刻起每 24 小时走一圈，
+   与倒计时的时分秒一致（戒烟时刻为空，满 24 小时走满，随后重新开始） */
+function setClockDayProgress(now){
+  now = Number(now) || Date.now();
+  var since = Math.max(0, now - S.quitDate);
+  var lapStart = S.quitDate + Math.floor(since / 86400000) * 86400000;
+  applyClockProgress((now - lapStart) / 86400000);
+}
+
+function applyClockProgress(pct){
   pct = Math.min(1, Math.max(0, Number(pct) || 0));
   var clocks = byId('clocks');
   if (clocks) clocks.style.setProperty('--stage', pct);
