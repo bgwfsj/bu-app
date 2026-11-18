@@ -49,18 +49,7 @@ public final class AppUpdater {
         if (!silent) toast(activity, "正在检查更新…");
         new Thread(() -> {
             try {
-                HttpURLConnection connection = openConnection(
-                    LATEST_RELEASE_API, "application/vnd.github+json");
-                int code = connection.getResponseCode();
-                if (code != 200) throw new Exception("GitHub 返回 " + code);
-                String json;
-                try (InputStream input = connection.getInputStream()) {
-                    json = readText(input);
-                } finally {
-                    connection.disconnect();
-                }
-
-                JSONObject release = new JSONObject(json);
+                JSONObject release = fetchLatestRelease();
                 String tag = release.optString("tag_name");
                 String version = tag.startsWith("v") ? tag.substring(1) : tag;
                 String current = currentVersion(activity);
@@ -90,6 +79,90 @@ public final class AppUpdater {
                 checking.set(false);
             }
         }, "bu-update-check").start();
+    }
+
+    /* 先走 GitHub API；被限流(403)或网络拦截时，
+       自动改用网页接口（无 API 配额限制）解析最新版本和 APK。 */
+    private static JSONObject fetchLatestRelease() throws Exception {
+        try {
+            HttpURLConnection connection = openConnection(
+                LATEST_RELEASE_API, "application/vnd.github+json");
+            int code = connection.getResponseCode();
+            if (code != 200) {
+                String detail = readErrorBody(connection);
+                throw new Exception(
+                    "GitHub 返回 " + code + (detail.isEmpty() ? "" : "：" + detail));
+            }
+            String json;
+            try (InputStream input = connection.getInputStream()) {
+                json = readText(input);
+            } finally {
+                connection.disconnect();
+            }
+            return new JSONObject(json);
+        } catch (Exception apiError) {
+            return fetchLatestReleaseFromPage();
+        }
+    }
+
+    private static JSONObject fetchLatestReleaseFromPage() throws Exception {
+        HttpURLConnection page = openConnection(
+            "https://github.com/bgwfsj/bu-app/releases/latest", "text/html");
+        int pageCode = page.getResponseCode();
+        String finalUrl = page.getURL().toString();
+        page.disconnect();
+        if (pageCode != 200) throw new Exception("GitHub 网页返回 " + pageCode);
+
+        java.util.regex.Matcher tagMatcher = java.util.regex.Pattern
+            .compile("/releases/tag/([^/\"?#]+)")
+            .matcher(finalUrl);
+        if (!tagMatcher.find()) throw new Exception("无法识别最新版本");
+        String tag = tagMatcher.group(1);
+
+        HttpURLConnection assets = openConnection(
+            "https://github.com/bgwfsj/bu-app/releases/expanded_assets/" + tag, "text/html");
+        int assetCode = assets.getResponseCode();
+        String html;
+        try (InputStream input = assets.getInputStream()) {
+            html = readText(input);
+        } finally {
+            assets.disconnect();
+        }
+        if (assetCode != 200) throw new Exception("GitHub 附件页返回 " + assetCode);
+
+        java.util.regex.Matcher linkMatcher = java.util.regex.Pattern
+            .compile("href=\"([^\"]*\\.apk)\"")
+            .matcher(html);
+        if (!linkMatcher.find()) throw new Exception("最新版本没有 APK 附件");
+        String path = linkMatcher.group(1);
+        if (!path.startsWith("http")) path = "https://github.com" + path;
+        String name = path.substring(path.lastIndexOf('/') + 1);
+
+        JSONObject asset = new JSONObject();
+        asset.put("url", path);
+        asset.put("browser_download_url", path);
+        asset.put("name", name);
+        asset.put("digest", JSONObject.NULL);
+        asset.put("size", -1);
+
+        JSONArray assetsArray = new JSONArray();
+        assetsArray.put(asset);
+        JSONObject release = new JSONObject();
+        release.put("tag_name", tag);
+        release.put("name", tag);
+        release.put("assets", assetsArray);
+        return release;
+    }
+
+    private static String readErrorBody(HttpURLConnection connection) {
+        try {
+            InputStream error = connection.getErrorStream();
+            if (error == null) return "";
+            String body = readText(error).trim();
+            return body.length() > 160 ? body.substring(0, 160) + "…" : body;
+        } catch (Exception ignored) {
+            return "";
+        }
     }
 
     private static void showUpdateDialog(
