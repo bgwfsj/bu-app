@@ -1,10 +1,12 @@
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
+$msgFile = Join-Path $root '_tools\release-message.txt'
+$message = [IO.File]::ReadAllText($msgFile, [Text.Encoding]::UTF8).Trim()
 Push-Location $root
 try {
     git add -A
-    git commit -m 'v6.0.19: 更新检查增加网页备用通道'
-    git tag v6.0.19
+    git commit -m $message
+    git tag v6.0.20
     git push origin main --tags
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }

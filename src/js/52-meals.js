@@ -69,7 +69,7 @@ var MEAL_GAP_RULES = {
   'late>dinner':      { short: 660, long: 1260, label: '夜宵到晚餐', range: '11–20 小时', overnight: true }
 };
 function mealDefaultState(){
-  return { schemaVersion: 1, records: [] };
+  return { schemaVersion: 2, records: [], menu: [] };
 }
 
 function mealTypeMeta(type){
@@ -108,6 +108,53 @@ function mealRecordDate(record){
   return new Date();
 }
 
+
+function mealParseFoods(value){
+  var parts;
+  if (Array.isArray(value)) parts = value;
+  else parts = String(value || '').split(/[、,，;；\n]/);
+  var out = [], seen = {};
+  each(parts, function(part){
+    var name = String(part).trim();
+    if (!name || seen[name]) return;
+    seen[name] = true;
+    out.push(name);
+  });
+  return out;
+}
+
+function mealRecordFoods(record){
+  return mealParseFoods(record && record.foods || []);
+}
+
+function mealChipButtonsHtml(selected){
+  selected = mealParseFoods(selected);
+  return mealData.menu.map(function(name){
+    return '<button type="button" class="meal-food-chip' + (selected.indexOf(name) >= 0 ? ' on' : '') + '"' +
+      actionAttrs('toggleMealFoodChip', [name]) + '>' + escHtml(name) + '</button>';
+  }).join('');
+}
+
+function mealFoodChipsHtml(selected){
+  selected = mealParseFoods(selected);
+  if (!mealData || !mealData.menu || !mealData.menu.length) {
+    return '<div class="meal-menu-chips-empty">菜单里还没有菜，输入后会自动加入。</div>';
+  }
+  return '<details class="meal-menu-picker">' +
+    '<summary><span>从菜单选</span><small>' + mealData.menu.length + ' 道菜</small><i>⌄</i></summary>' +
+    '<div class="meal-menu-chips">' + mealChipButtonsHtml(selected) + '</div>' +
+    '</details>';
+}
+
+function mealFoodEditorHtml(selected, label){
+  selected = mealParseFoods(selected);
+  mealFoodEditorTarget = 'meal-food-input';
+  return '<div class="meal-food-editor">' +
+    '<label class="todo-form-label">' + escHtml(label || '吃了什么') + '</label>' +
+    '<input class="todo-form-input" type="text" id="meal-food-input" value="' + escHtml(selected.join('、')) + '" placeholder="例如：粥、鸡蛋">' +
+    '<div class="meal-menu-chips">' + mealFoodChipsHtml(selected) + '</div>' +
+    '</div>';
+}
 function mealInIdealWindow(type, date){
   var meta = mealTypeMeta(type);
   if (!meta.primary) return false;
@@ -237,10 +284,11 @@ function normalizeMealState(data){
     var id = String(record.id || ('meal_' + when.getTime()));
     if (seen[id]) id += '_' + Math.random().toString(36).slice(2, 6);
     seen[id] = true;
-    parsed.push({ id: id, type: record.type, when: when, backfill: !!record.backfill });
+    parsed.push({ id: id, type: record.type, when: when, backfill: !!record.backfill, foods: mealParseFoods(record.foods) });
   });
   parsed.sort(function(a, b){ return a.when.getTime() - b.when.getTime(); });
   var out = mealDefaultState();
+  out.menu = mealParseFoods(data && data.menu || []);
   each(parsed, function(item){
     var previous = out.records.length ? out.records[out.records.length - 1] : null;
     var review = mealMomentReview(item.type, item.when, previous);
@@ -254,7 +302,11 @@ function normalizeMealState(data){
       gapMinutes: review.gapMinutes,
       reviewTitle: review.title,
       tip: mealTipFor(item.type, item.when),
-      backfill: item.backfill
+      backfill: item.backfill,
+      foods: item.foods
+    });
+    each(item.foods, function(name){
+      if (out.menu.indexOf(name) < 0) out.menu.push(name);
     });
   });
   return out;
@@ -267,9 +319,15 @@ function loadMealState(){
 
 function saveMealState(){
   if (!mealData) mealData = mealDefaultState();
-  mealData.schemaVersion = 1;
+  mealData.schemaVersion = 2;
+  if (!Array.isArray(mealData.menu)) mealData.menu = [];
   mealData.records.sort(function(a, b){
     return String(a.createdAt).localeCompare(String(b.createdAt));
+  });
+  each(mealData.records, function(record){
+    each(mealRecordFoods(record), function(name){
+      if (mealData.menu.indexOf(name) < 0) mealData.menu.push(name);
+    });
   });
   storeSet(MKEY, mealData);
 }
@@ -435,12 +493,15 @@ function paintMealCountdown(){
 
 function mealEntryHtml(record){
   var meta = mealTypeMeta(record.type);
+  var foods = mealRecordFoods(record);
   return '<div class="meal-entry" data-type="' + meta.id + '" data-regular="' + (record.regular ? 'true' : 'false') + '">' +
     '<span class="meal-entry-time">' + escHtml(record.time) + '</span>' +
     '<span class="meal-entry-dot"></span>' +
-    '<span class="meal-entry-main"><b>' + escHtml(meta.name) +
-    (record.backfill ? '<i>补记</i>' : '') + '</b><small>' +
-    escHtml(record.reviewTitle) + '</small></span>' +
+    '<span class="meal-entry-main"' + actionAttrs('openMealFoodEditor', [record.id]) + '><b>' + escHtml(meta.name) +
+    (record.backfill ? '<i>补记</i>' : '') + '</b>' +
+    (foods.length ? '<small class="meal-entry-food">' + escHtml(foods.join(' · ')) + '</small>' :
+      '<small>' + escHtml(record.reviewTitle) + '</small>') +
+    '</span>' +
     '<button type="button"' + actionAttrs('deleteMealRecord', [record.id]) + '>删除</button></div>';
 }
 
@@ -572,11 +633,15 @@ function openMealDay(dateKey){
       }
     }
     var review = mealMomentReview(record.type, mealRecordDate(record), prev);
-    return '<div class="meal-day-row">' +
+    var foods = mealRecordFoods(record);
+    return '<div class="meal-day-row"' + actionAttrs('openMealFoodEditor', [record.id, mealDateKey(day)]) + '>' +
       '<span class="meal-day-dot ' + (record.regular ? 'good' : 'warn') + '"></span>' +
       '<span class="meal-day-main"><b>' + escHtml(meta.name) + ' · ' + escHtml(record.time) +
-        (record.backfill ? '<i>补记</i>' : '') + '</b><small>' + escHtml(review.title) +
-        '</small></span><p>' + escHtml(review.detail) + '</p></div>';
+        (record.backfill ? '<i>补记</i>' : '') + '</b>' +
+        (foods.length ? '<small class="meal-day-food">' + escHtml(foods.join(' · ')) + '</small>' :
+          '<small>' + escHtml(review.title) + '</small>') +
+      '</span><em class="meal-day-edit">' + (foods.length ? '改吃什么' : '补吃什么') + '</em>' +
+      '<p>' + escHtml(review.detail) + '</p></div>';
   }).join('');
   openSheet(
     '<h3>' + (day.getMonth() + 1) + '月' + day.getDate() + '日 · 三餐</h3>' +
@@ -596,6 +661,7 @@ function renderMealPage(){
   renderMealList();
   renderMealWeek();
   renderMealCalendar();
+  renderMealMenu();
 }
 
 function recordMealNow(){
@@ -641,9 +707,11 @@ function recordMealAt(when, options){
     '<h3>' + (record.backfill ? '补记 · ' : '') + escHtml(meta.name) + ' · ' + escHtml(record.time) + '</h3>' +
     '<div class="meal-feedback-state ' + escHtml(review.tone) + '">' + escHtml(review.title) + '</div>' +
     '<p class="meal-feedback-detail">' + escHtml(review.detail) + '</p>' +
+    mealFoodEditorHtml([], '吃了什么（可空）') +
     '<div class="meal-tip-card"><b>饮食小知识</b><span>' + escHtml(record.tip) + '</span></div>' +
     '<p class="meal-feedback-note">这些只是一般作息提示，按自己的饥饿感和身体状况调整。</p>' +
-    '<div class="row"><button class="primary" style="flex:1"' + actionAttrs('closeSheet') + '>知道了</button></div>'
+    '<div class="row"><button class="ghost" style="flex:1"' + actionAttrs('closeSheet') + '>知道了</button>' +
+    '<button class="primary" style="flex:1"' + actionAttrs('saveMealFoods', [record.id]) + '>记下了</button></div>'
   );
   toast(record.backfill ? '已补记' + meta.name : '已记录' + meta.name);
 }
@@ -687,6 +755,109 @@ function deleteMealRecord(id){
     renderDashboard();
     toast('记录已删除');
   }, { title: '删除三餐记录', confirmLabel: '删除' });
+}
+
+
+
+
+function renderMealMenu(){
+  var box = byId('meal-menu-list');
+  if (!box || !mealData) return;
+  var counts = {}, typeCounts = {};
+  each(mealData.records, function(record){
+    each(mealRecordFoods(record), function(name){
+      counts[name] = (counts[name] || 0) + 1;
+      if (!typeCounts[name]) typeCounts[name] = {};
+      typeCounts[name][record.type] = (typeCounts[name][record.type] || 0) + 1;
+    });
+  });
+  var items = (mealData.menu || []).slice().sort(function(a, b){
+    var diff = (counts[b] || 0) - (counts[a] || 0);
+    return diff ? diff : String(a).localeCompare(String(b), 'zh-CN');
+  });
+  setTxt('meal-menu-summary', items.length ? items.length + ' 道菜' : '');
+  box.innerHTML = items.map(function(name){
+    var perType = [];
+    each(MEAL_TYPES, function(meta){
+      var n = typeCounts[name] ? (typeCounts[name][meta.id] || 0) : 0;
+      if (n > 0) perType.push(meta.name + ' ' + n);
+    });
+    return '<div class="meal-menu-row">' +
+      '<span class="meal-menu-dot"></span>' +
+      '<span class="meal-menu-main"><b>' + escHtml(name) + '</b>' +
+      '<small>' + ((counts[name] || 0) ? '共 ' + counts[name] + ' 次' : '还没吃过') +
+        (perType.length ? ' · ' + escHtml(perType.join(' · ')) : '') + '</small></span>' +
+      '</div>';
+  }).join('') || '<div class="meal-empty">还没有菜单<br><span>记录时输入，或点右上角加一道菜</span></div>';
+}
+
+function toggleMealFoodChip(name){
+  var input = byId(mealFoodEditorTarget);
+  if (!input) return;
+  var current = mealParseFoods(input.value);
+  var idx = current.indexOf(name);
+  if (idx >= 0) current.splice(idx, 1);
+  else current.push(name);
+  input.value = current.join('、');
+  var chips = input.closest('.meal-food-editor') && input.closest('.meal-food-editor').querySelector('.meal-menu-chips');
+  if (chips) chips.innerHTML = mealChipButtonsHtml(current);
+}
+
+function saveMealFoods(recordId, returnDateKey){
+  var record = (mealData && mealData.records || []).filter(function(item){ return item.id === recordId; })[0];
+  var input = byId('meal-food-input');
+  if (!record || !input) return;
+  record.foods = mealParseFoods(input.value);
+  saveMealState();
+  closeSheet();
+  if (returnDateKey) openMealDay(returnDateKey);
+  else {
+    renderMealPage();
+    renderDashboard();
+  }
+  toast(record.foods.length ? '记下了' : '已保存');
+}
+
+function openMealFoodEditor(recordId, returnDateKey){
+  var record = (mealData && mealData.records || []).filter(function(item){ return item.id === recordId; })[0];
+  if (!record) return;
+  var meta = mealTypeMeta(record.type);
+  openSheet(
+    '<h3>' + escHtml(meta.name) + ' · ' + escHtml(record.time) + '</h3>' +
+    '<p>记下这顿吃了什么，也会自动加入菜单。</p>' +
+    mealFoodEditorHtml(record.foods || [], '这顿吃了什么') +
+    '<div class="row"><button class="ghost"' + actionAttrs('closeSheet') + '>取消</button>' +
+    '<button class="primary"' + actionAttrs('saveMealFoods', [recordId, returnDateKey || '']) + '>保存</button></div>'
+  );
+}
+
+function openAddMealMenuItem(){
+  openSheet(
+    '<h3>加一道菜</h3>' +
+    '<p>手动加到菜单里，以后记录时可以点选。</p>' +
+    '<label class="todo-form-label">菜名</label>' +
+    '<input class="todo-form-input" type="text" id="meal-menu-new-name" placeholder="例如：清蒸鱼">' +
+    '<div class="row"><button class="ghost"' + actionAttrs('closeSheet') + '>取消</button>' +
+    '<button class="primary"' + actionAttrs('saveMealMenuItem') + '>加入菜单</button></div>'
+  );
+}
+
+function saveMealMenuItem(){
+  var input = byId('meal-menu-new-name');
+  if (!input) return;
+  var names = mealParseFoods(input.value);
+  if (!names.length) {
+    toast('先写一道菜');
+    return;
+  }
+  if (!mealData) loadMealState();
+  each(names, function(name){
+    if (mealData.menu.indexOf(name) < 0) mealData.menu.push(name);
+  });
+  saveMealState();
+  closeSheet();
+  renderMealMenu();
+  toast('已加入菜单');
 }
 
 function initMeals(){

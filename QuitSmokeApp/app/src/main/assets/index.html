@@ -1006,6 +1006,66 @@ button.meal-cal-day:active{background:rgba(13,32,45,.06)}
 .meal-tip-card span{font-size:12px;line-height:1.7;color:#53685f}
 .meal-feedback-note{margin:10px 0 14px!important;font-size:9.5px!important;color:#9ca7a3!important;line-height:1.6!important}
 
+/* ---------- 吃了什么 / 菜单 ---------- */
+.meal-entry-main{cursor:pointer}
+.meal-entry-food{color:#9b7654!important}
+.meal-food-editor{
+  margin:2px 0 12px;padding:12px 13px;border:1px solid var(--line2);border-radius:12px;
+  background:rgba(255,255,255,.66)
+}
+.meal-food-editor .todo-form-label{margin-top:0}
+.meal-menu-chips{display:flex;flex-wrap:wrap;gap:6px}
+.meal-menu-chips-empty{font-size:10px;line-height:1.6;color:#a0aaa7}
+.meal-food-chip{
+  padding:5px 11px;border:1px solid rgba(13,32,45,.1);border-radius:999px;
+  background:rgba(255,255,255,.72);color:#5d7080;font-size:11px;cursor:pointer
+}
+.meal-food-chip:active{transform:translateY(1px)}
+.meal-food-chip.on{background:rgba(10,168,122,.12);border-color:rgba(10,168,122,.3);color:#218c6c}
+.meal-menu-picker{margin-top:9px;border:1px solid var(--line2);border-radius:11px;background:rgba(255,255,255,.62);overflow:hidden}
+.meal-menu-picker>summary{
+  list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:9px 12px;font-size:11px;color:#5d7080;letter-spacing:.05em;user-select:none
+}
+.meal-menu-picker>summary::-webkit-details-marker{display:none}
+.meal-menu-picker>summary::marker{content:''}
+.meal-menu-picker>summary small{font-size:10px;color:#9ba7a3;font-weight:400}
+.meal-menu-picker>summary i{
+  font-style:normal;font-size:10px;color:#9ba7a3;line-height:1;transition:transform .25s
+}
+.meal-menu-picker[open]>summary i{transform:rotate(180deg)}
+.meal-menu-picker[open]>summary{border-bottom:1px solid var(--line2)}
+.meal-menu-picker .meal-menu-chips{padding:10px 12px 12px;max-height:190px;overflow:auto}
+.meal-day-row{cursor:pointer}
+.meal-day-food{color:#9b7654!important}
+.meal-day-edit{
+  flex:none;margin-top:2px;font-size:10px;font-style:normal;color:#8d9c97;letter-spacing:.04em
+}
+.meal-menu-card{
+  flex:0 0 auto;margin:2px 0 10px;padding:11px 10px 12px;border:1px solid var(--line2);
+  border-radius:13px;background:rgba(255,255,255,.72)
+}
+.meal-menu-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px}
+.meal-menu-head h3{margin:0;font-size:13px;font-weight:500;letter-spacing:.09em;color:#596e67}
+.meal-menu-head small{font-size:10px;color:#9ba7a3}
+.meal-menu-add{
+  width:28px;height:27px;margin-left:auto;border:1px solid var(--line2);border-radius:8px;
+  background:rgba(255,255,255,.7);color:#8c9b96;font-size:16px;line-height:1;cursor:pointer
+}
+.meal-menu-add:active{background:rgba(13,32,45,.06)}
+.meal-menu-list{display:flex;flex-direction:column;gap:6px}
+.meal-menu-row{
+  display:flex;align-items:center;gap:9px;padding:9px 11px;border:1px solid var(--line2);
+  border-radius:12px;background:rgba(255,255,255,.82)
+}
+.meal-menu-dot{
+  width:6px;height:6px;border-radius:50%;flex:none;
+  background:rgba(205,151,87,.55);box-shadow:0 0 0 3px rgba(205,151,87,.1)
+}
+.meal-menu-main{min-width:0}
+.meal-menu-main b{display:block;font-size:12.5px;font-weight:500;color:#435851}
+.meal-menu-main small{display:block;margin-top:3px;font-size:10px;line-height:1.5;color:#8f9f9a}
+
 /* 37-alcohol.css */
 /* ---------- 酒记 ---------- */
 body[data-page="alcohol"]::before{
@@ -1951,6 +2011,17 @@ body[data-page="fitness"]::before{
           <span><i class="late"></i>夜宵</span>
         </div>
       </section>
+
+
+      <section class="meal-menu-card">
+        <div class="meal-menu-head">
+          <h3>吃过什么</h3>
+          <small id="meal-menu-summary"></small>
+          <button class="iconbtn meal-menu-add" type="button" data-action="openAddMealMenuItem" title="加一道菜" aria-label="加一道菜">＋</button>
+        </div>
+        <div class="meal-menu-list" id="meal-menu-list"></div>
+      </section>
+
     </section>
 
     <!-- ================= 训练首页 ================= -->
@@ -2331,6 +2402,7 @@ var ledgerCollapsed = {};
 var ledgerRecordMode = 'preview';
 var ledgerTreeOpen = false;
 var mealData = null;
+var mealFoodEditorTarget = ''; // 当前食物输入框（三餐菜单编辑用）
 var mealCalendarOffset = 0;
 var alcoholData = null;
 var alcoholCalendarOffset = 0;
@@ -2497,7 +2569,12 @@ var APP_ACTION_NAMES = {
   saveLedgerTagEdit: true,
   addLedgerTag: true,
   setClockView: true,
-  openSetQuitDate: true
+  openSetQuitDate: true,
+  saveMealFoods: true,
+  openMealFoodEditor: true,
+  toggleMealFoodChip: true,
+  openAddMealMenuItem: true,
+  saveMealMenuItem: true
 };
 
 function actionAttrs(name, args, eventName){
@@ -2774,6 +2851,7 @@ byId('mask').addEventListener('click', closeSheet);
    应用版本记录
    ============================================================ */
 var APP_CHANGELOG = [
+  { version: '6.0.20', date: '2026-11-24', changes: ['三餐记录成功后可填写“吃了什么”，也可以点选菜单里的菜一起记下。', '日历里过去的每一餐都可以点开补记或修改吃了什么。', '三餐页最下方新增“吃过什么”菜单：每道菜显示总次数，以及早餐、午餐、晚餐等各餐吃过的次数；记录时输入的新菜会自动加入菜单，也可以手动加菜。', '“从菜单选”改为默认折叠，菜很多时展开后内部滚动，不会撑满弹框。'] },
   { version: '6.0.19', date: '2026-11-18', changes: ['检查更新增加备用通道：GitHub API 被限流（403）或网络拦截时，自动改用 GitHub 网页接口解析最新版本和下载链接，网页接口没有 API 配额限制。', '检查更新失败时提示会显示具体原因（如 API 限流），方便定位问题。'] },
   { version: '6.0.18', date: '2026-11-18', changes: ['戒烟右上角新增“⋯”菜单：时间皮肤（翻页·竖版、灯管·竖版、涟漪、风迹、流光）和“设置戒烟起始时间”入口，皮肤点击即可切换。', '涟漪、风迹、流光三个皮肤的进度环与轨迹改为从戒烟那一刻起每 24 小时走一圈，与倒计时的时分秒一致，走满后重新开始。'] },
   { version: '6.0.17', date: '2026-11-16', changes: ['待办：当天的待办全部完成后，到点不再发每日提醒；取消某一项后提醒会自动恢复。', '训练：训练中已全部完成的动作自动置底，未完成和正在做的排在上面；“调整本次训练”列表同样生效。'] },
@@ -4178,7 +4256,7 @@ var MEAL_GAP_RULES = {
   'late>dinner':      { short: 660, long: 1260, label: '夜宵到晚餐', range: '11–20 小时', overnight: true }
 };
 function mealDefaultState(){
-  return { schemaVersion: 1, records: [] };
+  return { schemaVersion: 2, records: [], menu: [] };
 }
 
 function mealTypeMeta(type){
@@ -4217,6 +4295,53 @@ function mealRecordDate(record){
   return new Date();
 }
 
+
+function mealParseFoods(value){
+  var parts;
+  if (Array.isArray(value)) parts = value;
+  else parts = String(value || '').split(/[、,，;；\n]/);
+  var out = [], seen = {};
+  each(parts, function(part){
+    var name = String(part).trim();
+    if (!name || seen[name]) return;
+    seen[name] = true;
+    out.push(name);
+  });
+  return out;
+}
+
+function mealRecordFoods(record){
+  return mealParseFoods(record && record.foods || []);
+}
+
+function mealChipButtonsHtml(selected){
+  selected = mealParseFoods(selected);
+  return mealData.menu.map(function(name){
+    return '<button type="button" class="meal-food-chip' + (selected.indexOf(name) >= 0 ? ' on' : '') + '"' +
+      actionAttrs('toggleMealFoodChip', [name]) + '>' + escHtml(name) + '</button>';
+  }).join('');
+}
+
+function mealFoodChipsHtml(selected){
+  selected = mealParseFoods(selected);
+  if (!mealData || !mealData.menu || !mealData.menu.length) {
+    return '<div class="meal-menu-chips-empty">菜单里还没有菜，输入后会自动加入。</div>';
+  }
+  return '<details class="meal-menu-picker">' +
+    '<summary><span>从菜单选</span><small>' + mealData.menu.length + ' 道菜</small><i>⌄</i></summary>' +
+    '<div class="meal-menu-chips">' + mealChipButtonsHtml(selected) + '</div>' +
+    '</details>';
+}
+
+function mealFoodEditorHtml(selected, label){
+  selected = mealParseFoods(selected);
+  mealFoodEditorTarget = 'meal-food-input';
+  return '<div class="meal-food-editor">' +
+    '<label class="todo-form-label">' + escHtml(label || '吃了什么') + '</label>' +
+    '<input class="todo-form-input" type="text" id="meal-food-input" value="' + escHtml(selected.join('、')) + '" placeholder="例如：粥、鸡蛋">' +
+    '<div class="meal-menu-chips">' + mealFoodChipsHtml(selected) + '</div>' +
+    '</div>';
+}
 function mealInIdealWindow(type, date){
   var meta = mealTypeMeta(type);
   if (!meta.primary) return false;
@@ -4346,10 +4471,11 @@ function normalizeMealState(data){
     var id = String(record.id || ('meal_' + when.getTime()));
     if (seen[id]) id += '_' + Math.random().toString(36).slice(2, 6);
     seen[id] = true;
-    parsed.push({ id: id, type: record.type, when: when, backfill: !!record.backfill });
+    parsed.push({ id: id, type: record.type, when: when, backfill: !!record.backfill, foods: mealParseFoods(record.foods) });
   });
   parsed.sort(function(a, b){ return a.when.getTime() - b.when.getTime(); });
   var out = mealDefaultState();
+  out.menu = mealParseFoods(data && data.menu || []);
   each(parsed, function(item){
     var previous = out.records.length ? out.records[out.records.length - 1] : null;
     var review = mealMomentReview(item.type, item.when, previous);
@@ -4363,7 +4489,11 @@ function normalizeMealState(data){
       gapMinutes: review.gapMinutes,
       reviewTitle: review.title,
       tip: mealTipFor(item.type, item.when),
-      backfill: item.backfill
+      backfill: item.backfill,
+      foods: item.foods
+    });
+    each(item.foods, function(name){
+      if (out.menu.indexOf(name) < 0) out.menu.push(name);
     });
   });
   return out;
@@ -4376,9 +4506,15 @@ function loadMealState(){
 
 function saveMealState(){
   if (!mealData) mealData = mealDefaultState();
-  mealData.schemaVersion = 1;
+  mealData.schemaVersion = 2;
+  if (!Array.isArray(mealData.menu)) mealData.menu = [];
   mealData.records.sort(function(a, b){
     return String(a.createdAt).localeCompare(String(b.createdAt));
+  });
+  each(mealData.records, function(record){
+    each(mealRecordFoods(record), function(name){
+      if (mealData.menu.indexOf(name) < 0) mealData.menu.push(name);
+    });
   });
   storeSet(MKEY, mealData);
 }
@@ -4544,12 +4680,15 @@ function paintMealCountdown(){
 
 function mealEntryHtml(record){
   var meta = mealTypeMeta(record.type);
+  var foods = mealRecordFoods(record);
   return '<div class="meal-entry" data-type="' + meta.id + '" data-regular="' + (record.regular ? 'true' : 'false') + '">' +
     '<span class="meal-entry-time">' + escHtml(record.time) + '</span>' +
     '<span class="meal-entry-dot"></span>' +
-    '<span class="meal-entry-main"><b>' + escHtml(meta.name) +
-    (record.backfill ? '<i>补记</i>' : '') + '</b><small>' +
-    escHtml(record.reviewTitle) + '</small></span>' +
+    '<span class="meal-entry-main"' + actionAttrs('openMealFoodEditor', [record.id]) + '><b>' + escHtml(meta.name) +
+    (record.backfill ? '<i>补记</i>' : '') + '</b>' +
+    (foods.length ? '<small class="meal-entry-food">' + escHtml(foods.join(' · ')) + '</small>' :
+      '<small>' + escHtml(record.reviewTitle) + '</small>') +
+    '</span>' +
     '<button type="button"' + actionAttrs('deleteMealRecord', [record.id]) + '>删除</button></div>';
 }
 
@@ -4681,11 +4820,15 @@ function openMealDay(dateKey){
       }
     }
     var review = mealMomentReview(record.type, mealRecordDate(record), prev);
-    return '<div class="meal-day-row">' +
+    var foods = mealRecordFoods(record);
+    return '<div class="meal-day-row"' + actionAttrs('openMealFoodEditor', [record.id, mealDateKey(day)]) + '>' +
       '<span class="meal-day-dot ' + (record.regular ? 'good' : 'warn') + '"></span>' +
       '<span class="meal-day-main"><b>' + escHtml(meta.name) + ' · ' + escHtml(record.time) +
-        (record.backfill ? '<i>补记</i>' : '') + '</b><small>' + escHtml(review.title) +
-        '</small></span><p>' + escHtml(review.detail) + '</p></div>';
+        (record.backfill ? '<i>补记</i>' : '') + '</b>' +
+        (foods.length ? '<small class="meal-day-food">' + escHtml(foods.join(' · ')) + '</small>' :
+          '<small>' + escHtml(review.title) + '</small>') +
+      '</span><em class="meal-day-edit">' + (foods.length ? '改吃什么' : '补吃什么') + '</em>' +
+      '<p>' + escHtml(review.detail) + '</p></div>';
   }).join('');
   openSheet(
     '<h3>' + (day.getMonth() + 1) + '月' + day.getDate() + '日 · 三餐</h3>' +
@@ -4705,6 +4848,7 @@ function renderMealPage(){
   renderMealList();
   renderMealWeek();
   renderMealCalendar();
+  renderMealMenu();
 }
 
 function recordMealNow(){
@@ -4750,9 +4894,11 @@ function recordMealAt(when, options){
     '<h3>' + (record.backfill ? '补记 · ' : '') + escHtml(meta.name) + ' · ' + escHtml(record.time) + '</h3>' +
     '<div class="meal-feedback-state ' + escHtml(review.tone) + '">' + escHtml(review.title) + '</div>' +
     '<p class="meal-feedback-detail">' + escHtml(review.detail) + '</p>' +
+    mealFoodEditorHtml([], '吃了什么（可空）') +
     '<div class="meal-tip-card"><b>饮食小知识</b><span>' + escHtml(record.tip) + '</span></div>' +
     '<p class="meal-feedback-note">这些只是一般作息提示，按自己的饥饿感和身体状况调整。</p>' +
-    '<div class="row"><button class="primary" style="flex:1"' + actionAttrs('closeSheet') + '>知道了</button></div>'
+    '<div class="row"><button class="ghost" style="flex:1"' + actionAttrs('closeSheet') + '>知道了</button>' +
+    '<button class="primary" style="flex:1"' + actionAttrs('saveMealFoods', [record.id]) + '>记下了</button></div>'
   );
   toast(record.backfill ? '已补记' + meta.name : '已记录' + meta.name);
 }
@@ -4796,6 +4942,109 @@ function deleteMealRecord(id){
     renderDashboard();
     toast('记录已删除');
   }, { title: '删除三餐记录', confirmLabel: '删除' });
+}
+
+
+
+
+function renderMealMenu(){
+  var box = byId('meal-menu-list');
+  if (!box || !mealData) return;
+  var counts = {}, typeCounts = {};
+  each(mealData.records, function(record){
+    each(mealRecordFoods(record), function(name){
+      counts[name] = (counts[name] || 0) + 1;
+      if (!typeCounts[name]) typeCounts[name] = {};
+      typeCounts[name][record.type] = (typeCounts[name][record.type] || 0) + 1;
+    });
+  });
+  var items = (mealData.menu || []).slice().sort(function(a, b){
+    var diff = (counts[b] || 0) - (counts[a] || 0);
+    return diff ? diff : String(a).localeCompare(String(b), 'zh-CN');
+  });
+  setTxt('meal-menu-summary', items.length ? items.length + ' 道菜' : '');
+  box.innerHTML = items.map(function(name){
+    var perType = [];
+    each(MEAL_TYPES, function(meta){
+      var n = typeCounts[name] ? (typeCounts[name][meta.id] || 0) : 0;
+      if (n > 0) perType.push(meta.name + ' ' + n);
+    });
+    return '<div class="meal-menu-row">' +
+      '<span class="meal-menu-dot"></span>' +
+      '<span class="meal-menu-main"><b>' + escHtml(name) + '</b>' +
+      '<small>' + ((counts[name] || 0) ? '共 ' + counts[name] + ' 次' : '还没吃过') +
+        (perType.length ? ' · ' + escHtml(perType.join(' · ')) : '') + '</small></span>' +
+      '</div>';
+  }).join('') || '<div class="meal-empty">还没有菜单<br><span>记录时输入，或点右上角加一道菜</span></div>';
+}
+
+function toggleMealFoodChip(name){
+  var input = byId(mealFoodEditorTarget);
+  if (!input) return;
+  var current = mealParseFoods(input.value);
+  var idx = current.indexOf(name);
+  if (idx >= 0) current.splice(idx, 1);
+  else current.push(name);
+  input.value = current.join('、');
+  var chips = input.closest('.meal-food-editor') && input.closest('.meal-food-editor').querySelector('.meal-menu-chips');
+  if (chips) chips.innerHTML = mealChipButtonsHtml(current);
+}
+
+function saveMealFoods(recordId, returnDateKey){
+  var record = (mealData && mealData.records || []).filter(function(item){ return item.id === recordId; })[0];
+  var input = byId('meal-food-input');
+  if (!record || !input) return;
+  record.foods = mealParseFoods(input.value);
+  saveMealState();
+  closeSheet();
+  if (returnDateKey) openMealDay(returnDateKey);
+  else {
+    renderMealPage();
+    renderDashboard();
+  }
+  toast(record.foods.length ? '记下了' : '已保存');
+}
+
+function openMealFoodEditor(recordId, returnDateKey){
+  var record = (mealData && mealData.records || []).filter(function(item){ return item.id === recordId; })[0];
+  if (!record) return;
+  var meta = mealTypeMeta(record.type);
+  openSheet(
+    '<h3>' + escHtml(meta.name) + ' · ' + escHtml(record.time) + '</h3>' +
+    '<p>记下这顿吃了什么，也会自动加入菜单。</p>' +
+    mealFoodEditorHtml(record.foods || [], '这顿吃了什么') +
+    '<div class="row"><button class="ghost"' + actionAttrs('closeSheet') + '>取消</button>' +
+    '<button class="primary"' + actionAttrs('saveMealFoods', [recordId, returnDateKey || '']) + '>保存</button></div>'
+  );
+}
+
+function openAddMealMenuItem(){
+  openSheet(
+    '<h3>加一道菜</h3>' +
+    '<p>手动加到菜单里，以后记录时可以点选。</p>' +
+    '<label class="todo-form-label">菜名</label>' +
+    '<input class="todo-form-input" type="text" id="meal-menu-new-name" placeholder="例如：清蒸鱼">' +
+    '<div class="row"><button class="ghost"' + actionAttrs('closeSheet') + '>取消</button>' +
+    '<button class="primary"' + actionAttrs('saveMealMenuItem') + '>加入菜单</button></div>'
+  );
+}
+
+function saveMealMenuItem(){
+  var input = byId('meal-menu-new-name');
+  if (!input) return;
+  var names = mealParseFoods(input.value);
+  if (!names.length) {
+    toast('先写一道菜');
+    return;
+  }
+  if (!mealData) loadMealState();
+  each(names, function(name){
+    if (mealData.menu.indexOf(name) < 0) mealData.menu.push(name);
+  });
+  saveMealState();
+  closeSheet();
+  renderMealMenu();
+  toast('已加入菜单');
 }
 
 function initMeals(){

@@ -198,3 +198,63 @@ button.meal-cal-day:active{background:rgba(13,32,45,.06)}
 .meal-tip-card b{font-size:10px;letter-spacing:.12em;color:#789088}
 .meal-tip-card span{font-size:12px;line-height:1.7;color:#53685f}
 .meal-feedback-note{margin:10px 0 14px!important;font-size:9.5px!important;color:#9ca7a3!important;line-height:1.6!important}
+
+/* ---------- 吃了什么 / 菜单 ---------- */
+.meal-entry-main{cursor:pointer}
+.meal-entry-food{color:#9b7654!important}
+.meal-food-editor{
+  margin:2px 0 12px;padding:12px 13px;border:1px solid var(--line2);border-radius:12px;
+  background:rgba(255,255,255,.66)
+}
+.meal-food-editor .todo-form-label{margin-top:0}
+.meal-menu-chips{display:flex;flex-wrap:wrap;gap:6px}
+.meal-menu-chips-empty{font-size:10px;line-height:1.6;color:#a0aaa7}
+.meal-food-chip{
+  padding:5px 11px;border:1px solid rgba(13,32,45,.1);border-radius:999px;
+  background:rgba(255,255,255,.72);color:#5d7080;font-size:11px;cursor:pointer
+}
+.meal-food-chip:active{transform:translateY(1px)}
+.meal-food-chip.on{background:rgba(10,168,122,.12);border-color:rgba(10,168,122,.3);color:#218c6c}
+.meal-menu-picker{margin-top:9px;border:1px solid var(--line2);border-radius:11px;background:rgba(255,255,255,.62);overflow:hidden}
+.meal-menu-picker>summary{
+  list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:9px 12px;font-size:11px;color:#5d7080;letter-spacing:.05em;user-select:none
+}
+.meal-menu-picker>summary::-webkit-details-marker{display:none}
+.meal-menu-picker>summary::marker{content:''}
+.meal-menu-picker>summary small{font-size:10px;color:#9ba7a3;font-weight:400}
+.meal-menu-picker>summary i{
+  font-style:normal;font-size:10px;color:#9ba7a3;line-height:1;transition:transform .25s
+}
+.meal-menu-picker[open]>summary i{transform:rotate(180deg)}
+.meal-menu-picker[open]>summary{border-bottom:1px solid var(--line2)}
+.meal-menu-picker .meal-menu-chips{padding:10px 12px 12px;max-height:190px;overflow:auto}
+.meal-day-row{cursor:pointer}
+.meal-day-food{color:#9b7654!important}
+.meal-day-edit{
+  flex:none;margin-top:2px;font-size:10px;font-style:normal;color:#8d9c97;letter-spacing:.04em
+}
+.meal-menu-card{
+  flex:0 0 auto;margin:2px 0 10px;padding:11px 10px 12px;border:1px solid var(--line2);
+  border-radius:13px;background:rgba(255,255,255,.72)
+}
+.meal-menu-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px}
+.meal-menu-head h3{margin:0;font-size:13px;font-weight:500;letter-spacing:.09em;color:#596e67}
+.meal-menu-head small{font-size:10px;color:#9ba7a3}
+.meal-menu-add{
+  width:28px;height:27px;margin-left:auto;border:1px solid var(--line2);border-radius:8px;
+  background:rgba(255,255,255,.7);color:#8c9b96;font-size:16px;line-height:1;cursor:pointer
+}
+.meal-menu-add:active{background:rgba(13,32,45,.06)}
+.meal-menu-list{display:flex;flex-direction:column;gap:6px}
+.meal-menu-row{
+  display:flex;align-items:center;gap:9px;padding:9px 11px;border:1px solid var(--line2);
+  border-radius:12px;background:rgba(255,255,255,.82)
+}
+.meal-menu-dot{
+  width:6px;height:6px;border-radius:50%;flex:none;
+  background:rgba(205,151,87,.55);box-shadow:0 0 0 3px rgba(205,151,87,.1)
+}
+.meal-menu-main{min-width:0}
+.meal-menu-main b{display:block;font-size:12.5px;font-weight:500;color:#435851}
+.meal-menu-main small{display:block;margin-top:3px;font-size:10px;line-height:1.5;color:#8f9f9a}

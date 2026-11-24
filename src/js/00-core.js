@@ -52,6 +52,7 @@ var ledgerCollapsed = {};
 var ledgerRecordMode = 'preview';
 var ledgerTreeOpen = false;
 var mealData = null;
+var mealFoodEditorTarget = ''; // 当前食物输入框（三餐菜单编辑用）
 var mealCalendarOffset = 0;
 var alcoholData = null;
 var alcoholCalendarOffset = 0;
@@ -218,7 +219,12 @@ var APP_ACTION_NAMES = {
   saveLedgerTagEdit: true,
   addLedgerTag: true,
   setClockView: true,
-  openSetQuitDate: true
+  openSetQuitDate: true,
+  saveMealFoods: true,
+  openMealFoodEditor: true,
+  toggleMealFoodChip: true,
+  openAddMealMenuItem: true,
+  saveMealMenuItem: true
 };
 
 function actionAttrs(name, args, eventName){

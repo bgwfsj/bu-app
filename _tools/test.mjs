@@ -356,7 +356,15 @@ async function run() {
       var hasEvaluation = byId('sheet').querySelectorAll('.meal-feedback-state').length === 1;
       var hasTip = byId('sheet').querySelectorAll('.meal-tip-card').length === 1;
       var gapMentioned = byId('sheet').querySelector('.meal-feedback-detail').textContent.indexOf('更早的用餐记录') >= 0;
-      closeSheet();
+      var foodEditorInSheet = !!byId('sheet').querySelector('.meal-food-editor');
+      var foodInputInSheet = !!byId('meal-food-input');
+      byId('meal-food-input').value = '粥、鸡蛋';
+      byId('sheet').querySelector('[data-action="saveMealFoods"]').click();
+      var foodSheetClosed = !byId('sheet').classList.contains('on');
+      var foodsStored = JSON.parse(localStorage.getItem(MKEY)).records.filter(function(r){
+        return r.foods && r.foods.indexOf('粥') >= 0 && r.foods.indexOf('鸡蛋') >= 0;
+      }).length;
+      var menuSynced = JSON.parse(localStorage.getItem(MKEY)).menu.indexOf('粥') >= 0;
       recordMealAt(todayAt(15, 10));
       closeSheet();
       recordMealAt(todayAt(23, 10));
@@ -391,6 +399,31 @@ async function run() {
       var dayGoodDots = byId('sheet').querySelectorAll('.meal-day-dot.good').length;
       var dayWarnDots = byId('sheet').querySelectorAll('.meal-day-dot.warn').length;
       var dayHasDetail = !!byId('sheet').querySelector('.meal-day-row p');
+      var dayRowsEditable = byId('sheet').querySelectorAll('.meal-day-row[data-action="openMealFoodEditor"]').length;
+      var dayFoodShown = byId('sheet').textContent.indexOf('粥') >= 0;
+      closeSheet();
+      var parseFoods = mealParseFoods('粥、鸡蛋，豆浆;牛奶').length;
+      var menuRows = byId('meal-menu-list').querySelectorAll('.meal-menu-row').length;
+      var menuHasPorridge = byId('meal-menu-list').textContent.indexOf('粥') >= 0;
+      var menuMealCounts = /共 \\d+ 次/.test(byId('meal-menu-list').textContent) &&
+        /午餐 \\d+/.test(byId('meal-menu-list').textContent);
+      openAddMealMenuItem();
+      byId('meal-menu-new-name').value = '清蒸鱼';
+      saveMealMenuItem();
+      var menuAfterAdd = JSON.parse(localStorage.getItem(MKEY)).menu.indexOf('清蒸鱼') >= 0;
+      var menuRowsAfterAdd = byId('meal-menu-list').querySelectorAll('.meal-menu-row').length;
+      var backfillRecord = mealData.records.filter(function(r){ return r.backfill; })[0];
+      openMealFoodEditor(backfillRecord.id, mealDateKey(backfillDay));
+      var picker = byId('sheet').querySelector('.meal-menu-picker');
+      var pickerCollapsed = picker && !picker.open;
+      picker.querySelector('summary').click();
+      var pickerExpanded = picker.open && picker.querySelectorAll('.meal-food-chip').length >= 1;
+      byId('meal-food-input').value = '米饭、青菜';
+      byId('sheet').querySelector('[data-action="saveMealFoods"]').click();
+      var backfillFoodsSaved = (function(){
+        var r = mealData.records.filter(function(item){ return item.id === backfillRecord.id; })[0];
+        return r && r.foods.indexOf('米饭') >= 0;
+      })();
       closeSheet();
       var stored = JSON.parse(localStorage.getItem('meals_app_v1'));
       var rowCount = byId('meal-list').querySelectorAll('.meal-entry').length;
@@ -453,6 +486,22 @@ async function run() {
         hasEvaluation: hasEvaluation,
         hasTip: hasTip,
         gapMentioned: gapMentioned,
+        foodEditorInSheet: foodEditorInSheet,
+        foodInputInSheet: foodInputInSheet,
+        foodSheetClosed: foodSheetClosed,
+        foodsStored: foodsStored,
+        menuSynced: menuSynced,
+        parseFoods: parseFoods,
+        menuRows: menuRows,
+        menuHasPorridge: menuHasPorridge,
+        menuMealCounts: menuMealCounts,
+        menuAfterAdd: menuAfterAdd,
+        menuRowsAfterAdd: menuRowsAfterAdd,
+        dayRowsEditable: dayRowsEditable,
+        dayFoodShown: dayFoodShown,
+        pickerCollapsed: pickerCollapsed,
+        pickerExpanded: pickerExpanded,
+        backfillFoodsSaved: backfillFoodsSaved,
         intervalGoodGap: intervalGood.gapMinutes,
         intervalGoodTitle: intervalGood.title,
         intervalShortGap: intervalShort.gapMinutes,
@@ -534,6 +583,22 @@ async function run() {
     assert.equal(meals.hasEvaluation, true);
     assert.equal(meals.hasTip, true);
     assert.equal(meals.gapMentioned, true);
+    assert.equal(meals.foodEditorInSheet, true);
+    assert.equal(meals.foodInputInSheet, true);
+    assert.equal(meals.foodSheetClosed, true);
+    assert.equal(meals.foodsStored, 1);
+    assert.equal(meals.menuSynced, true);
+    assert.equal(meals.parseFoods, 4);
+    assert.ok(meals.menuRows >= 1);
+    assert.equal(meals.menuHasPorridge, true);
+    assert.equal(meals.menuMealCounts, true);
+    assert.equal(meals.menuAfterAdd, true);
+    assert.equal(meals.menuRowsAfterAdd, meals.menuRows + 1);
+    assert.ok(meals.dayRowsEditable >= 1);
+    assert.equal(meals.dayFoodShown, true);
+    assert.equal(meals.pickerCollapsed, true);
+    assert.equal(meals.pickerExpanded, true);
+    assert.equal(meals.backfillFoodsSaved, true);
     assert.equal(meals.intervalGoodGap, 210);
     assert.equal(meals.intervalGoodTitle, '吃得规律');
     assert.equal(meals.intervalShortGap, 45);
@@ -804,8 +869,8 @@ async function run() {
       cleanupConfirmOpened: true,
       cleanupCalls: 1,
       aboutOpened: true,
-      changelogCount: 78,
-      aboutVersion: '6.0.19',
+      changelogCount: 79,
+      aboutVersion: '6.0.20',
       updateBackupExposed: true,
       updateCalls: 1,
       handledBack: true,
