@@ -70,6 +70,22 @@ public final class StandaloneReminderScheduler {
         return ("standalone:" + id).hashCode() & 0x7fffffff;
     }
 
+    private static String occurrenceKey(JSONObject item, Calendar c) {
+        String date;
+        if ("once".equals(item.optString("mode"))) {
+            date = item.optString("date");
+        } else {
+            date = String.format(Locale.US, "%04d-%02d-%02d",
+                c.get(Calendar.YEAR), c.get(Calendar.MONTH) + 1, c.get(Calendar.DAY_OF_MONTH));
+        }
+        return item.optString("id") + "|" + date + "|" + item.optString("time");
+    }
+
+    private static boolean isSkipped(JSONObject item, Calendar c) {
+        String skip = item.optString("skipNextKey");
+        return !skip.isEmpty() && skip.equals(occurrenceKey(item, c));
+    }
+
     private static void cancelStored(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         try {
@@ -165,6 +181,9 @@ public final class StandaloneReminderScheduler {
                 if (candidate.getTimeInMillis() <= now) {
                     candidate.add(Calendar.DAY_OF_YEAR, 1);
                 }
+                if (isSkipped(item, candidate)) {
+                    candidate.add(Calendar.DAY_OF_YEAR, 1);
+                }
                 return candidate.getTimeInMillis();
             }
 
@@ -179,6 +198,7 @@ public final class StandaloneReminderScheduler {
                 candidate.set(Calendar.SECOND, 0);
                 candidate.set(Calendar.MILLISECOND, 0);
                 if (candidate.getTimeInMillis() <= now) candidate.add(Calendar.DAY_OF_YEAR, 7);
+                if (isSkipped(item, candidate)) candidate.add(Calendar.DAY_OF_YEAR, 7);
                 return candidate.getTimeInMillis();
             }
 
@@ -192,7 +212,9 @@ public final class StandaloneReminderScheduler {
                     int jsDay = candidate.get(Calendar.DAY_OF_WEEK) - 1;
                     boolean hits = "weekdays".equals(mode) ? (jsDay >= 1 && jsDay <= 5) :
                         (jsDay == 0 || jsDay == 6);
-                    if (hits && candidate.getTimeInMillis() > now) return candidate.getTimeInMillis();
+                    if (hits && candidate.getTimeInMillis() > now && !isSkipped(item, candidate)) {
+                        return candidate.getTimeInMillis();
+                    }
                     candidate.add(Calendar.DAY_OF_YEAR, 1);
                 }
                 return -1;
@@ -207,7 +229,11 @@ public final class StandaloneReminderScheduler {
                         String date = dates.optString(i, "");
                         try {
                             Date parsed = format.parse(date + " " + time);
-                            if (parsed.getTime() > now) return parsed.getTime();
+                            if (parsed.getTime() > now) {
+                                Calendar parsedCal = Calendar.getInstance();
+                                parsedCal.setTime(parsed);
+                                if (!isSkipped(item, parsedCal)) return parsed.getTime();
+                            }
                         } catch (Exception ignored) {}
                     }
                 }
@@ -227,7 +253,9 @@ public final class StandaloneReminderScheduler {
                     candidate.set(Calendar.MINUTE, minute);
                     candidate.set(Calendar.SECOND, 0);
                     candidate.set(Calendar.MILLISECOND, 0);
-                    if (candidate.getTimeInMillis() > now) return candidate.getTimeInMillis();
+                    if (candidate.getTimeInMillis() > now && !isSkipped(item, candidate)) {
+                        return candidate.getTimeInMillis();
+                    }
                     month.add(Calendar.MONTH, 1);
                 }
                 return -1;
@@ -242,7 +270,9 @@ public final class StandaloneReminderScheduler {
                     candidate.set(year, month, 1, hour, minute, 0);
                     int lastDay = candidate.getActualMaximum(Calendar.DAY_OF_MONTH);
                     candidate.set(Calendar.DAY_OF_MONTH, Math.min(wantedDay, lastDay));
-                    if (candidate.getTimeInMillis() > now) return candidate.getTimeInMillis();
+                    if (candidate.getTimeInMillis() > now && !isSkipped(item, candidate)) {
+                        return candidate.getTimeInMillis();
+                    }
                 }
             }
         } catch (Exception ignored) {}

@@ -587,6 +587,7 @@ body[data-page="settings"] #page-pager{opacity:0;pointer-events:none}
 .reminder-copy small{display:block;font-size:10px;color:#a1adb1;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .reminder-convert{border:0;background:transparent;color:#16896a;font-size:var(--fs-meta);padding:4px 2px;cursor:pointer}
 .reminder-convert{color:#5f8eaa}
+.reminder-check{border:0;background:transparent;color:#16896a;font-size:var(--fs-meta);padding:4px 2px;cursor:pointer;white-space:nowrap}
 .reminder-del{border:0;background:transparent;color:#c5a2a2;font-size:15px;padding:3px 2px;cursor:pointer}
 .reminder-empty{text-align:center;padding:27px 10px;color:#98a6aa;font-size:12.5px;line-height:1.8;background:rgba(255,255,255,.55);border:1px dashed var(--line);border-radius:13px}
 .reminder-archive-box{margin-top:18px;border-top:1px solid var(--line2);padding-top:10px}
@@ -2532,6 +2533,7 @@ var APP_ACTION_NAMES = {
   openReminderMenu: true,
   toggleReminderHomeNotice: true,
   completeHomeReminder: true,
+  confirmReminderOccurrence: true,
   saveSnooze: true,
   openSnoozeDialog: true,
   confirmNotificationAction: true,
@@ -2851,6 +2853,7 @@ byId('mask').addEventListener('click', closeSheet);
    应用版本记录
    ============================================================ */
 var APP_CHANGELOG = [
+  { version: '6.0.21', date: '2026-11-25', changes: ['提醒新增“提前确认本次”：每条提醒右侧可点击“确认本次”，仅一次提醒确认后直接归档、到点不再提醒；每天/每周/工作日/周末/自定义/每月/每年提醒确认后会跳过本次（今天这次或下一次出现的时间点），当天划线、首页不再提示，被跳过的这次系统通知也不会发出，之后的周期照常。'] },
   { version: '6.0.20', date: '2026-11-24', changes: ['三餐记录成功后可填写“吃了什么”，也可以点选菜单里的菜一起记下。', '日历里过去的每一餐都可以点开补记或修改吃了什么。', '三餐页最下方新增“吃过什么”菜单：每道菜显示总次数，以及早餐、午餐、晚餐等各餐吃过的次数；记录时输入的新菜会自动加入菜单，也可以手动加菜。', '“从菜单选”改为默认折叠，菜很多时展开后内部滚动，不会撑满弹框。'] },
   { version: '6.0.19', date: '2026-11-18', changes: ['检查更新增加备用通道：GitHub API 被限流（403）或网络拦截时，自动改用 GitHub 网页接口解析最新版本和下载链接，网页接口没有 API 配额限制。', '检查更新失败时提示会显示具体原因（如 API 限流），方便定位问题。'] },
   { version: '6.0.18', date: '2026-11-18', changes: ['戒烟右上角新增“⋯”菜单：时间皮肤（翻页·竖版、灯管·竖版、涟漪、风迹、流光）和“设置戒烟起始时间”入口，皮肤点击即可切换。', '涟漪、风迹、流光三个皮肤的进度环与轨迹改为从戒烟那一刻起每 24 小时走一圈，与倒计时的时分秒一致，走满后重新开始。'] },
@@ -7679,6 +7682,9 @@ function normalizeReminderItem(item){
     if (isNaN(month) || month < 1 || month > 12) return null;
     out.month = month;
   }
+  if (typeof item.skipNextKey === 'string' && item.skipNextKey) {
+    out.skipNextKey = item.skipNextKey;
+  }
   return out;
 }
 
@@ -7737,6 +7743,9 @@ function reminderNextDate(item, from){
   if (item.mode === 'daily') {
     var daily = reminderAtTime(new Date(now), item.time);
     if (daily.getTime() <= now.getTime()) daily.setDate(daily.getDate() + 1);
+    if (item.skipNextKey && reminderOccurrenceKey(item, daily) === item.skipNextKey) {
+      daily.setDate(daily.getDate() + 1);
+    }
     return daily;
   }
   if (item.mode === 'weekly') {
@@ -7744,6 +7753,9 @@ function reminderNextDate(item, from){
     var delta = (item.weekday - weekly.getDay() + 7) % 7;
     if (delta === 0 && weekly.getTime() <= now.getTime()) delta = 7;
     weekly.setDate(weekly.getDate() + delta);
+    if (item.skipNextKey && reminderOccurrenceKey(item, weekly) === item.skipNextKey) {
+      weekly.setDate(weekly.getDate() + 7);
+    }
     return weekly;
   }
   if (item.mode === 'weekdays' || item.mode === 'weekends') {
@@ -7752,7 +7764,10 @@ function reminderNextDate(item, from){
       var weekday = dayCandidate.getDay();
       var hits = item.mode === 'weekdays' ? (weekday >= 1 && weekday <= 5) :
         (weekday === 0 || weekday === 6);
-      if (hits && dayCandidate.getTime() > now.getTime()) return dayCandidate;
+      if (hits && dayCandidate.getTime() > now.getTime() &&
+          !(item.skipNextKey && reminderOccurrenceKey(item, dayCandidate) === item.skipNextKey)) {
+        return dayCandidate;
+      }
       dayCandidate.setDate(dayCandidate.getDate() + 1);
     }
   }
@@ -7760,7 +7775,10 @@ function reminderNextDate(item, from){
     var dates = (item.dates || []).slice().sort();
     for (var i = 0; i < dates.length; i++) {
       var custom = new Date(dates[i] + 'T' + item.time + ':00');
-      if (!isNaN(custom.getTime()) && custom.getTime() > now.getTime()) return custom;
+      if (!isNaN(custom.getTime()) && custom.getTime() > now.getTime() &&
+          !(item.skipNextKey && reminderOccurrenceKey(item, custom) === item.skipNextKey)) {
+        return custom;
+      }
     }
     return null;
   }
@@ -7770,7 +7788,10 @@ function reminderNextDate(item, from){
       var last = reminderDaysInMonth(ym.getFullYear(), ym.getMonth() + 1);
       var candidate = new Date(ym.getFullYear(), ym.getMonth(), Math.min(item.day, last));
       reminderAtTime(candidate, item.time);
-      if (candidate.getTime() > now.getTime()) return candidate;
+      if (candidate.getTime() > now.getTime() &&
+          !(item.skipNextKey && reminderOccurrenceKey(item, candidate) === item.skipNextKey)) {
+        return candidate;
+      }
     }
   }
   if (item.mode === 'yearly') {
@@ -7778,7 +7799,10 @@ function reminderNextDate(item, from){
       var lastDay = reminderDaysInMonth(y, item.month);
       var yearly = new Date(y, item.month - 1, Math.min(item.day, lastDay));
       reminderAtTime(yearly, item.time);
-      if (yearly.getTime() > now.getTime()) return yearly;
+      if (yearly.getTime() > now.getTime() &&
+          !(item.skipNextKey && reminderOccurrenceKey(item, yearly) === item.skipNextKey)) {
+        return yearly;
+      }
     }
   }
   return null;
@@ -7967,6 +7991,7 @@ function renderReminderPage(){
           '<span class="reminder-copy"><b>' + escHtml(item.title) + '</b>' +
           '<span>' + escHtml(reminderRuleText(item)) + '</span>' +
           '<small>' + escHtml(reminderNextText(item)) + '</small></span>' +
+          (doneToday ? '' : '<button class="reminder-check"' + actionAttrs('confirmReminderOccurrence', [item.id]) + ' aria-label="提前确认本次提醒">确认本次</button>') +
           '<button class="reminder-convert"' + actionAttrs('convertReminderToTodo', [item.id]) + ' aria-label="转为待办">转</button>' +
           '<button class="reminder-del"' + actionAttrs('deleteReminder', [item.id]) + ' aria-label="删除提醒">×</button>' +
           '</div>';
@@ -8282,6 +8307,48 @@ function saveReminder(){
 function editReminder(id){
   openReminderForm(id);
 }
+function confirmReminderOccurrence(id){
+  var item = reminderItemById(id);
+  if (!item) return;
+  if (item.mode === 'once') {
+    appConfirm('确认完成这条提醒？确认后到点不再提醒，并移入归档。', function(){
+      var once = new Date(item.date + 'T' + item.time + ':00');
+      var key = reminderOccurrenceKey(item, once);
+      reminderData.handledOccurrences[key] = true;
+      reminderData.completedOccurrences[key] = true;
+      reminderData.items = reminderData.items.filter(function(saved){ return saved.id !== id; });
+      item.archivedAt = Date.now();
+      item.archiveReason = 'completed';
+      reminderData.archived.push(item);
+      saveReminderState(false);
+      renderReminderPage();
+      renderHomeNotice();
+      toast('已确认，不再提醒');
+    }, { title: '确认本次提醒', confirmLabel: '确认完成' });
+    return;
+  }
+  var now = new Date();
+  var occurrence = reminderOccursOnDate(item, now) ?
+    new Date(now.getFullYear(), now.getMonth(), now.getDate(),
+      parseInt(item.time.split(':' )[0], 10), parseInt(item.time.split(':' )[1], 10), 0, 0) :
+    reminderNextDate(item);
+  if (!occurrence || isNaN(occurrence.getTime())) {
+    toast('没有可确认的下一次提醒');
+    return;
+  }
+  var key = reminderOccurrenceKey(item, occurrence);
+  var isEarly = occurrence.getTime() > Date.now();
+  appConfirm('确认本次提醒（' + reminderShortDate(occurrence) + '）？' +
+    (isEarly ? '确认后到点不再提醒，之后的周期照常。' : '今天这次已经到点，确认后不再出现在首页提醒。'), function(){
+    if (isEarly) item.skipNextKey = key; else delete item.skipNextKey;
+    reminderData.handledOccurrences[key] = true;
+    reminderData.completedOccurrences[key] = true;
+    saveReminderState(false);
+    renderReminderPage();
+    renderHomeNotice();
+    toast('已确认本次，不再提醒');
+  }, { title: '确认本次提醒', confirmLabel: '确认完成' });
+}
 
 function deleteReminder(id){
   var item = reminderItemById(id);
@@ -8310,6 +8377,7 @@ function restoreReminder(id){
   reminderData.archived = reminderData.archived.filter(function(saved){ return saved.id !== id; });
   delete item.archivedAt;
   delete item.archiveReason;
+  delete item.skipNextKey;
   if (item.mode === 'once') {
     var candidate = new Date(item.date + 'T' + item.time + ':00');
     if (isNaN(candidate.getTime()) || candidate.getTime() <= Date.now()) {
@@ -8379,6 +8447,7 @@ function reminderNativeItem(item){
   if (item.mode === 'custom') out.dates = (item.dates || []).slice();
   if (item.mode === 'monthly' || item.mode === 'yearly') out.day = item.day;
   if (item.mode === 'yearly') out.month = item.month;
+  if (item.skipNextKey) out.skipNextKey = item.skipNextKey;
   return out;
 }
 

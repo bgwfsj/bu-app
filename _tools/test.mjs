@@ -869,8 +869,8 @@ async function run() {
       cleanupConfirmOpened: true,
       cleanupCalls: 1,
       aboutOpened: true,
-      changelogCount: 79,
-      aboutVersion: '6.0.20',
+      changelogCount: 80,
+      aboutVersion: '6.0.21',
       updateBackupExposed: true,
       updateCalls: 1,
       handledBack: true,
@@ -1512,6 +1512,49 @@ async function run() {
     assert.equal(reminders.reminderEditButtonsRemoved, true);
     assert.equal(reminders.reminderRowEditable, true);
     assert.equal(reminders.reminderArchiveEditable, false);
+
+    const earlyConfirm = await evaluate(cdp, `(function(){
+      var originalReminders = JSON.parse(JSON.stringify(reminderData));
+      reminderData = reminderDefaultState();
+      reminderData.items.push({
+        id: 'early_daily', title: '提前确认', mode: 'daily', time: '23:59', createdAt: new Date().toISOString()
+      });
+      reminderData.items.push({
+        id: 'early_weekly', title: '周确认', mode: 'weekly', weekday: new Date().getDay(), time: '08:00', createdAt: new Date().toISOString()
+      });
+      renderReminderPage();
+      var hasConfirmButton = !!byId('reminder-list').querySelector('.reminder-check[data-action="confirmReminderOccurrence"]');
+      var next = reminderNextDate(reminderData.items[0]);
+      var key = reminderOccurrenceKey(reminderData.items[0], next);
+      var originalNext = new Date(next);
+      confirmReminderOccurrence('early_daily');
+      document.querySelector('[data-action="resolveAppConfirm"][data-args="[true]"]').click();
+      var item = reminderItemById('early_daily');
+      var after = reminderNextDate(item);
+      var nativeItemsAfter = reminderData.items.map(reminderNativeItem);
+      var weeklyItem = reminderItemById('early_weekly');
+      var wNext = reminderNextDate(weeklyItem);
+      weeklyItem.skipNextKey = reminderOccurrenceKey(weeklyItem, wNext);
+      var wAfter = reminderNextDate(weeklyItem);
+      var handledSet = reminderData.handledOccurrences[key] === true;
+      reminderData = JSON.parse(JSON.stringify(originalReminders));
+      saveReminderState(false);
+      renderReminderPage();
+      return {
+        hasConfirmButton: hasConfirmButton,
+        skipped: !!item && item.skipNextKey === key,
+        nextSkipped: !!after && after.getTime() > originalNext.getTime(),
+        handled: handledSet,
+        nativeCarriesSkip: nativeItemsAfter[0] && nativeItemsAfter[0].skipNextKey === key,
+        weeklySkip: wAfter.getTime() > wNext.getTime()
+      };
+    })()`);
+    assert.equal(earlyConfirm.hasConfirmButton, true);
+    assert.equal(earlyConfirm.skipped, true);
+    assert.equal(earlyConfirm.nextSkipped, true);
+    assert.equal(earlyConfirm.handled, true);
+    assert.equal(earlyConfirm.nativeCarriesSkip, true);
+    assert.equal(earlyConfirm.weeklySkip, true);
 
     const notificationDialog = await evaluate(cdp, `(function(){
       reminderData.items.push({

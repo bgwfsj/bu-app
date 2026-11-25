@@ -37,6 +37,7 @@
 .reminder-copy small{display:block;font-size:10px;color:#a1adb1;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .reminder-convert{border:0;background:transparent;color:#16896a;font-size:var(--fs-meta);padding:4px 2px;cursor:pointer}
 .reminder-convert{color:#5f8eaa}
+.reminder-check{border:0;background:transparent;color:#16896a;font-size:var(--fs-meta);padding:4px 2px;cursor:pointer;white-space:nowrap}
 .reminder-del{border:0;background:transparent;color:#c5a2a2;font-size:15px;padding:3px 2px;cursor:pointer}
 .reminder-empty{text-align:center;padding:27px 10px;color:#98a6aa;font-size:12.5px;line-height:1.8;background:rgba(255,255,255,.55);border:1px dashed var(--line);border-radius:13px}
 .reminder-archive-box{margin-top:18px;border-top:1px solid var(--line2);padding-top:10px}

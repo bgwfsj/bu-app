@@ -69,6 +69,9 @@ function normalizeReminderItem(item){
     if (isNaN(month) || month < 1 || month > 12) return null;
     out.month = month;
   }
+  if (typeof item.skipNextKey === 'string' && item.skipNextKey) {
+    out.skipNextKey = item.skipNextKey;
+  }
   return out;
 }
 
@@ -127,6 +130,9 @@ function reminderNextDate(item, from){
   if (item.mode === 'daily') {
     var daily = reminderAtTime(new Date(now), item.time);
     if (daily.getTime() <= now.getTime()) daily.setDate(daily.getDate() + 1);
+    if (item.skipNextKey && reminderOccurrenceKey(item, daily) === item.skipNextKey) {
+      daily.setDate(daily.getDate() + 1);
+    }
     return daily;
   }
   if (item.mode === 'weekly') {
@@ -134,6 +140,9 @@ function reminderNextDate(item, from){
     var delta = (item.weekday - weekly.getDay() + 7) % 7;
     if (delta === 0 && weekly.getTime() <= now.getTime()) delta = 7;
     weekly.setDate(weekly.getDate() + delta);
+    if (item.skipNextKey && reminderOccurrenceKey(item, weekly) === item.skipNextKey) {
+      weekly.setDate(weekly.getDate() + 7);
+    }
     return weekly;
   }
   if (item.mode === 'weekdays' || item.mode === 'weekends') {
@@ -142,7 +151,10 @@ function reminderNextDate(item, from){
       var weekday = dayCandidate.getDay();
       var hits = item.mode === 'weekdays' ? (weekday >= 1 && weekday <= 5) :
         (weekday === 0 || weekday === 6);
-      if (hits && dayCandidate.getTime() > now.getTime()) return dayCandidate;
+      if (hits && dayCandidate.getTime() > now.getTime() &&
+          !(item.skipNextKey && reminderOccurrenceKey(item, dayCandidate) === item.skipNextKey)) {
+        return dayCandidate;
+      }
       dayCandidate.setDate(dayCandidate.getDate() + 1);
     }
   }
@@ -150,7 +162,10 @@ function reminderNextDate(item, from){
     var dates = (item.dates || []).slice().sort();
     for (var i = 0; i < dates.length; i++) {
       var custom = new Date(dates[i] + 'T' + item.time + ':00');
-      if (!isNaN(custom.getTime()) && custom.getTime() > now.getTime()) return custom;
+      if (!isNaN(custom.getTime()) && custom.getTime() > now.getTime() &&
+          !(item.skipNextKey && reminderOccurrenceKey(item, custom) === item.skipNextKey)) {
+        return custom;
+      }
     }
     return null;
   }
@@ -160,7 +175,10 @@ function reminderNextDate(item, from){
       var last = reminderDaysInMonth(ym.getFullYear(), ym.getMonth() + 1);
       var candidate = new Date(ym.getFullYear(), ym.getMonth(), Math.min(item.day, last));
       reminderAtTime(candidate, item.time);
-      if (candidate.getTime() > now.getTime()) return candidate;
+      if (candidate.getTime() > now.getTime() &&
+          !(item.skipNextKey && reminderOccurrenceKey(item, candidate) === item.skipNextKey)) {
+        return candidate;
+      }
     }
   }
   if (item.mode === 'yearly') {
@@ -168,7 +186,10 @@ function reminderNextDate(item, from){
       var lastDay = reminderDaysInMonth(y, item.month);
       var yearly = new Date(y, item.month - 1, Math.min(item.day, lastDay));
       reminderAtTime(yearly, item.time);
-      if (yearly.getTime() > now.getTime()) return yearly;
+      if (yearly.getTime() > now.getTime() &&
+          !(item.skipNextKey && reminderOccurrenceKey(item, yearly) === item.skipNextKey)) {
+        return yearly;
+      }
     }
   }
   return null;
@@ -357,6 +378,7 @@ function renderReminderPage(){
           '<span class="reminder-copy"><b>' + escHtml(item.title) + '</b>' +
           '<span>' + escHtml(reminderRuleText(item)) + '</span>' +
           '<small>' + escHtml(reminderNextText(item)) + '</small></span>' +
+          (doneToday ? '' : '<button class="reminder-check"' + actionAttrs('confirmReminderOccurrence', [item.id]) + ' aria-label="提前确认本次提醒">确认本次</button>') +
           '<button class="reminder-convert"' + actionAttrs('convertReminderToTodo', [item.id]) + ' aria-label="转为待办">转</button>' +
           '<button class="reminder-del"' + actionAttrs('deleteReminder', [item.id]) + ' aria-label="删除提醒">×</button>' +
           '</div>';
@@ -672,6 +694,48 @@ function saveReminder(){
 function editReminder(id){
   openReminderForm(id);
 }
+function confirmReminderOccurrence(id){
+  var item = reminderItemById(id);
+  if (!item) return;
+  if (item.mode === 'once') {
+    appConfirm('确认完成这条提醒？确认后到点不再提醒，并移入归档。', function(){
+      var once = new Date(item.date + 'T' + item.time + ':00');
+      var key = reminderOccurrenceKey(item, once);
+      reminderData.handledOccurrences[key] = true;
+      reminderData.completedOccurrences[key] = true;
+      reminderData.items = reminderData.items.filter(function(saved){ return saved.id !== id; });
+      item.archivedAt = Date.now();
+      item.archiveReason = 'completed';
+      reminderData.archived.push(item);
+      saveReminderState(false);
+      renderReminderPage();
+      renderHomeNotice();
+      toast('已确认，不再提醒');
+    }, { title: '确认本次提醒', confirmLabel: '确认完成' });
+    return;
+  }
+  var now = new Date();
+  var occurrence = reminderOccursOnDate(item, now) ?
+    new Date(now.getFullYear(), now.getMonth(), now.getDate(),
+      parseInt(item.time.split(':' )[0], 10), parseInt(item.time.split(':' )[1], 10), 0, 0) :
+    reminderNextDate(item);
+  if (!occurrence || isNaN(occurrence.getTime())) {
+    toast('没有可确认的下一次提醒');
+    return;
+  }
+  var key = reminderOccurrenceKey(item, occurrence);
+  var isEarly = occurrence.getTime() > Date.now();
+  appConfirm('确认本次提醒（' + reminderShortDate(occurrence) + '）？' +
+    (isEarly ? '确认后到点不再提醒，之后的周期照常。' : '今天这次已经到点，确认后不再出现在首页提醒。'), function(){
+    if (isEarly) item.skipNextKey = key; else delete item.skipNextKey;
+    reminderData.handledOccurrences[key] = true;
+    reminderData.completedOccurrences[key] = true;
+    saveReminderState(false);
+    renderReminderPage();
+    renderHomeNotice();
+    toast('已确认本次，不再提醒');
+  }, { title: '确认本次提醒', confirmLabel: '确认完成' });
+}
 
 function deleteReminder(id){
   var item = reminderItemById(id);
@@ -700,6 +764,7 @@ function restoreReminder(id){
   reminderData.archived = reminderData.archived.filter(function(saved){ return saved.id !== id; });
   delete item.archivedAt;
   delete item.archiveReason;
+  delete item.skipNextKey;
   if (item.mode === 'once') {
     var candidate = new Date(item.date + 'T' + item.time + ':00');
     if (isNaN(candidate.getTime()) || candidate.getTime() <= Date.now()) {
@@ -769,6 +834,7 @@ function reminderNativeItem(item){
   if (item.mode === 'custom') out.dates = (item.dates || []).slice();
   if (item.mode === 'monthly' || item.mode === 'yearly') out.day = item.day;
   if (item.mode === 'yearly') out.month = item.month;
+  if (item.skipNextKey) out.skipNextKey = item.skipNextKey;
   return out;
 }
 

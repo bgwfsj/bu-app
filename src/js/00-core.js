@@ -182,6 +182,7 @@ var APP_ACTION_NAMES = {
   openReminderMenu: true,
   toggleReminderHomeNotice: true,
   completeHomeReminder: true,
+  confirmReminderOccurrence: true,
   saveSnooze: true,
   openSnoozeDialog: true,
   confirmNotificationAction: true,
