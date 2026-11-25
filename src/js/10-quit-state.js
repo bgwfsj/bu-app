@@ -6,6 +6,7 @@ function loadState(){
   if (d && typeof d.quitDate === 'number' && d.quitDate > 0) {
     S = d;
     normalizeQuitHistory();
+    normalizeSmokeState();
     return true;
   }
 
@@ -14,6 +15,7 @@ function loadState(){
   var legacy = old && old.registration && old.registration.quitDate;
   if (legacy > 0 && legacy <= Date.now()) {
     S = { quitDate: legacy, quitHistory: [] };
+    normalizeSmokeState();
     saveS();
     return true;
   }
@@ -26,6 +28,23 @@ function normalizeQuitHistory(){
     return item && Number(item.startedAt) > 0 && Number(item.endedAt) > 0 &&
       Number(item.durationMs) >= 0;
   }).slice(-100);
+}
+
+function normalizeSmokeState(){
+  if (typeof S.smokeStart !== 'number' || !(S.smokeStart > 0)) S.smokeStart = 0;
+  S.smokeCount = Math.max(0, Math.floor(Number(S.smokeCount) || 0));
+  S.smokeView = !!S.smokeView;
+}
+
+function renderQuitPage(){
+  var brand = byId('quit-brand-txt');
+  if (brand) brand.textContent = S.smokeView ? '烟' : '戒烟';
+  var quitBlock = byId('quit-textblock');
+  var smokeBlock = byId('smoke-textblock');
+  if (quitBlock) quitBlock.classList.toggle('off', !!S.smokeView);
+  if (smokeBlock) smokeBlock.classList.toggle('off', !S.smokeView);
+  if (S.smokeView) renderSmoke();
+  else renderQuit();
 }
 
 /* ============================================================
@@ -48,13 +67,10 @@ function setCurHead(label, badge){
 }
 
 function renderQuit(){
+  setTxt('quit-kicker', '戒烟时间');
   if (!S.quitDate) {
     renderQuitRecord(0);
-    setTxt('r-d', '--'); setTxt('r-h', '--'); setTxt('r-m', '--'); setTxt('r-s', '--');
-    setTxt('e-d', '--'); setTxt('e-h', '--'); setTxt('e-m', '--'); setTxt('e-s', '--');
-    setTxt('f-d', '--'); setTxt('f-h', '--'); setTxt('f-m', '--'); setTxt('f-s', '--');
-    setTxt('n-d', '--'); setTxt('n-h', '--'); setTxt('n-m', '--'); setTxt('n-s', '--');
-    updateFlip('0', '00', '00', '00');
+    setClockValues(0, true);
     setCurHead('等待设置', '0/' + STAGES.length);
     byId('cur-d').textContent = '先设置你开始戒烟的时间。';
     setTxt('quit-hero-title', '从今天开始');
@@ -69,34 +85,7 @@ function renderQuit(){
   var now = Date.now();
   var ms = Math.max(0, now - S.quitDate);
   renderQuitRecord(ms);
-  var s = Math.floor(ms / 1000);
-  var d = Math.floor(s / 86400);
-  var h = Math.floor((s % 86400) / 3600);
-  var m = Math.floor((s % 3600) / 60);
-  var sec = s % 60;
-
-  var hh = pad2(h), mm = pad2(m), ss = pad2(sec);
-  setTxt('r-d', '' + d);
-  setTxt('r-h', hh);
-  setTxt('r-m', mm);
-  setTxt('r-s', ss);
-  setTxt('e-d', '' + d);
-  setTxt('e-h', hh);
-  setTxt('e-m', mm);
-  setTxt('e-s', ss);
-  setTxt('f-d', '' + d);
-  setTxt('f-h', hh);
-  setTxt('f-m', mm);
-  setTxt('f-s', ss);
-  setTxt('n-d', '' + d);
-  setTxt('n-h', hh);
-  setTxt('n-m', mm);
-  setTxt('n-s', ss);
-  var dl = String(d).length;
-  var roundDay = document.querySelector('.roundday');
-  if (roundDay) roundDay.dataset.len = dl >= 5 ? '5' : (dl === 4 ? '4' : '');
-  if (dl !== lastDLen) { lastDLen = dl; fitClock(); }   // 位数变化时重算字号
-  updateFlip('' + d, hh, mm, ss);
+  setClockValues(ms);
   setTxt('quit-hero-title', '身体正在回来');
 
   var idx = currentStageIdx(ms);
@@ -176,6 +165,82 @@ function renderQuitRecord(currentMs){
   }
 }
 
+/* 五套皮肤共用的时间数字：天/时/分/秒，unset 时全部显示 -- */
+function setClockValues(ms, unset){
+  if (unset) {
+    setTxt('r-d', '--'); setTxt('r-h', '--'); setTxt('r-m', '--'); setTxt('r-s', '--');
+    setTxt('e-d', '--'); setTxt('e-h', '--'); setTxt('e-m', '--'); setTxt('e-s', '--');
+    setTxt('f-d', '--'); setTxt('f-h', '--'); setTxt('f-m', '--'); setTxt('f-s', '--');
+    setTxt('n-d', '--'); setTxt('n-h', '--'); setTxt('n-m', '--'); setTxt('n-s', '--');
+    updateFlip('0', '00', '00', '00');
+    if (lastDLen !== -1) { lastDLen = -1; fitClock(); }
+    return;
+  }
+  ms = Math.max(0, Number(ms) || 0);
+  var s = Math.floor(ms / 1000);
+  var d = Math.floor(s / 86400);
+  var h = Math.floor((s % 86400) / 3600);
+  var m = Math.floor((s % 3600) / 60);
+  var sec = s % 60;
+  var hh = pad2(h), mm = pad2(m), ss = pad2(sec);
+  setTxt('r-d', '' + d); setTxt('r-h', hh); setTxt('r-m', mm); setTxt('r-s', ss);
+  setTxt('e-d', '' + d); setTxt('e-h', hh); setTxt('e-m', mm); setTxt('e-s', ss);
+  setTxt('f-d', '' + d); setTxt('f-h', hh); setTxt('f-m', mm); setTxt('f-s', ss);
+  setTxt('n-d', '' + d); setTxt('n-h', hh); setTxt('n-m', mm); setTxt('n-s', ss);
+  var dl = String(d).length;
+  var roundDay = document.querySelector('.roundday');
+  if (roundDay) roundDay.dataset.len = dl >= 5 ? '5' : (dl === 4 ? '4' : '');
+  if (dl !== lastDLen) { lastDLen = dl; fitClock(); }   // 位数变化时重算字号
+  updateFlip('' + d, hh, mm, ss);
+}
+
+/* 抽烟统计视图：同一套皮肤，时钟从统计起点开始计 */
+function renderSmoke(){
+  setTxt('quit-kicker', '抽烟统计');
+  setTxt('quit-hero-title', '这段时间抽了多少');
+  var start = Number(S.smokeStart) > 0 ? S.smokeStart : 0;
+  var count = Math.max(0, Math.floor(Number(S.smokeCount) || 0));
+  var now = Date.now();
+  if (!start) {
+    setClockValues(0, true);
+    applyClockProgress(0);
+    setTxt('quit-hero-sub', '先设置统计起点，破戒会自动 +1 根。');
+    var c1 = byId('smoke-count');
+    if (c1 && c1.textContent !== String(count)) c1.textContent = String(count);
+    var m1 = byId('smoke-meta');
+    if (m1 && m1.textContent !== '尚未设置起点，到 ⋮ 里开始统计') m1.textContent = '尚未设置起点，到 ⋮ 里开始统计';
+    renderSmokeRecord(0);
+    return;
+  }
+  var ms = Math.max(0, now - start);
+  setClockValues(ms);
+  setTxt('quit-hero-sub', '破戒时自动 +1，起点与数量可在设置里调整。');
+  var s = Math.floor(ms / 1000);
+  var days = Math.max(1, Math.floor(s / 86400) + (s % 86400 > 0 ? 1 : 0));
+  var avg = count > 0 ? (count / days).toFixed(1) : '0';
+  var meta = '从 ' + quitRecordDate(start) + ' 开始 · 平均每天 ' + avg + ' 根';
+  var c2 = byId('smoke-count');
+  if (c2 && c2.textContent !== String(count)) c2.textContent = String(count);
+  var m2 = byId('smoke-meta');
+  if (m2 && m2.textContent !== meta) m2.textContent = meta;
+  renderSmokeRecord(ms);
+  setClockDayProgress(now);
+}
+
+/* 抽烟统计视图右上角的记录：共几根 + 起点日期 */
+function renderSmokeRecord(ms){
+  var box = byId('quit-record');
+  if (!box) return;
+  var start = Number(S.smokeStart) > 0 ? S.smokeStart : 0;
+  var count = Math.max(0, Math.floor(Number(S.smokeCount) || 0));
+  if (!start) {
+    box.innerHTML = '<b>尚未开始统计</b>';
+    box.hidden = false;
+    return;
+  }
+  box.innerHTML = '<b>共 ' + count + ' 根</b><small>自 ' + quitRecordDate(start) + '</small>';
+}
+
 function setTxt(id, v){
   var el = byId(id);
   if (el && el.textContent !== v) el.textContent = v;
@@ -185,8 +250,10 @@ function setTxt(id, v){
    与倒计时的时分秒一致（戒烟时刻为空，满 24 小时走满，随后重新开始） */
 function setClockDayProgress(now){
   now = Number(now) || Date.now();
-  var since = Math.max(0, now - S.quitDate);
-  var lapStart = S.quitDate + Math.floor(since / 86400000) * 86400000;
+  var base = S.smokeView && Number(S.smokeStart) > 0 ? S.smokeStart : S.quitDate;
+  if (!base || base <= 0) { applyClockProgress(0); return; }
+  var since = Math.max(0, now - base);
+  var lapStart = base + Math.floor(since / 86400000) * 86400000;
   applyClockProgress((now - lapStart) / 86400000);
 }
 

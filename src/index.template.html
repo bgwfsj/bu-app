@@ -119,7 +119,7 @@
     <!-- ================= 戒烟页 ================= -->
     <section class="page" id="p-quit">
       <div class="top">
-        <div class="brand"><span class="led"></span>戒烟</div>
+        <div class="brand" id="quit-brand"><span class="led"></span><span id="quit-brand-txt">戒烟</span></div>
         <div class="quit-top-actions">
           <span class="quit-record" id="quit-record" aria-live="polite"></span>
           <button class="breakdot" id="btn-break" aria-label="破戒"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M5.4 5.4 L18.6 18.6 M18.6 5.4 L5.4 18.6" stroke="currentColor" stroke-width="1.15" stroke-linecap="round" fill="none"/></svg></button>
@@ -128,7 +128,7 @@
       </div>
 
       <div class="section-hero">
-        <div class="section-kicker">戒烟时间</div>
+        <div class="section-kicker" id="quit-kicker">戒烟时间</div>
         <h1 class="section-title" id="quit-hero-title">身体正在回来</h1>
         <p class="section-sub" id="quit-hero-sub">每一次坚持，都是身体慢慢修复的过程。</p>
       </div>
@@ -216,7 +216,7 @@
         </div>
       </div>
 
-      <div class="textblock">
+      <div class="textblock" id="quit-textblock">
       <div class="cur" id="curcard">
         <div class="ct" id="cur-t"><span class="cdot"></span>刚刚开始<em>0/11</em></div>
         <div class="cd" id="cur-d">身体开始代谢尼古丁，先坚持住最初的 20 分钟。</div>
@@ -232,6 +232,14 @@
         <summary>全部 11 个阶段 <i>&#9662;</i></summary>
         <div class="stagelist" id="stagelist"></div>
       </details>
+      </div>
+
+      <div class="textblock off" id="smoke-textblock">
+        <div class="smokecard">
+          <div class="smoke-num"><b id="smoke-count">0</b><span>根</span></div>
+          <div class="smoke-meta" id="smoke-meta">尚未开始统计</div>
+          <div class="smoke-note">破戒时自动 +1，可在 ⋮ 里调整</div>
+        </div>
       </div>
       </div>
 

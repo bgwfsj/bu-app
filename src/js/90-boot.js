@@ -34,7 +34,8 @@ function boot(){
     }
   });
   initFitness();
-  renderQuit();
+  renderQuitPage();
+  fitClock();
   initWater();
   initMeals();
   initAlcohol();

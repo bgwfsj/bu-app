@@ -441,7 +441,7 @@ function paintLiveWorkout(){
 
 function paintLiveTimers(){
   paintLiveWorkout();
-  if (page === 4) renderQuit();
+  if (page === 4) renderQuitPage();
 }
 
 function workoutAnimationFrame(timestamp){

@@ -869,8 +869,8 @@ async function run() {
       cleanupConfirmOpened: true,
       cleanupCalls: 1,
       aboutOpened: true,
-      changelogCount: 80,
-      aboutVersion: '6.0.21',
+      changelogCount: 81,
+      aboutVersion: '6.0.22',
       updateBackupExposed: true,
       updateCalls: 1,
       handledBack: true,
@@ -954,6 +954,53 @@ async function run() {
     assert.ok(/\d{4}\.\d{2}\.\d{2}/.test(quitRecord.historical));
     assert.ok(quitRecord.currentLongest.indexOf('你第一次走这么远') >= 0);
     assert.ok(quitRecord.firstJourney.indexOf('你第一次走这么远') >= 0);
+
+    const smokeView = await evaluate(cdp, `(function(){
+      var original = JSON.parse(JSON.stringify(S));
+      S.smokeStart = Date.now() - 2 * 86400000 - 3600000;
+      S.smokeCount = 5;
+      S.smokeView = true;
+      renderQuitPage();
+      var brandSmoke = byId('quit-brand-txt').textContent;
+      var countText = byId('smoke-count').textContent;
+      var metaText = byId('smoke-meta').textContent;
+      var smokeVisible = !byId('smoke-textblock').classList.contains('off');
+      var quitHidden = byId('quit-textblock').classList.contains('off');
+      var recordTop = byId('quit-record').textContent;
+      var startBefore = S.smokeStart;
+      var beforeBreak = S.smokeCount;
+      doBreak();
+      var afterBreak = S.smokeCount;
+      var startKept = S.smokeStart === startBefore;
+      toggleSmokeView();
+      var brandQuit = byId('quit-brand-txt').textContent;
+      var smokeHidden = byId('smoke-textblock').classList.contains('off');
+      var quitVisible = !byId('quit-textblock').classList.contains('off');
+      toggleSmokeView();
+      var backToSmoke = byId('quit-brand-txt').textContent;
+      S = original;
+      saveS();
+      renderQuitPage();
+      return {
+        brandSmoke: brandSmoke, countText: countText, metaText: metaText,
+        smokeVisible: smokeVisible, quitHidden: quitHidden, recordTop: recordTop,
+        beforeBreak: beforeBreak, afterBreak: afterBreak, startKept: startKept,
+        brandQuit: brandQuit, smokeHidden: smokeHidden, quitVisible: quitVisible,
+        backToSmoke: backToSmoke
+      };
+    })()`);
+    assert.equal(smokeView.brandSmoke, '烟');
+    assert.equal(smokeView.countText, '5');
+    assert.ok(smokeView.metaText.indexOf('平均每天') >= 0);
+    assert.equal(smokeView.smokeVisible, true);
+    assert.equal(smokeView.quitHidden, true);
+    assert.ok(smokeView.recordTop.indexOf('共 5 根') >= 0);
+    assert.equal(smokeView.afterBreak, smokeView.beforeBreak + 1);
+    assert.equal(smokeView.startKept, true);
+    assert.equal(smokeView.brandQuit, '戒烟');
+    assert.equal(smokeView.smokeHidden, true);
+    assert.equal(smokeView.quitVisible, true);
+    assert.equal(smokeView.backToSmoke, '烟');
 
     const workout = await evaluate(cdp, `(function(){
       startWorkoutFromPlan('plan_default');

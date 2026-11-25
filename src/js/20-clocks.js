@@ -76,7 +76,7 @@ function grpSum(el){
 function vertHeight(){
   var page = document.getElementById('p-quit');
   var top = page && page.querySelector('.top');
-  var tb = page && page.querySelector('.textblock');
+  var tb = page && page.querySelector('.textblock:not(.off)');
   var sectionHead = page && page.querySelector('.section-hero');
   if (!page || !tb || !page.clientHeight) return 0;
   var cs = getComputedStyle(page);
