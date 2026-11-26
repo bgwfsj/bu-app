@@ -127,23 +127,49 @@ function mealRecordFoods(record){
   return mealParseFoods(record && record.foods || []);
 }
 
-function mealChipButtonsHtml(selected){
+/* 菜单按“吃过次数”排序：次数多的在前，次数相同按拼音 */
+function mealMenuSorted(){
+  var counts = {};
+  each(mealData.records || [], function(record){
+    each(mealRecordFoods(record), function(name){
+      counts[name] = (counts[name] || 0) + 1;
+    });
+  });
+  return (mealData.menu || []).slice().sort(function(a, b){
+    var diff = (counts[b] || 0) - (counts[a] || 0);
+    return diff ? diff : String(a).localeCompare(String(b), 'zh-CN');
+  });
+}
+
+function mealChipButtonsHtml(selected, names){
   selected = mealParseFoods(selected);
-  return mealData.menu.map(function(name){
+  if (!names) names = mealData.menu;
+  return names.map(function(name){
     return '<button type="button" class="meal-food-chip' + (selected.indexOf(name) >= 0 ? ' on' : '') + '"' +
       actionAttrs('toggleMealFoodChip', [name]) + '>' + escHtml(name) + '</button>';
   }).join('');
 }
 
+/* 选菜：吃过次数最多的 5 道默认展开，其余折叠在“其他”里 */
 function mealFoodChipsHtml(selected){
   selected = mealParseFoods(selected);
   if (!mealData || !mealData.menu || !mealData.menu.length) {
     return '<div class="meal-menu-chips-empty">菜单里还没有菜，输入后会自动加入。</div>';
   }
-  return '<details class="meal-menu-picker">' +
-    '<summary><span>从菜单选</span><small>' + mealData.menu.length + ' 道菜</small><i>⌄</i></summary>' +
-    '<div class="meal-menu-chips">' + mealChipButtonsHtml(selected) + '</div>' +
-    '</details>';
+  var ordered = mealMenuSorted();
+  var top = ordered.slice(0, 5);
+  var rest = ordered.slice(5);
+  var html = '<div class="meal-menu-picker">' +
+    '<div class="meal-menu-picker-head"><span>从菜单选</span><small>' + mealData.menu.length + ' 道菜</small></div>' +
+    '<div class="meal-menu-top"><div class="meal-menu-chips">' + mealChipButtonsHtml(selected, top) + '</div></div>';
+  if (rest.length) {
+    html += '<details class="meal-menu-more">' +
+      '<summary><span>其他 ' + rest.length + ' 道菜</span><i>⌄</i></summary>' +
+      '<div class="meal-menu-chips">' + mealChipButtonsHtml(selected, rest) + '</div>' +
+      '</details>';
+  }
+  html += '</div>';
+  return html;
 }
 
 function mealFoodEditorHtml(selected, label){
@@ -771,10 +797,7 @@ function renderMealMenu(){
       typeCounts[name][record.type] = (typeCounts[name][record.type] || 0) + 1;
     });
   });
-  var items = (mealData.menu || []).slice().sort(function(a, b){
-    var diff = (counts[b] || 0) - (counts[a] || 0);
-    return diff ? diff : String(a).localeCompare(String(b), 'zh-CN');
-  });
+  var items = mealMenuSorted();
   setTxt('meal-menu-summary', items.length ? items.length + ' 道菜' : '');
   box.innerHTML = items.map(function(name){
     var perType = [];
@@ -799,8 +822,15 @@ function toggleMealFoodChip(name){
   if (idx >= 0) current.splice(idx, 1);
   else current.push(name);
   input.value = current.join('、');
-  var chips = input.closest('.meal-food-editor') && input.closest('.meal-food-editor').querySelector('.meal-menu-chips');
-  if (chips) chips.innerHTML = mealChipButtonsHtml(current);
+  var editor = input.closest('.meal-food-editor');
+  if (!editor) return;
+  var buttons = editor.querySelectorAll('.meal-food-chip');
+  for (var i = 0; i < buttons.length; i++) {
+    if (buttons[i].textContent === name) {
+      buttons[i].classList.toggle('on', idx < 0);
+      break;
+    }
+  }
 }
 
 function saveMealFoods(recordId, returnDateKey){

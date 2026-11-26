@@ -413,11 +413,22 @@ async function run() {
       var menuAfterAdd = JSON.parse(localStorage.getItem(MKEY)).menu.indexOf('清蒸鱼') >= 0;
       var menuRowsAfterAdd = byId('meal-menu-list').querySelectorAll('.meal-menu-row').length;
       var backfillRecord = mealData.records.filter(function(r){ return r.backfill; })[0];
+      mealData.menu = mealData.menu.concat(['牛肉面', '三明治', '沙拉', '汉堡', '意面', '寿司']);
       openMealFoodEditor(backfillRecord.id, mealDateKey(backfillDay));
       var picker = byId('sheet').querySelector('.meal-menu-picker');
-      var pickerCollapsed = picker && !picker.open;
-      picker.querySelector('summary').click();
-      var pickerExpanded = picker.open && picker.querySelectorAll('.meal-food-chip').length >= 1;
+      var topChips = picker ? picker.querySelectorAll('.meal-menu-top .meal-food-chip').length : 0;
+      var more = picker ? picker.querySelector('.meal-menu-more') : null;
+      var moreExists = !!more;
+      var moreCollapsed = !more || !more.open;
+      var moreChips = more ? more.querySelectorAll('.meal-food-chip').length : 0;
+      if (more) more.querySelector('summary').click();
+      var moreExpanded = !!more && more.open && moreChips >= 1;
+      var moreChip = more ? more.querySelector('.meal-food-chip') : null;
+      var moreChipText = moreChip ? moreChip.textContent : '';
+      if (moreChip) moreChip.click();
+      var chipToggleKeepsOpen = !!more && more.open;
+      var chipToggledOn = !!(moreChip && moreChip.classList.contains('on'));
+      var inputHasChip = byId('meal-food-input').value.indexOf(moreChipText) >= 0;
       byId('meal-food-input').value = '米饭、青菜';
       byId('sheet').querySelector('[data-action="saveMealFoods"]').click();
       var backfillFoodsSaved = (function(){
@@ -499,8 +510,14 @@ async function run() {
         menuRowsAfterAdd: menuRowsAfterAdd,
         dayRowsEditable: dayRowsEditable,
         dayFoodShown: dayFoodShown,
-        pickerCollapsed: pickerCollapsed,
-        pickerExpanded: pickerExpanded,
+        topChips: topChips,
+        moreExists: moreExists,
+        moreCollapsed: moreCollapsed,
+        moreChips: moreChips,
+        moreExpanded: moreExpanded,
+        chipToggleKeepsOpen: chipToggleKeepsOpen,
+        chipToggledOn: chipToggledOn,
+        inputHasChip: inputHasChip,
         backfillFoodsSaved: backfillFoodsSaved,
         intervalGoodGap: intervalGood.gapMinutes,
         intervalGoodTitle: intervalGood.title,
@@ -596,8 +613,14 @@ async function run() {
     assert.equal(meals.menuRowsAfterAdd, meals.menuRows + 1);
     assert.ok(meals.dayRowsEditable >= 1);
     assert.equal(meals.dayFoodShown, true);
-    assert.equal(meals.pickerCollapsed, true);
-    assert.equal(meals.pickerExpanded, true);
+    assert.equal(meals.topChips, 5);
+    assert.equal(meals.moreExists, true);
+    assert.equal(meals.moreCollapsed, true);
+    assert.ok(meals.moreChips >= 1);
+    assert.equal(meals.moreExpanded, true);
+    assert.equal(meals.chipToggleKeepsOpen, true);
+    assert.equal(meals.chipToggledOn, true);
+    assert.equal(meals.inputHasChip, true);
     assert.equal(meals.backfillFoodsSaved, true);
     assert.equal(meals.intervalGoodGap, 210);
     assert.equal(meals.intervalGoodTitle, '吃得规律');
@@ -869,8 +892,8 @@ async function run() {
       cleanupConfirmOpened: true,
       cleanupCalls: 1,
       aboutOpened: true,
-      changelogCount: 81,
-      aboutVersion: '6.0.22',
+      changelogCount: 82,
+      aboutVersion: '6.0.23',
       updateBackupExposed: true,
       updateCalls: 1,
       handledBack: true,

@@ -6,7 +6,7 @@ Push-Location $root
 try {
     git add -A
     git commit -m $message
-    git tag v6.0.22
+    git tag v6.0.23
     git push origin main --tags
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }

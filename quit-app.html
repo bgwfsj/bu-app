@@ -1039,6 +1039,12 @@ button.meal-cal-day:active{background:rgba(13,32,45,.06)}
 .meal-food-chip:active{transform:translateY(1px)}
 .meal-food-chip.on{background:rgba(10,168,122,.12);border-color:rgba(10,168,122,.3);color:#218c6c}
 .meal-menu-picker{margin-top:9px;border:1px solid var(--line2);border-radius:11px;background:rgba(255,255,255,.62);overflow:hidden}
+.meal-menu-picker-head{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:9px 12px;font-size:11px;color:#5d7080;letter-spacing:.05em;
+  border-bottom:1px solid var(--line2)
+}
+.meal-menu-picker-head small{font-size:10px;color:#9ba7a3;font-weight:400}
 .meal-menu-picker>summary{
   list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;
   padding:9px 12px;font-size:11px;color:#5d7080;letter-spacing:.05em;user-select:none
@@ -1052,6 +1058,19 @@ button.meal-cal-day:active{background:rgba(13,32,45,.06)}
 .meal-menu-picker[open]>summary i{transform:rotate(180deg)}
 .meal-menu-picker[open]>summary{border-bottom:1px solid var(--line2)}
 .meal-menu-picker .meal-menu-chips{padding:10px 12px 12px;max-height:190px;overflow:auto}
+.meal-menu-more{border-top:1px solid var(--line2)}
+.meal-menu-more>summary{
+  list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:9px 12px;font-size:11px;color:#8d9c97;letter-spacing:.05em;user-select:none
+}
+.meal-menu-more>summary::-webkit-details-marker{display:none}
+.meal-menu-more>summary::marker{content:''}
+.meal-menu-more>summary small{font-size:10px;color:#9ba7a3;font-weight:400}
+.meal-menu-more>summary i{
+  font-style:normal;font-size:10px;color:#9ba7a3;line-height:1;transition:transform .25s
+}
+.meal-menu-more[open]>summary i{transform:rotate(180deg)}
+.meal-menu-more .meal-menu-chips{padding:2px 12px 12px;max-height:190px;overflow:auto}
 .meal-day-row{cursor:pointer}
 .meal-day-food{color:#9b7654!important}
 .meal-day-edit{
@@ -2881,6 +2900,7 @@ byId('mask').addEventListener('click', closeSheet);
    应用版本记录
    ============================================================ */
 var APP_CHANGELOG = [
+  { version: '6.0.23', date: '2026-11-26', changes: ['三餐记录选菜优化：吃过次数最多的 5 道菜默认直接展开显示，其余菜折叠在“其他 N 道菜”里，展开后选中菜品不会收起折叠状态；菜单不足 5 道时全部直接显示。'] },
   { version: '6.0.22', date: '2026-11-25', changes: ['戒烟新增“抽烟统计”：点左上角“戒烟 / 烟”可在戒烟与抽烟统计两个视图间切换，共用同一套时间皮肤（翻页·竖版、灯管·竖版、涟漪、风迹、流光）。', '抽烟统计视图显示从独立设置的统计起点开始的累计时间，下方大数字展示这段时间抽了多少根烟和平均每天根数。', '戒烟页破戒会自动 +1 根，不影响统计起点；右上角菜单可单独设置统计起点、手动调整根数、重置本次统计。'] },
   { version: '6.0.21', date: '2026-11-25', changes: ['提醒新增“提前确认本次”：每条提醒右侧可点击“确认本次”，仅一次提醒确认后直接归档、到点不再提醒；每天/每周/工作日/周末/自定义/每月/每年提醒确认后会跳过本次（今天这次或下一次出现的时间点），当天划线、首页不再提示，被跳过的这次系统通知也不会发出，之后的周期照常。'] },
   { version: '6.0.20', date: '2026-11-24', changes: ['三餐记录成功后可填写“吃了什么”，也可以点选菜单里的菜一起记下。', '日历里过去的每一餐都可以点开补记或修改吃了什么。', '三餐页最下方新增“吃过什么”菜单：每道菜显示总次数，以及早餐、午餐、晚餐等各餐吃过的次数；记录时输入的新菜会自动加入菜单，也可以手动加菜。', '“从菜单选”改为默认折叠，菜很多时展开后内部滚动，不会撑满弹框。'] },
@@ -4494,23 +4514,49 @@ function mealRecordFoods(record){
   return mealParseFoods(record && record.foods || []);
 }
 
-function mealChipButtonsHtml(selected){
+/* 菜单按“吃过次数”排序：次数多的在前，次数相同按拼音 */
+function mealMenuSorted(){
+  var counts = {};
+  each(mealData.records || [], function(record){
+    each(mealRecordFoods(record), function(name){
+      counts[name] = (counts[name] || 0) + 1;
+    });
+  });
+  return (mealData.menu || []).slice().sort(function(a, b){
+    var diff = (counts[b] || 0) - (counts[a] || 0);
+    return diff ? diff : String(a).localeCompare(String(b), 'zh-CN');
+  });
+}
+
+function mealChipButtonsHtml(selected, names){
   selected = mealParseFoods(selected);
-  return mealData.menu.map(function(name){
+  if (!names) names = mealData.menu;
+  return names.map(function(name){
     return '<button type="button" class="meal-food-chip' + (selected.indexOf(name) >= 0 ? ' on' : '') + '"' +
       actionAttrs('toggleMealFoodChip', [name]) + '>' + escHtml(name) + '</button>';
   }).join('');
 }
 
+/* 选菜：吃过次数最多的 5 道默认展开，其余折叠在“其他”里 */
 function mealFoodChipsHtml(selected){
   selected = mealParseFoods(selected);
   if (!mealData || !mealData.menu || !mealData.menu.length) {
     return '<div class="meal-menu-chips-empty">菜单里还没有菜，输入后会自动加入。</div>';
   }
-  return '<details class="meal-menu-picker">' +
-    '<summary><span>从菜单选</span><small>' + mealData.menu.length + ' 道菜</small><i>⌄</i></summary>' +
-    '<div class="meal-menu-chips">' + mealChipButtonsHtml(selected) + '</div>' +
-    '</details>';
+  var ordered = mealMenuSorted();
+  var top = ordered.slice(0, 5);
+  var rest = ordered.slice(5);
+  var html = '<div class="meal-menu-picker">' +
+    '<div class="meal-menu-picker-head"><span>从菜单选</span><small>' + mealData.menu.length + ' 道菜</small></div>' +
+    '<div class="meal-menu-top"><div class="meal-menu-chips">' + mealChipButtonsHtml(selected, top) + '</div></div>';
+  if (rest.length) {
+    html += '<details class="meal-menu-more">' +
+      '<summary><span>其他 ' + rest.length + ' 道菜</span><i>⌄</i></summary>' +
+      '<div class="meal-menu-chips">' + mealChipButtonsHtml(selected, rest) + '</div>' +
+      '</details>';
+  }
+  html += '</div>';
+  return html;
 }
 
 function mealFoodEditorHtml(selected, label){
@@ -5138,10 +5184,7 @@ function renderMealMenu(){
       typeCounts[name][record.type] = (typeCounts[name][record.type] || 0) + 1;
     });
   });
-  var items = (mealData.menu || []).slice().sort(function(a, b){
-    var diff = (counts[b] || 0) - (counts[a] || 0);
-    return diff ? diff : String(a).localeCompare(String(b), 'zh-CN');
-  });
+  var items = mealMenuSorted();
   setTxt('meal-menu-summary', items.length ? items.length + ' 道菜' : '');
   box.innerHTML = items.map(function(name){
     var perType = [];
@@ -5166,8 +5209,15 @@ function toggleMealFoodChip(name){
   if (idx >= 0) current.splice(idx, 1);
   else current.push(name);
   input.value = current.join('、');
-  var chips = input.closest('.meal-food-editor') && input.closest('.meal-food-editor').querySelector('.meal-menu-chips');
-  if (chips) chips.innerHTML = mealChipButtonsHtml(current);
+  var editor = input.closest('.meal-food-editor');
+  if (!editor) return;
+  var buttons = editor.querySelectorAll('.meal-food-chip');
+  for (var i = 0; i < buttons.length; i++) {
+    if (buttons[i].textContent === name) {
+      buttons[i].classList.toggle('on', idx < 0);
+      break;
+    }
+  }
 }
 
 function saveMealFoods(recordId, returnDateKey){
